@@ -16,7 +16,7 @@ Reviews the frontend changes for client-side security issues and dependency risk
 ## Approach
 1. Read `docs/runs/<task-id>/frontend-build.md` and inspect the changed files.
 2. Check: secrets or tokens in code/environment files, sensitive data in `localStorage`/logs/URLs, XSS (`innerHTML`, `bypassSecurityTrust*`, unsanitised input), auth guard coverage on new routes, error messages leaking internals, over-fetching of personal data, CORS/URL assumptions, open redirects.
-3. Run `npm audit --omit=dev` and `npm outdated` in `Frontend/`; list vulnerable and significantly outdated dependencies (especially newly added ones).
+3. Run `npm audit --omit=dev` and `npm outdated` in `Frontend/`; list vulnerable and significantly outdated dependencies (especially newly added ones). Rate dependency advisories as: npm `critical` -> `blocker`; npm `high`/`moderate`/`low` -> `medium` at most (reported, never blocking).
 4. Write `docs/runs/<task-id>/frontend-review-security.md` with findings: severity (`blocker`, `high`, `medium`, `low`), file/line or package, problem, suggested fix.
 
 ## Output Format

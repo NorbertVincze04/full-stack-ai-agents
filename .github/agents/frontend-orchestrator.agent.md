@@ -17,7 +17,7 @@ Delegates the frontend part of a task to the frontend sub-agents, runs the revie
 
 ## Approach
 1. Read `docs/specs/<task-id>.md` and `.github/config.json` -> `workflow`.
-2. Call `Frontend Builder` with the task ID and spec path. If it reports blockers, return them to the caller.
+2. Call `Frontend Builder` with the task ID and spec path (and, when the caller passes human feedback from a failed acceptance check, that feedback so it fixes exactly that). If it reports blockers, return them to the caller. On a feedback round, re-run the reviewers and `Frontend Task-to-PR` `mode: prepare` as below.
 3. Call `Frontend Tester` only if `workflow.frontendTester` is `always` or the caller explicitly requested tests (`on-demand`).
 4. Call `Frontend UX Reviewer`, `Frontend Code Reviewer` and `Frontend Security Reviewer` (independent, may run in parallel).
 5. If any reviewer or the tester reports `blocker` or `high` findings, call `Frontend Builder` with the report paths to fix them, then re-run only the agents that reported findings. Repeat up to `workflow.maxFixIterations` times; remaining findings are reported, not hidden.

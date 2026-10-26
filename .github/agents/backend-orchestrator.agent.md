@@ -18,7 +18,7 @@ Delegates the backend part of a task to the backend sub-agents, runs the review-
 ## Approach
 1. Read `docs/specs/<task-id>.md` and `.github/config.json` -> `workflow`.
 2. If the spec changes tables, columns, constraints or needs new queries, call `Database Builder` first.
-3. Call `Backend Builder` (it consumes the database report if present). If it reports blockers, return them to the caller.
+3. Call `Backend Builder` (it consumes the database report if present; when the caller passes human feedback from a failed acceptance check, pass it so it fixes exactly that). If it reports blockers, return them to the caller. On a feedback round, re-run the reviewers and `Backend Task-to-PR` `mode: prepare` as below.
 4. Call `Backend Tester` if `workflow.backendTester` is `always` or tests were requested.
 5. Call `Backend Code Reviewer`, and `Backend Security Agent` if `workflow.backendSecurity` is `always` or a security check was requested (independent, may run in parallel).
 6. If the tester or any reviewer reports `blocker` or `high` findings, call `Backend Builder` (or `Database Builder` for schema/query findings) with the report paths, then re-run only the agents that reported findings. Repeat up to `workflow.maxFixIterations` times; remaining findings are reported, not hidden.
