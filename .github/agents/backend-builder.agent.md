@@ -16,11 +16,12 @@ Implements the backend part of a spec in `Backend/` (Node.js, Express 5, TypeScr
 - Keep the `{ success, payload?, message?, errors? }` response shape and the conventions in `.github/docs/PROJECT_OVERVIEW.md` section 3.
 
 ## Approach
-1. Read `docs/specs/<task-id>.md`, `.github/docs/PROJECT_OVERVIEW.md` and the existing `Backend/` code the task touches. If `Backend/` is empty, scaffold the Express 5 + TypeScript project as described in the overview.
+1. Read `docs/specs/<task-id>.md`, then `docs/context/project.md` and `docs/context/backend.md` following `docs/context/README.md` (reading rules, freshness check, bootstrap if missing). Open only the source files the context points to for this task; read `.github/docs/PROJECT_OVERVIEW.md` only for the part the task needs. If `Backend/` is empty, scaffold the Express 5 + TypeScript project as described in the overview.
 2. If the caller passed review/test report paths, read them and fix only those findings.
 3. Implement routes, controllers, services, repositories, validation, middleware (auth, admin, rate limit), and error handling with correct HTTP status codes.
 4. Run `npm run build` in `Backend/`; fix errors you introduced.
-5. Write `docs/runs/<task-id>/backend-build.md`: acceptance criteria -> how implemented, API contract (method, path, auth, request, response, errors), files created/changed, dependencies added, commands run and results, known gaps.
+5. Update `docs/context/backend.md` (and the status line in `docs/context/project.md`) for what changed, per the update rules in `docs/context/README.md`.
+6. Write `docs/runs/<task-id>/backend-build.md`: acceptance criteria -> how implemented, API contract (method, path, auth, request, response, errors), files created/changed (including the context files), dependencies added, commands run and results, known gaps.
 
 ## Output Format
 - `Verdict:` done | blocked

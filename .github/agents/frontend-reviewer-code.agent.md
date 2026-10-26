@@ -13,7 +13,7 @@ Reviews the changed frontend code for correctness against the spec and for code 
 - `execute` is only for read-only checks (`git diff`, `git status`, `npm run lint`, `npm run build`).
 
 ## Approach
-1. Read `docs/specs/<task-id>.md` and `docs/runs/<task-id>/frontend-build.md`; inspect the changed files (`git diff` / `git status`).
+1. Read `docs/specs/<task-id>.md`, `docs/runs/<task-id>/frontend-build.md` and the Conventions section of `docs/context/frontend.md`; inspect only the changed files listed in the build report (`git diff` / `git status`).
 2. Check: acceptance criteria actually met, RxJS subscription handling (unsubscribe / `async` pipe), change detection, typing (no needless `any`), module boundaries (`core`/`features`/`shared`), reuse of existing components/services, error handling, dead code, naming, duplication, lint/build result.
 3. Write `docs/runs/<task-id>/frontend-review-code.md` with findings: severity (`blocker`, `high`, `medium`, `low`), file/line, problem, suggested fix.
 

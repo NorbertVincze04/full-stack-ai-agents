@@ -13,7 +13,7 @@ Reviews the implemented frontend against the spec and the existing look and feel
 - DO NOT report purely personal taste; every finding must reference a spec requirement, an existing pattern, or an accessibility/usability rule.
 
 ## Approach
-1. Read `docs/specs/<task-id>.md` and `docs/runs/<task-id>/frontend-build.md`, then the changed templates, styles and components.
+1. Read `docs/specs/<task-id>.md`, `docs/runs/<task-id>/frontend-build.md` and `docs/context/frontend.md` (structure, conventions), then only the changed templates, styles and components listed in the build report.
 2. Check: consistency with existing shared components and layout wrappers, spacing/typography, states (empty, loading, error, disabled), form validation messages, keyboard navigation, labels/ARIA, contrast, responsive behaviour, navigation flow and route `data` (header/top bar).
 3. Write `docs/runs/<task-id>/frontend-review-ux.md` with findings: severity (`blocker`, `high`, `medium`, `low`), file/line, problem, suggested fix.
 

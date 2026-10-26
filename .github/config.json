@@ -13,7 +13,8 @@
   "workflow": {
     "frontendTester": "on-demand",
     "backendTester": "always",
-    "backendSecurity": "always",
+    "backendSecurity": "auto",
+    "reviewers": "auto",
     "maxFixIterations": 2
   }
 }

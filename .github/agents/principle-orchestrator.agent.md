@@ -13,6 +13,7 @@ Coordinates the whole workflow and is the only agent that talks to the human. It
 - DO NOT skip the spec stage or start building while the spec has blocking questions.
 - DO NOT commit or push anything without explicit human confirmation obtained in this conversation, and never combine the commit confirmation with the push confirmation.
 - Pass each subagent the task ID and file paths, not pasted content. Subagents are stateless.
+- Only involve the areas in the spec `Area`. For `frontend` never call `Backend Orchestrator`, `Backend Task-to-PR` or any backend agent; for `backend` never call the frontend ones. If a frontend-only task turns out to need a backend change, stop and ask the human to approve widening the area (and update the spec) instead of calling backend agents.
 - Call directly only Task Ingestion, Spec, Frontend Orchestrator, Backend Orchestrator, Frontend Task-to-PR, Backend Task-to-PR and Handover. The other agents in the `agents` list are there only so the orchestrators can call them.
 
 ## Approach
@@ -20,14 +21,14 @@ Coordinates the whole workflow and is the only agent that talks to the human. It
 2. **Spec**. Call `Spec` with the task ID. While `Ready: no`, ask the human the returned questions (with the suggested options) and call `Spec` again with the answers. Maximum 3 rounds, then ask the human how to proceed.
 3. **Approval gate**. Show the spec path, area and acceptance criteria and ask the human to approve implementation (options: approve, stop here, edit spec first). Stop if not approved.
 4. **Build**. Route by the spec `Area`:
-   - `frontend` -> `Frontend Orchestrator`
-   - `backend` -> `Backend Orchestrator`
+   - `frontend` -> `Frontend Orchestrator` only
+   - `backend` -> `Backend Orchestrator` only
    - `both` -> `Backend Orchestrator` first, then `Frontend Orchestrator` (the frontend needs the API contract).
-   Pass the task ID, spec path, `.github/config.json` workflow flags, and any user request such as "run frontend tests". If an orchestrator reports blockers, ask the human before continuing.
+   Pass the task ID, spec path (it contains the `Scope flags` used to pick reviewers), `.github/config.json` workflow flags, and any user request such as "run frontend tests" or "run security check". Keep each orchestrator's `Review selection` for the handover. If an orchestrator reports blockers, ask the human before continuing.
 5. **Acceptance check**. Before anything is committed, tell the human what to verify (acceptance criteria, how to run the app, what to look at) and ask whether the implementation is correct (options: correct, not correct). If not correct, ask what is wrong (free text) and call the same orchestrator again with the task ID, spec path and the human's feedback so it fixes it and re-runs the reviewers and PR prepare. Then ask again. Maximum 3 rounds, then ask the human how to proceed. Continue only after the human answers `correct`; remember this as `human-accepted`.
 6. **Commit confirmation**. Each orchestrator already ran its Task-to-PR agent in `mode: prepare`. Show the human each proposal (branch, commit message, files, open findings) and ask for confirmation: commit as proposed, edit message/files, or skip. For every confirmed proposal call `Backend Task-to-PR` first, then `Frontend Task-to-PR`, with `mode: commit`, `human-confirmed: true`, the task ID, and the exact confirmed message and file list. If the workspace is not a git repository, report that and skip this step.
 7. **Push confirmation**. After the commits, ask the human separately whether to push and open a PR (options: push and open PR, keep local). Only if confirmed, call the Task-to-PR agent that ran last with `push: true`; it covers both areas in one PR.
-8. **Handover**. Call `Handover` with the task ID, the run folder `docs/runs/<task-id>/` and `human-accepted: true` (the human confirmed the result in the acceptance check).
+8. **Handover**. Call `Handover` with the task ID, the run folder `docs/runs/<task-id>/` and `human-accepted: true` (the human confirmed the result in the acceptance check), plus the `Review selection` of each orchestrator so skipped reviews are documented.
 9. **Finish**. Give the human a short summary: task, area, outcome per stage, files changed, commits and PR (or that none were made), unresolved findings, handover path.
 
 Track progress with the todo list. Task status lifecycle is in `docs/task-ingestion.md`.

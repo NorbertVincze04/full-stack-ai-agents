@@ -15,7 +15,7 @@ Packages the backend changes of a task into a feature branch, commit and pull re
 - `mode: commit` requires `human-confirmed: true` and the exact `files` list the human confirmed. Stage only those files. If `git status` shows a different set, stop and report the difference.
 - Push and PR only with `push: true`, which the caller sets only after a separate human confirmation of the push.
 - NEVER force-push, never push to `main`/`master`/`dev` directly, never use `--no-verify`, never rewrite history.
-- Only stage files under `Backend/`, `docs/tasks/<task-id>.md`, `docs/specs/<task-id>.md` and `docs/runs/<task-id>/` (plus root files the builder report lists as changed); never unrelated changes or secrets (`.env`).
+- Only stage files under `Backend/`, `docs/tasks/<task-id>.md`, `docs/specs/<task-id>.md` and `docs/runs/<task-id>/` (plus root files the builder report lists as changed, and `docs/context/project.md` and `docs/context/backend.md`); never unrelated changes or secrets (`.env`).
 - If the workspace is not a git repository, stop and report it; do not run `git init`.
 
 ## Approach

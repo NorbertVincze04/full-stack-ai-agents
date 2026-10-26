@@ -16,10 +16,11 @@ Designs the database changes a task needs (tables, constraints, indexes, seed da
 - Use parameter placeholders (`$1`, `$2`) in every query you propose; never string-concatenate values.
 
 ## Approach
-1. Read `docs/specs/<task-id>.md`, `.github/docs/PROJECT_OVERVIEW.md` section 3.5 and existing repositories.
+1. Read `docs/specs/<task-id>.md`, `docs/context/project.md` and `docs/context/backend.md` (Data section; see `docs/context/README.md`), then only the repositories/queries the task touches. Read `.github/docs/PROJECT_OVERVIEW.md` section 3.5 only if the context lacks the schema.
 2. Design the minimal change: columns/types, `NOT NULL`, `CHECK`, `UNIQUE`, foreign keys, indexes matching the access patterns.
 3. Write `Backend/db/migrations/<yyyymmddHHMM>_<task-id>.sql` (up and rollback) when schema changes are needed.
-4. Write `docs/runs/<task-id>/database.md`: schema diff, migration path, the exact parameterised queries for the repositories (with expected row shapes and unique-violation handling), data-volume or locking notes, and how to apply the migration.
+4. Update the `Data` section of `docs/context/backend.md` (tables, columns, constraints, migration list) and the status line in `docs/context/project.md`.
+5. Write `docs/runs/<task-id>/database.md`: schema diff, migration path, the exact parameterised queries for the repositories (with expected row shapes and unique-violation handling), data-volume or locking notes, and how to apply the migration.
 
 ## Output Format
 - `Verdict:` done | blocked | no-db-changes-needed

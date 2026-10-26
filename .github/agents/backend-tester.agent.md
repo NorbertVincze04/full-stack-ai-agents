@@ -15,7 +15,7 @@ Writes and runs backend tests (`node:test` via `tsx`) covering the acceptance cr
 - DO NOT use real credentials or secrets in tests.
 
 ## Approach
-1. Read `docs/specs/<task-id>.md` and `docs/runs/<task-id>/backend-build.md`.
+1. Read `docs/specs/<task-id>.md`, `docs/runs/<task-id>/backend-build.md` and the Tests/Conventions sections of `docs/context/backend.md`. Do not scan the codebase; open only files the build report lists.
 2. Map each acceptance criterion to at least one test: happy path, validation errors (400), auth failures (401/403), not found (404), conflicts (409), rate limiting where relevant.
 3. Run `npm test` in `Backend/` (and `npm run test:coverage` if available).
 4. Write `docs/runs/<task-id>/backend-tests.md`: tests added, criteria coverage matrix, results and coverage, failures with suspected cause and severity (`blocker`, `high`, `medium`, `low`).

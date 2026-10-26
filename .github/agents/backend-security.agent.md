@@ -15,7 +15,7 @@ Audits the backend for security issues: vulnerable modules and dependencies, ins
 - Only test code and dependencies in this repository; never attack or scan external systems.
 
 ## Approach
-1. Read `docs/runs/<task-id>/backend-build.md` (and `database.md` if present); when invoked on demand without a task, audit the whole `Backend/`.
+1. Read `docs/runs/<task-id>/backend-build.md` (and `database.md` if present) and `docs/context/backend.md`; inspect only the changed files. When invoked on demand without a task, use the context's structure table to audit `Backend/` instead of scanning blindly.
 2. Code: SQL built by string concatenation, missing input validation, missing auth/admin middleware on new routes, broken access control (IDOR), JWT handling and hard-coded fallbacks, password/secret storage, rate limiting, CORS, error messages leaking internals, unsafe logging of personal data, `child_process` usage.
 3. Dependencies: `npm audit --omit=dev` and `npm outdated` in `Backend/`; list vulnerable and significantly outdated packages (especially newly added ones). Rate dependency advisories as: npm `critical` -> `blocker`; npm `high`/`moderate`/`low` -> `medium` at most (reported, never blocking).
 4. Write `docs/runs/<task-id>/backend-security.md` (or `docs/runs/security-<yyyymmdd>.md` for on-demand audits) with findings: severity (`blocker`, `high`, `medium`, `low`), file/line or package, risk, suggested fix.

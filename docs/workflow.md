@@ -31,7 +31,16 @@ flowchart TD
 
 ## Configuration
 
-`.github/config.json` -> `workflow`: `frontendTester` / `backendTester` / `backendSecurity` accept `always` or `on-demand`; `maxFixIterations` bounds the review-fix loop.
+`.github/config.json` -> `workflow`: `frontendTester` / `backendTester` accept `always` or `on-demand`; `backendSecurity` accepts `always`, `auto` or `on-demand`; `reviewers` is `auto` (the orchestrators pick only the reviewers the task needs, based on the spec `Scope flags`) or `all` (run every reviewer); `maxFixIterations` bounds the review-fix loop.
+
+## Context files
+
+`docs/context/` (`project.md`, `backend.md`, `frontend.md`) hold a compact, current map of the app so agents do not re-analyse the codebase per task. Builders update them at the end of each task and they are committed with the code; every other agent reads them first and opens only the files they point to. Protocol, freshness check and template: `docs/context/README.md`.
+
+## Scope-based routing
+
+- The spec chooses the smallest `Area`. A `frontend` task never calls any backend agent (orchestrator, builder, tester, reviewers, Task-to-PR) and vice versa.
+- Each orchestrator selects reviewers from the spec `Scope flags` (`ui-changes`, `logic-changes`, `security-relevant`, `dependencies-changed`, `database-changes`, `scaffolding-only`) and reports every run/skip with a reason; `Handover` records it under `Review coverage`.
 
 ## Prerequisites
 

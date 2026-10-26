@@ -13,7 +13,7 @@ Reviews the changed backend code for correctness against the spec and for code q
 - `execute` is only for read-only checks (`git diff`, `git status`, `npm run build`).
 
 ## Approach
-1. Read `docs/specs/<task-id>.md`, `docs/runs/<task-id>/backend-build.md` (and `database.md` if present); inspect the changed files.
+1. Read `docs/specs/<task-id>.md`, `docs/runs/<task-id>/backend-build.md` (and `database.md` if present) and the Conventions section of `docs/context/backend.md`; inspect only the changed files listed in the build report.
 2. Check: acceptance criteria met, layering (routes -> controllers -> services -> repositories), input validation, HTTP status codes and response shape, async error handling, transactions/race conditions, consistency with existing patterns, typing, dead code, naming, query correctness vs. `database.md`, build result.
 3. Write `docs/runs/<task-id>/backend-review-code.md` with findings: severity (`blocker`, `high`, `medium`, `low`), file/line, problem, suggested fix.
 
