@@ -1,0 +1,19 @@
+{
+  "azureDevOps": {
+    "organization": "CljP-LOM1-Automation",
+    "organizationUrl": "https://dev.azure.com/CljP-LOM1-Automation/",
+    "project": "",
+    "taskFilter": {
+      "field": "System.Tags",
+      "operator": "Contains",
+      "value": "deskbookingPrj"
+    },
+    "doneState": "Done"
+  },
+  "workflow": {
+    "frontendTester": "on-demand",
+    "backendTester": "always",
+    "backendSecurity": "always",
+    "maxFixIterations": 2
+  }
+}

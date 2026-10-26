@@ -1,0 +1,23 @@
+{
+  "inputs": [
+    {
+      "id": "ado_pat",
+      "type": "promptString",
+      "description": "Azure DevOps Personal Access Token (scopes: Work Items Read & Write). Stored encrypted by VS Code, never written to this file.",
+      "password": true
+    }
+  ],
+  "servers": {
+    "ado": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/scripts/ado-mcp.mjs",
+        "CljP-LOM1-Automation"
+      ],
+      "env": {
+        "ADO_PAT": "${input:ado_pat}"
+      }
+    }
+  }
+}
