@@ -5,6 +5,53 @@
   min-height: 100dvh;
 }
 
+header {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 1rem;
+  background-color: #1f2937;
+  color: #ffffff;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  overflow-wrap: anywhere;
+}
+
+header a {
+  color: inherit;
+  text-decoration: none;
+}
+
+header a:hover {
+  text-decoration: underline;
+}
+
+header a:focus-visible,
+header button:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+header button {
+  flex: 0 0 auto;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.5rem 1rem;
+  border: 2px solid #ffffff;
+  border-radius: 4px;
+  background-color: #ffffff;
+  color: #1f2937;
+  font: inherit;
+  cursor: pointer;
+}
+
 main {
   flex: 1;
 }
