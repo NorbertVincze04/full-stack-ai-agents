@@ -2,7 +2,7 @@
   "azureDevOps": {
     "organization": "CljP-LOM1-Automation",
     "organizationUrl": "https://dev.azure.com/CljP-LOM1-Automation/",
-    "project": "",
+    "project": "WebTools",
     "taskFilter": {
       "field": "System.Tags",
       "operator": "Contains",

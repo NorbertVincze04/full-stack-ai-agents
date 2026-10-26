@@ -18,6 +18,13 @@ if (!pat) {
 const env = { ...process.env, NODE_USE_ENV_PROXY: "1", PERSONAL_ACCESS_TOKEN: Buffer.from(`agent:${pat}`).toString("base64") };
 delete env.ADO_PAT;
 
+// The corporate proxy answers 407; route the server through the local authenticating proxy instead.
+if (env.ADO_MCP_PROXY) {
+  for (const key of Object.keys(env)) if (/^https?_proxy$/i.test(key)) delete env[key];
+  env.HTTPS_PROXY = env.HTTP_PROXY = env.ADO_MCP_PROXY;
+  if (process.platform !== "win32") env.https_proxy = env.http_proxy = env.ADO_MCP_PROXY;
+}
+
 // Domains limited to what the agents need; `core` is required by the server.
 const child = spawn(
   "npx",

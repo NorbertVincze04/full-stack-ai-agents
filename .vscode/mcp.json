@@ -16,7 +16,8 @@
         "CljP-LOM1-Automation"
       ],
       "env": {
-        "ADO_PAT": "${input:ado_pat}"
+        "ADO_PAT": "${input:ado_pat}",
+        "ADO_MCP_PROXY": "http://127.0.0.1:3128"
       }
     }
   }
