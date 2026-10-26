@@ -32,4 +32,14 @@ describe('AppComponent', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('h1')?.textContent).toContain('Desk Booking');
   });
+
+  it('should render the copyright footer', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    fixture.detectChanges();
+    const footer = (fixture.nativeElement as HTMLElement).querySelector('footer');
+    expect(footer).not.toBeNull();
+    expect(footer?.textContent?.trim()).toBe(
+      `© ${new Date().getFullYear()} Desk Booking. All rights reserved.`
+    );
+  });
 });

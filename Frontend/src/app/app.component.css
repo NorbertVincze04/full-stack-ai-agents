@@ -1,0 +1,20 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+main {
+  flex: 1;
+}
+
+footer {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 1rem;
+  text-align: center;
+  overflow-wrap: anywhere;
+  background-color: #1f2937;
+  color: #ffffff;
+}

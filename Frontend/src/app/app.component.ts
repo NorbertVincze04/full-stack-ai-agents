@@ -7,4 +7,5 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   readonly title = 'Desk Booking';
+  readonly currentYear = new Date().getFullYear();
 }
