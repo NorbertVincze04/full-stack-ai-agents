@@ -4,7 +4,7 @@ source: manual
 url:
 title: Header with app name and login button
 tags: []
-status: specified
+status: done
 ---
 
 ## Description
