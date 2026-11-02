@@ -44,10 +44,35 @@ function runUntilLine(
   });
 }
 
+const requiredEnv = {
+  JWT_SECRET: "test-secret",
+  DATABASE_URL: "postgresql://user:pass@127.0.0.1:1/ico-env",
+};
+
 describe("server startup", () => {
+  it("exits non-zero when JWT_SECRET and DATABASE_URL are missing", async () => {
+    const result = await new Promise<{ code: number | null; stderr: string }>(
+      (resolve) => {
+        const child = spawn(process.execPath, ["src/server.ts"], {
+          cwd: backendDir,
+          env: { ...process.env, PORT: "0", JWT_SECRET: "", DATABASE_URL: "" },
+          stdio: ["ignore", "ignore", "pipe"],
+        });
+        let stderr = "";
+        child.stderr.on("data", (chunk: Buffer) => {
+          stderr += chunk.toString();
+        });
+        child.on("exit", (code) => resolve({ code, stderr }));
+      },
+    );
+    assert.equal(result.code, 1);
+    assert.match(result.stderr, /JWT_SECRET, DATABASE_URL/);
+  });
+
   it("logs exactly `hello world` on startup (node src/server.ts)", async () => {
     const { stdout, stderr } = await runUntilLine(["src/server.ts"], {
       PORT: "0",
+      ...requiredEnv,
     });
     assert.equal(stdout.trim(), "hello world");
     assert.equal(stderr, "");
@@ -58,7 +83,10 @@ describe("server startup", () => {
       t.skip("dist/ not built; run `npm run build` first");
       return;
     }
-    const { stdout } = await runUntilLine(["dist/server.js"], { PORT: "0" });
+    const { stdout } = await runUntilLine(["dist/server.js"], {
+      PORT: "0",
+      ...requiredEnv,
+    });
     assert.equal(stdout.trim(), "hello world");
   });
 });
