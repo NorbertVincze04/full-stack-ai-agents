@@ -1,0 +1,12 @@
+node_modules
+dist
+.angular
+.vscode
+.env*
+.git
+.gitignore
+certs
+db-backups
+*.md
+Containerfile
+.containerignore

@@ -1,0 +1,13 @@
+node_modules
+dist
+.env*
+.git
+.gitignore
+certs
+db-backups
+db
+migrations
+tests
+*.md
+Containerfile
+.containerignore

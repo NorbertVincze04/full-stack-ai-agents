@@ -2,17 +2,26 @@ import cors from "cors";
 import express from "express";
 import type { Express } from "express";
 import { createAuthController } from "./controllers/authController.ts";
+import { createHealthController } from "./controllers/healthController.ts";
 import { errorHandler } from "./middleware/errorHandler.ts";
 import { createLoginRateLimiter } from "./middleware/loginRateLimit.ts";
 import type { LoginRateLimitOptions } from "./middleware/loginRateLimit.ts";
+import {
+  createHealthRepository,
+  unconfiguredHealthRepository,
+} from "./repositories/healthRepository.ts";
 import { unconfiguredUserRepository } from "./repositories/userRepository.ts";
-import type { UserRepository } from "./repositories/userRepository.ts";
+import type { Queryable, UserRepository } from "./repositories/userRepository.ts";
 import { createAuthRouter } from "./routes/authRoutes.ts";
+import { createHealthRouter } from "./routes/healthRoutes.ts";
 import { createAuthService } from "./services/authService.ts";
+import { createHealthService } from "./services/healthService.ts";
 
 export interface AppOptions {
   userRepository?: UserRepository;
   loginRateLimit?: LoginRateLimitOptions;
+  dbProbe?: Queryable;
+  healthTimeoutMs?: number;
 }
 
 export function createApp(options: AppOptions = {}): Express {
@@ -35,6 +44,14 @@ export function createApp(options: AppOptions = {}): Express {
       createLoginRateLimiter(options.loginRateLimit),
     ),
   );
+
+  const healthService = createHealthService(
+    options.dbProbe
+      ? createHealthRepository(options.dbProbe)
+      : unconfiguredHealthRepository,
+    options.healthTimeoutMs,
+  );
+  app.use("/api/health", createHealthRouter(createHealthController(healthService)));
 
   app.use(errorHandler);
 

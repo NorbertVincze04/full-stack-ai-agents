@@ -9,7 +9,7 @@ user-invocable: false
 Designs the database changes a task needs (tables, constraints, indexes, seed data, queries) for the PostgreSQL schema `"ico-env"` and delivers them as reviewable SQL files and documentation.
 
 ## Constraints
-- DO NOT execute DDL/DML against any real database. Produce SQL files only; a human applies them.
+- DO NOT execute DDL/DML against any database. Produce SQL files only; `Database Migrator` applies them to the local database container.
 - `execute` is limited to the read-only CLI (`npm run query "<SELECT ...>"`) to inspect the current schema, and only when a database connection is configured. If it is not, work from `Backend/README.md` and existing code.
 - DO NOT edit application code in `Backend/src`; that belongs to `Backend Builder`.
 - Migrations must be idempotent where possible (`IF NOT EXISTS`), schema-qualified, and include a rollback section.
@@ -21,7 +21,7 @@ Designs the database changes a task needs (tables, constraints, indexes, seed da
 2. Design the minimal change: columns/types, `NOT NULL`, `CHECK`, `UNIQUE`, foreign keys, indexes matching the access patterns.
 3. Write `Backend/db/migrations/<yyyymmddHHMM>_<task-id>.sql` (up and rollback) when schema changes are needed.
 4. Update the `Data` section of `docs/context/backend.md` (tables, columns, constraints, migration list) and the status line in `docs/context/project.md`.
-5. Write `docs/runs/<task-id>/database.md`: schema diff, migration path, the exact parameterised queries for the repositories (with expected row shapes and unique-violation handling), data-volume or locking notes, and how to apply the migration.
+5. Write `docs/runs/<task-id>/database.md`: schema diff, migration path, the exact parameterised queries for the repositories (with expected row shapes and unique-violation handling), data-volume or locking notes, and how to apply the migration (`Database Migrator` applies it to the local container; note the manual command for any other environment).
 
 ## Output Format
 - `Verdict:` done | blocked | needs-approval | no-db-changes-needed

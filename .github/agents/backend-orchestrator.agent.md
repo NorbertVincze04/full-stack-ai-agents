@@ -2,7 +2,7 @@
 description: "Use when the principle orchestrator has an approved spec with backend scope and needs it built, tested, reviewed and secured by the backend sub-agents."
 name: "Backend Orchestrator"
 tools: [agent, read, search, todo]
-agents: ["Database Builder", "Backend Builder", "Backend Tester", "Backend Code Reviewer", "Backend Security Agent", "Backend Task-to-PR"]
+agents: ["Database Builder", "Database Migrator", "Backend Builder", "Backend Tester", "Backend Code Reviewer", "Backend Security Agent", "Backend Task-to-PR"]
 user-invocable: false
 ---
 
@@ -14,11 +14,11 @@ Delegates the backend part of a task to the backend sub-agents, runs the review-
 - Call `Backend Task-to-PR` only with `mode: prepare`. Commit and push happen later, after the human confirms through the principle orchestrator.
 - Pass task ID, spec path and report paths to subagents, not pasted content.
 - Every subagent writes its report to `docs/runs/<task-id>/`; you only read them.
-- Pass `approved-risks` from the caller to `Database Builder` and `Backend Builder`. If either returns `needs-approval` (a risky change per `docs/risk-gate.md` not covered by `approved-risks`), stop and return `Status: needs-human` for that risk; never decide it yourself.
+- Pass `approved-risks` from the caller to `Database Builder`, `Database Migrator` and `Backend Builder`. If any returns `needs-approval` (a risky change per `docs/risk-gate.md` not covered by `approved-risks`), stop and return `Status: needs-human` for that risk; never decide it yourself.
 
 ## Approach
 1. Read `docs/specs/<task-id>.md` and `.github/config.json` -> `workflow`.
-2. If the spec changes tables, columns, constraints or needs new queries, call `Database Builder` first.
+2. If the spec changes tables, columns, constraints or needs new queries, call `Database Builder` first. Then, if `.github/config.json` -> `containers.enabled` is true and the stack's `.env`/`compose.yaml` exist, call `Database Migrator` to apply the new migration to the local database container (pass `approved-risks`); if they do not exist yet, leave the migration file and say so in your output.
 3. Call `Backend Builder` (it consumes the database report if present; when the caller passes human feedback from a failed acceptance check, pass it so it fixes exactly that). If it reports blockers, return them to the caller. On a feedback round, re-run the reviewers and `Backend Task-to-PR` `mode: prepare` as below.
 4. Call `Backend Tester` if `workflow.backendTester` is `always` or tests were requested. **Test-fix loop**: if any test fails, do not continue to the reviewers. Identify each failing test (by name) and keep a counter per failing test. For each round, call `Backend Builder` (or `Database Builder` for schema/query causes) with the tester report path and the failing test names, asking it to diagnose the root cause and fix it (a test that contradicts the spec is reported, not edited, by the builder), then call `Backend Tester` again to re-run. A test is resolved when it passes. Maximum `workflow.maxTestFixLoops` (default 2) rounds per failing test. If a test still fails after its last round, stop and return `Status: needs-human` (see Output Format) instead of continuing. Reviewers run only after the tests pass. If the caller passes a human answer to an earlier `needs-human` question, give it to the builder/tester as the decision to follow and restart the counter of those tests.
 5. **Select reviewers** (do not run a reviewer that adds no value). Read the spec `Scope flags` and the builder report (files changed), then decide per reviewer and record a one-line reason for each run or skip. If `workflow.reviewers` is `all`, run both.

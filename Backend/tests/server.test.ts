@@ -89,4 +89,33 @@ describe("server startup", () => {
     });
     assert.equal(stdout.trim(), "hello world");
   });
+
+  for (const signal of ["SIGTERM", "SIGINT"] as const) {
+    // Windows cannot deliver POSIX signals to a child; kill() is a hard terminate there.
+    it(`shuts down gracefully with exit 0 on ${signal}`, async (t) => {
+      if (process.platform === "win32") {
+        t.skip("POSIX signals are not deliverable on Windows");
+        return;
+      }
+      const code = await new Promise<number | null>((resolve, reject) => {
+        const child = spawn(process.execPath, ["src/server.ts"], {
+          cwd: backendDir,
+          env: { ...process.env, PORT: "0", ...requiredEnv },
+          stdio: ["ignore", "pipe", "ignore"],
+        });
+        const timer = setTimeout(() => {
+          child.kill("SIGKILL");
+          reject(new Error("no graceful exit within 10 s"));
+        }, 10000);
+        child.stdout.on("data", (chunk: Buffer) => {
+          if (chunk.toString().includes("hello world")) child.kill(signal);
+        });
+        child.on("exit", (exitCode) => {
+          clearTimeout(timer);
+          resolve(exitCode);
+        });
+      });
+      assert.equal(code, 0);
+    });
+  }
 });

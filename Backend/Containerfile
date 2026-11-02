@@ -1,0 +1,28 @@
+FROM docker.io/library/node:22.18.0-alpine AS deps
+
+# Build-time proxy only; ARGs of this stage never reach the runtime image.
+ARG BUILD_HTTP_PROXY=
+ARG BUILD_HTTPS_PROXY=
+ARG BUILD_NO_PROXY=localhost,127.0.0.1,db,backend,frontend
+
+WORKDIR /app
+COPY package.json package-lock.json ./
+
+RUN set -eu; \
+    if [ -n "$BUILD_HTTP_PROXY" ]; then export npm_config_proxy="$BUILD_HTTP_PROXY"; fi; \
+    if [ -n "$BUILD_HTTPS_PROXY" ]; then export npm_config_https_proxy="$BUILD_HTTPS_PROXY"; fi; \
+    export npm_config_noproxy="$BUILD_NO_PROXY"; \
+    npm ci --omit=dev --no-audit --no-fund
+
+FROM docker.io/library/node:22.18.0-alpine AS runtime
+
+ENV NODE_ENV=production
+WORKDIR /app
+COPY --from=deps --chown=node:node /app/node_modules ./node_modules
+COPY --chown=node:node package.json ./
+COPY --chown=node:node src ./src
+
+USER node
+EXPOSE 3000
+# Node >= 22.18 runs TypeScript natively
+CMD ["node", "src/server.ts"]

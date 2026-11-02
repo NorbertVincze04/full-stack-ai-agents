@@ -17,5 +17,18 @@
     "reviewers": "auto",
     "maxFixIterations": 2,
     "maxTestFixLoops": 2
+  },
+  "containers": {
+    "enabled": true,
+    "runtime": "podman",
+    "composeFile": "compose.yaml",
+    "envFile": ".env",
+    "proxy": {
+      "hostProxyUrl": "http://127.0.0.1:3128",
+      "buildProxyUrl": "http://127.0.0.1:3128",
+      "noProxy": "localhost,127.0.0.1,db,backend,frontend"
+    },
+    "caCertDir": "certs",
+    "allowedRegistries": ["docker.io/library", "quay.io", "ghcr.io"]
   }
 }

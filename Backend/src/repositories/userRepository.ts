@@ -1,3 +1,5 @@
+import { DEFAULT_DB_SCHEMA, parseDbSchema } from "../config/dbSchema.ts";
+
 export interface UserRecord {
   id: string;
   email: string;
@@ -16,13 +18,20 @@ export interface Queryable {
   ): Promise<{ rows: Array<Record<string, unknown>> }>;
 }
 
-export function createUserRepository(db: Queryable): UserRepository {
+// `public` stays unquoted so the default query is unchanged; other (validated) schemas are quoted.
+function usersTable(schema: string): string {
+  const name = parseDbSchema(schema);
+  return name === DEFAULT_DB_SCHEMA ? "public.users" : `"${name}".users`;
+}
+
+export function createUserRepository(
+  db: Queryable,
+  schema: string = DEFAULT_DB_SCHEMA,
+): UserRepository {
+  const query = `SELECT id, email, password_hash, type FROM ${usersTable(schema)} WHERE email = $1`;
   return {
     async findByEmail(email) {
-      const result = await db.query(
-        "SELECT id, email, password_hash, type FROM public.users WHERE email = $1",
-        [email],
-      );
+      const result = await db.query(query, [email]);
       const row = result.rows[0];
       if (!row) {
         return null;

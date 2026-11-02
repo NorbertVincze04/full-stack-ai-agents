@@ -16,16 +16,16 @@ Turns `docs/tasks/<task-id>.md` into an implementation-ready specification at `d
 ## Approach
 1. Read `docs/tasks/<task-id>.md`, then `docs/context/project.md` and the context file of each likely area (`docs/context/backend.md`, `docs/context/frontend.md`), following `docs/context/README.md`. Open source files only for what the context cannot answer; read `.github/docs/PROJECT_OVERVIEW.md` only for the part the task needs. If a context file is missing, report it and read the minimum code needed.
 2. If the caller passed human answers, merge them into the spec and drop the answered questions.
-3. Write `docs/specs/<task-id>.md` with: summary, scope and out-of-scope, area (`frontend`, `backend` or `both`) with reasoning, a `Scope flags` section (below), functional requirements, API/data changes, UI behaviour, acceptance criteria restated as a numbered checklist (`AC1`, `AC2`, ...), risks, and `Open Questions`.
-   - Choose the **smallest** area that satisfies the task. `frontend` means no backend, API or database change is needed; `backend` means no UI change is needed. Use `both` only when each side needs real changes.
+3. Write `docs/specs/<task-id>.md` with: summary, scope and out-of-scope, area (a set of `frontend`, `backend`, `containers`) with reasoning, a `Scope flags` section (below), functional requirements, API/data changes, UI behaviour, acceptance criteria restated as a numbered checklist (`AC1`, `AC2`, ...), risks, and `Open Questions`.
+   - Choose the **smallest** area set that satisfies the task. `frontend` means no backend, API or database change is needed; `backend` means no UI change is needed; add `containers` only when the task is about Podman images, compose, `.env`, the database container or local environment setup (see `docs/context/containers.md`). Include a side only when it needs real changes, and say explicitly when containerizing needs an app change (health route, DB connection code, `apiUrl`) so those land in `backend`/`frontend`.
    - `Scope flags` (yes/no each, with a one-line reason; the orchestrators use them to pick reviewers): `ui-changes` (visible UI, templates, styles, routes), `logic-changes` (application logic beyond scaffolding/config/text), `security-relevant` (auth, guards, user input, personal data, storage, SQL, secrets, CORS), `dependencies-changed`, `database-changes`, `scaffolding-only` (project setup/config with no behaviour).
-4. Add a `Risk gate` section listing every risky item the task implies (`R1`, `R2`, ...) per `docs/risk-gate.md` (security, database, major functionality), each with impact and a safer alternative when one exists. Write `none` if there are none.
+4. Add a `Risk gate` section listing every risky item the task implies (`R1`, `R2`, ...) per `docs/risk-gate.md` (security, database, major functionality, local environment/containers), each with impact and a safer alternative when one exists. Write `none` if there are none.
 5. Ask only questions that block implementation or change the outcome; give each question 2-4 suggested options when possible and mark a recommended one.
 6. Set the task `status` to `specified` only when there are no blocking questions; otherwise leave it `new`.
 
 ## Output Format
 - `Spec file:` path
-- `Area:` frontend | backend | both
+- `Area:` the set of frontend | backend | containers
 - `Scope flags:` the flags and their yes/no values
 - `Risk gate:` risky items `R1`.. with impact and safer alternative, or `none`
 - `Ready:` yes | no

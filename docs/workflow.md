@@ -10,6 +10,8 @@ flowchart TD
   SP -. questions .-> H
   PO --> FO[Frontend Orchestrator]
   PO --> BO[Backend Orchestrator]
+  PO --> CO[Container Orchestrator]
+  CO --> CB[Container Builder] --> DM[Database Migrator] --> CT[Container Tester] --> CR[Container Reviewer]
   FO --> FB[Frontend Builder] --> FT[Frontend Tester - on demand] --> FR[UI/UX + Code + Security reviewers]
   BO --> DB[Database Builder] --> BB[Backend Builder] --> BT[Backend Tester] --> BR[Code Reviewer + Security]
   PO --> HO[Handover]
@@ -35,7 +37,7 @@ flowchart TD
 
 ## Risk gate
 
-Security changes, anything that can damage the database, and changes to major functionality need your approval first (`docs/risk-gate.md`). `Spec` lists them under `Risk gate`; the principle orchestrator asks you per item before any build. If a builder finds an unapproved risky change mid-build, it stops with `needs-approval`, the orchestrator returns `needs-human`, and you are asked. Agents never run database changes; approved SQL is delivered as a migration for you to apply. `Handover` records the approved risks.
+Security changes, anything that can damage the database, and changes to major functionality need your approval first (`docs/risk-gate.md`). `Spec` lists them under `Risk gate`; the principle orchestrator asks you per item before any build. If a builder finds an unapproved risky change mid-build, it stops with `needs-approval`, the orchestrator returns `needs-human`, and you are asked. Agents never run SQL against anything except the local `db` container; `Database Migrator` applies migrations there (backup first for risky ones), so you do not run migration files by hand. `Handover` records the approved risks.
 
 ## Test-fix loop
 
@@ -43,7 +45,11 @@ When a tester reports a failing test, the orchestrator does not go on to the rev
 
 ## Context files
 
-`docs/context/` (`project.md`, `backend.md`, `frontend.md`) hold a compact, current map of the app so agents do not re-analyse the codebase per task. Builders update them at the end of each task and they are committed with the code; every other agent reads them first and opens only the files they point to. Protocol, freshness check and template: `docs/context/README.md`.
+`docs/context/` (`project.md`, `backend.md`, `frontend.md`, `containers.md`) hold a compact, current map of the app so agents do not re-analyse the codebase per task. Builders update them at the end of each task and they are committed with the code; every other agent reads them first and opens only the files they point to. Protocol, freshness check and template: `docs/context/README.md`.
+
+## Containers (Podman, local)
+
+Tasks with `containers` in the spec `Area` go to `Container Orchestrator`: `Container Builder` (compose file, Containerfiles for frontend/backend/db, nginx, `.env`), `Database Migrator` (applies `Backend/db/migrations` to the `db` container), `Container Tester` (`podman compose up -d --build`, health and connectivity checks), `Container Reviewer`. Design, ports, env variables and the Bosch proxy/CA handling: `docs/context/containers.md`; settings: `.github/config.json` -> `containers`. Sensitive actions (creating the Podman machine, volume/prune/`down -v`, overwriting `.env`, installing a CA, proxy changes) go through the risk gate. Order when several areas are involved: backend, frontend, containers.
 
 ## Scope-based routing
 

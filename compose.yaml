@@ -1,0 +1,97 @@
+# Start: podman compose up -d --build   (run podman with HTTP_PROXY/HTTPS_PROXY set to the host proxy for image pulls)
+# Stop:  podman compose down            (never use -v: it deletes the database volume)
+name: deskbooking
+
+# Podman forwards host proxy variables into containers by default; blank them so nothing proxy-related exists at runtime.
+x-no-runtime-proxy: &no-runtime-proxy
+  HTTP_PROXY: ""
+  HTTPS_PROXY: ""
+  NO_PROXY: ""
+  http_proxy: ""
+  https_proxy: ""
+  no_proxy: ""
+
+# Build containers use host networking (build.network: host, build only) so the mirrored-network proxy on 127.0.0.1:3128 is reachable.
+x-build-proxy-args: &build-proxy-args
+  BUILD_HTTP_PROXY: ${BUILD_HTTP_PROXY:-}
+  BUILD_HTTPS_PROXY: ${BUILD_HTTPS_PROXY:-}
+  BUILD_NO_PROXY: ${BUILD_NO_PROXY:-localhost,127.0.0.1,db,backend,frontend}
+
+services:
+  db:
+    image: docker.io/library/postgres:16.9-alpine
+    environment:
+      <<: *no-runtime-proxy
+      POSTGRES_DB: ${POSTGRES_DB:-deskbooking}
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./Backend/db/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      # -h 127.0.0.1: the temporary init server listens on the unix socket only
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    networks: [app]
+
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Containerfile
+      network: host
+      args: *build-proxy-args
+    image: localhost/deskbooking-backend:local
+    init: true
+    environment:
+      <<: *no-runtime-proxy
+      NODE_ENV: production
+      PORT: "3000"
+      DATABASE_URL: postgresql://${POSTGRES_USER:?set POSTGRES_USER in .env}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@db:5432/${POSTGRES_DB:-deskbooking}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+      CORS_ORIGIN: http://localhost:${FRONTEND_PORT:-4200}
+      DB_SCHEMA: ${DB_SCHEMA:-ico-env}
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    networks: [app]
+
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Containerfile
+      network: host
+      args: *build-proxy-args
+    image: localhost/deskbooking-frontend:local
+    environment:
+      <<: *no-runtime-proxy
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-4200}:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    networks: [app]
+
+networks:
+  app:
+
+volumes:
+  db-data:

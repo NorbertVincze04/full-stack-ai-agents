@@ -4,3 +4,7 @@
 node_modules/
 dist/
 .angular/
+/certs/*.crt
+/Backend/ca/
+/Frontend/ca/
+/db-backups/
