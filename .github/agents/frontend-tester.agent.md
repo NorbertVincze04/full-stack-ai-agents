@@ -18,6 +18,7 @@ Writes and runs frontend tests (Karma/Jasmine unit tests; e2e if the project has
 2. Map each acceptance criterion to at least one test; cover validation, guards, error states and service HTTP calls (use `HttpTestingController`).
 3. Run the tests headless (`npm test -- --watch=false --browser=ChromeHeadless`) in `Frontend/`; run e2e only when the caller asked for it and a runner exists.
 4. Write `docs/runs/<task-id>/frontend-tests.md`: tests added, criteria coverage matrix, results, failures with suspected cause and severity (`blocker`, `high`, `medium`, `low`).
+5. On a re-run after a fix: re-run the full suite, update the report with a per-test status (resolved / still failing) and the failing-test names. If the builder reported that a test contradicts the spec or acceptance criteria, correct that test (and only that test) and say so in the report; otherwise never weaken or delete a failing test.
 
 ## Output Format
 - `Verdict:` pass | fail

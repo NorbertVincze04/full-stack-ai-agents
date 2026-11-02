@@ -31,7 +31,15 @@ flowchart TD
 
 ## Configuration
 
-`.github/config.json` -> `workflow`: `frontendTester` / `backendTester` accept `always` or `on-demand`; `backendSecurity` accepts `always`, `auto` or `on-demand`; `reviewers` is `auto` (the orchestrators pick only the reviewers the task needs, based on the spec `Scope flags`) or `all` (run every reviewer); `maxFixIterations` bounds the review-fix loop.
+`.github/config.json` -> `workflow`: `frontendTester` / `backendTester` accept `always` or `on-demand`; `backendSecurity` accepts `always`, `auto` or `on-demand`; `reviewers` is `auto` (the orchestrators pick only the reviewers the task needs, based on the spec `Scope flags`) or `all` (run every reviewer); `maxFixIterations` bounds the review-fix loop; `maxTestFixLoops` bounds the test-fix loop per failing test.
+
+## Risk gate
+
+Security changes, anything that can damage the database, and changes to major functionality need your approval first (`docs/risk-gate.md`). `Spec` lists them under `Risk gate`; the principle orchestrator asks you per item before any build. If a builder finds an unapproved risky change mid-build, it stops with `needs-approval`, the orchestrator returns `needs-human`, and you are asked. Agents never run database changes; approved SQL is delivered as a migration for you to apply. `Handover` records the approved risks.
+
+## Test-fix loop
+
+When a tester reports a failing test, the orchestrator does not go on to the reviewers. Per failing test, up to `maxTestFixLoops` (2) rounds: builder diagnoses the root cause and fixes it, then the tester re-runs. If a test still fails afterwards, the orchestrator returns `needs-human` with the root cause, what was tried and a question with options; the principle orchestrator asks you, passes your answer back, and the counter for those tests restarts.
 
 ## Context files
 

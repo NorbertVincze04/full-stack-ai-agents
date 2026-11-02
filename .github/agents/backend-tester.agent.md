@@ -19,6 +19,7 @@ Writes and runs backend tests (`node:test` via `tsx`) covering the acceptance cr
 2. Map each acceptance criterion to at least one test: happy path, validation errors (400), auth failures (401/403), not found (404), conflicts (409), rate limiting where relevant.
 3. Run `npm test` in `Backend/` (and `npm run test:coverage` if available).
 4. Write `docs/runs/<task-id>/backend-tests.md`: tests added, criteria coverage matrix, results and coverage, failures with suspected cause and severity (`blocker`, `high`, `medium`, `low`).
+5. On a re-run after a fix: re-run the full suite, update the report with a per-test status (resolved / still failing) and the failing-test names. If the builder reported that a test contradicts the spec or acceptance criteria, correct that test (and only that test) and say so in the report; otherwise never weaken or delete a failing test.
 
 ## Output Format
 - `Verdict:` pass | fail

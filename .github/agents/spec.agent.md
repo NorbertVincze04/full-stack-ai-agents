@@ -19,13 +19,15 @@ Turns `docs/tasks/<task-id>.md` into an implementation-ready specification at `d
 3. Write `docs/specs/<task-id>.md` with: summary, scope and out-of-scope, area (`frontend`, `backend` or `both`) with reasoning, a `Scope flags` section (below), functional requirements, API/data changes, UI behaviour, acceptance criteria restated as a numbered checklist (`AC1`, `AC2`, ...), risks, and `Open Questions`.
    - Choose the **smallest** area that satisfies the task. `frontend` means no backend, API or database change is needed; `backend` means no UI change is needed. Use `both` only when each side needs real changes.
    - `Scope flags` (yes/no each, with a one-line reason; the orchestrators use them to pick reviewers): `ui-changes` (visible UI, templates, styles, routes), `logic-changes` (application logic beyond scaffolding/config/text), `security-relevant` (auth, guards, user input, personal data, storage, SQL, secrets, CORS), `dependencies-changed`, `database-changes`, `scaffolding-only` (project setup/config with no behaviour).
-4. Ask only questions that block implementation or change the outcome; give each question 2-4 suggested options when possible and mark a recommended one.
-5. Set the task `status` to `specified` only when there are no blocking questions; otherwise leave it `new`.
+4. Add a `Risk gate` section listing every risky item the task implies (`R1`, `R2`, ...) per `docs/risk-gate.md` (security, database, major functionality), each with impact and a safer alternative when one exists. Write `none` if there are none.
+5. Ask only questions that block implementation or change the outcome; give each question 2-4 suggested options when possible and mark a recommended one.
+6. Set the task `status` to `specified` only when there are no blocking questions; otherwise leave it `new`.
 
 ## Output Format
 - `Spec file:` path
 - `Area:` frontend | backend | both
 - `Scope flags:` the flags and their yes/no values
+- `Risk gate:` risky items `R1`.. with impact and safer alternative, or `none`
 - `Ready:` yes | no
 - `Questions for human:` numbered list with suggested options (empty if ready)
 - `Acceptance criteria:` the numbered checklist

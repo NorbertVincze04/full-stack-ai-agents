@@ -13,18 +13,19 @@ Implements the backend part of a spec in `Backend/` (Node.js, Express 5, TypeScr
 - DO NOT write schema/migration SQL; that belongs to `Database Builder`. Use its report in `docs/runs/<task-id>/database.md` when present. For trivial queries on existing tables, writing repository code is fine.
 - DO NOT run anything that writes to the real database or opens the Cloud Foundry tunnel without it being in the spec.
 - DO NOT hard-code secrets; read config from environment (`src/config`). Use parameterised queries only.
+- Risk gate (`docs/risk-gate.md`): implement a security (auth, JWT, passwords, permissions, CORS), database-affecting or major-functionality change only if it is in the caller's `approved-risks` and exactly as approved. Otherwise do not implement it; stop and return `Verdict: needs-approval` with the change, impact, safer alternatives and a question.
 - Keep the `{ success, payload?, message?, errors? }` response shape and the conventions in `.github/docs/PROJECT_OVERVIEW.md` section 3.
 
 ## Approach
 1. Read `docs/specs/<task-id>.md`, then `docs/context/project.md` and `docs/context/backend.md` following `docs/context/README.md` (reading rules, freshness check, bootstrap if missing). Open only the source files the context points to for this task; read `.github/docs/PROJECT_OVERVIEW.md` only for the part the task needs. If `Backend/` is empty, scaffold the Express 5 + TypeScript project as described in the overview.
-2. If the caller passed review/test report paths, read them and fix only those findings.
+2. If the caller passed review/test report paths, read them and fix only those findings. For failing tests: diagnose the root cause first (read the failing test and the code under test, reproduce with the test command), fix the application code, and write the diagnosis and fix in the build report. If the test itself contradicts the spec or acceptance criteria, do not edit the test; report it so the tester can correct it.
 3. Implement routes, controllers, services, repositories, validation, middleware (auth, admin, rate limit), and error handling with correct HTTP status codes.
 4. Run `npm run build` in `Backend/`; fix errors you introduced.
 5. Update `docs/context/backend.md` (and the status line in `docs/context/project.md`) for what changed, per the update rules in `docs/context/README.md`.
 6. Write `docs/runs/<task-id>/backend-build.md`: acceptance criteria -> how implemented, API contract (method, path, auth, request, response, errors), files created/changed (including the context files), dependencies added, commands run and results, known gaps.
 
 ## Output Format
-- `Verdict:` done | blocked
+- `Verdict:` done | blocked | needs-approval
 - Report path
 - API contract summary
 - Files created/changed

@@ -15,6 +15,7 @@
     "backendTester": "always",
     "backendSecurity": "auto",
     "reviewers": "auto",
-    "maxFixIterations": 2
+    "maxFixIterations": 2,
+    "maxTestFixLoops": 2
   }
 }

@@ -14,6 +14,7 @@ Designs the database changes a task needs (tables, constraints, indexes, seed da
 - DO NOT edit application code in `Backend/src`; that belongs to `Backend Builder`.
 - Migrations must be idempotent where possible (`IF NOT EXISTS`), schema-qualified, and include a rollback section.
 - Use parameter placeholders (`$1`, `$2`) in every query you propose; never string-concatenate values.
+- Risk gate (`docs/risk-gate.md`): destructive or data-affecting SQL (`DROP`, `TRUNCATE`, wide `DELETE`/`UPDATE`, column removal/retyping, new constraints on tables with data, backfills) may be written only if it is in the caller's `approved-risks` and exactly as approved. Otherwise do not write it; return `Verdict: needs-approval` with the statement, impact, safer alternatives (for example additive/expand-contract) and a question. Mark every risky statement `RISK` in the report. Even when approved, never execute it.
 
 ## Approach
 1. Read `docs/specs/<task-id>.md`, `docs/context/project.md` and `docs/context/backend.md` (Data section; see `docs/context/README.md`), then only the repositories/queries the task touches. Read `.github/docs/PROJECT_OVERVIEW.md` section 3.5 only if the context lacks the schema.
@@ -23,6 +24,6 @@ Designs the database changes a task needs (tables, constraints, indexes, seed da
 5. Write `docs/runs/<task-id>/database.md`: schema diff, migration path, the exact parameterised queries for the repositories (with expected row shapes and unique-violation handling), data-volume or locking notes, and how to apply the migration.
 
 ## Output Format
-- `Verdict:` done | blocked | no-db-changes-needed
+- `Verdict:` done | blocked | needs-approval | no-db-changes-needed
 - Report path and migration file path
 - Queries the backend builder must use
