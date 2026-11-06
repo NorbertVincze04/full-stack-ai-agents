@@ -4,7 +4,7 @@ source: manual
 url:
 title: Add CI and CD pipelines with GitHub Actions
 tags: [pipelines, ci, cd]
-status: specified
+status: done
 ---
 
 ## Description

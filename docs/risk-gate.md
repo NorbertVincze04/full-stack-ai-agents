@@ -10,6 +10,7 @@ Some changes must not be implemented without an explicit human decision. Subagen
 | Database | `DROP`, `TRUNCATE`, `DELETE`/`UPDATE` without a narrow `WHERE`, removing or retyping columns, adding `NOT NULL`/`UNIQUE`/FK constraints on tables with data, data migrations or backfills, anything that rewrites or loses existing data, running anything against a real database |
 | Major functionality | Removing or changing the behaviour of an existing endpoint, route or flow (login, booking, admin), breaking an API contract, replacing core libraries, major dependency upgrades, changing the project structure or build pipeline |
 | Local environment / containers | `podman machine init/rm/reset/set`, `podman system prune/reset`, `podman volume rm/prune`, `compose down -v`, removing containers/images/volumes outside the `deskbooking` compose project; overwriting an existing `.env`, printing or committing secrets; installing a CA certificate; changing proxy or Podman/WSL settings; binding a port to a non-loopback address; privileged containers or host mounts outside the repo; pulling images from registries not in `containers.allowedRegistries`; installing tools (for example a compose provider) |
+| Pipelines / CI-CD | A workflow that pushes or merges into a branch (including the CD merge into the release branch), `contents: write` or any permission above read, `secrets.*`/tokens, third-party actions outside `actions/*`, `pull_request_target`, self-hosted runners, any deployment, publishing, tagging or release, making a check non-blocking or removing it, changing branch protection or repository settings, changing the triggers on the release branch |
 
 When in doubt, treat it as risky.
 
@@ -21,4 +22,5 @@ When in doubt, treat it as risky.
 4. Approval covers exactly what was described. Anything wider needs a new question.
 5. Agents never run SQL against any database except the local `db` container of this project (never Cloud Foundry or any remote host). `Database Builder` only writes migration files; `Database Migrator` applies them to the local container. Risky statements (see Database) are applied only if approved exactly as described, after a `pg_dump` backup, and are marked `RISK` in the report.
 6. Container and environment actions from the `Local environment / containers` row need approval before they run; routine actions (build, `compose up -d`, `compose down` without `-v`, creating a missing `.env`, reading logs) do not.
-7. `Handover` records every approved risk and who approved it under `Approved risks`.
+7. Pipeline actions from the `Pipelines / CI-CD` row need approval before they are written; plain verification jobs with read-only permissions do not.
+8. `Handover` records every approved risk and who approved it under `Approved risks`.

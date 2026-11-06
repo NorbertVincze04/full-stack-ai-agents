@@ -8,6 +8,7 @@ Agents keep a short, current description of the app in `docs/context/` so they d
 | `backend.md` | Backend map: commands, structure, config, API, DB, conventions, tests | `Backend Builder`, `Database Builder` |
 | `frontend.md` | Frontend map: commands, structure, routes, components, services, conventions, tests | `Frontend Builder` |
 | `containers.md` | Podman/compose stack: services, files, env vars, Bosch proxy handling, conventions | `Container Builder` |
+| `pipelines.md` | CI/CD workflows: triggers, jobs, branch promotion, prerequisites, conventions | `CI Pipeline Builder`, `CD Pipeline Builder` |
 
 `.github/docs/PROJECT_OVERVIEW.md` is the **target design**. The context files describe the **actual current state** and win on any conflict.
 

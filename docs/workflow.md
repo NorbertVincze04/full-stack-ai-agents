@@ -11,6 +11,8 @@ flowchart TD
   PO --> FO[Frontend Orchestrator]
   PO --> BO[Backend Orchestrator]
   PO --> CO[Container Orchestrator]
+  PO --> PL[Pipeline Orchestrator]
+  PL --> CI[CI Pipeline Builder] --> CD[CD Pipeline Builder] --> PLR[Pipeline Reviewer]
   CO --> CB[Container Builder] --> DM[Database Migrator] --> CT[Container Tester] --> CR[Container Reviewer]
   FO --> FB[Frontend Builder] --> FT[Frontend Tester - on demand] --> FR[UI/UX + Code + Security reviewers]
   BO --> DB[Database Builder] --> BB[Backend Builder] --> BT[Backend Tester] --> BR[Code Reviewer + Security]
@@ -45,11 +47,15 @@ When a tester reports a failing test, the orchestrator does not go on to the rev
 
 ## Context files
 
-`docs/context/` (`project.md`, `backend.md`, `frontend.md`, `containers.md`) hold a compact, current map of the app so agents do not re-analyse the codebase per task. Builders update them at the end of each task and they are committed with the code; every other agent reads them first and opens only the files they point to. Protocol, freshness check and template: `docs/context/README.md`.
+`docs/context/` (`project.md`, `backend.md`, `frontend.md`, `containers.md`, `pipelines.md`) hold a compact, current map of the app so agents do not re-analyse the codebase per task. Builders update them at the end of each task and they are committed with the code; every other agent reads them first and opens only the files they point to. Protocol, freshness check and template: `docs/context/README.md`.
 
 ## Containers (Podman, local)
 
 Tasks with `containers` in the spec `Area` go to `Container Orchestrator`: `Container Builder` (compose file, Containerfiles for frontend/backend/db, nginx, `.env`), `Database Migrator` (applies `Backend/db/migrations` to the `db` container), `Container Tester` (`podman compose up -d --build`, health and connectivity checks), `Container Reviewer`. Design, ports, env variables and the Bosch proxy/CA handling: `docs/context/containers.md`; settings: `.github/config.json` -> `containers`. Sensitive actions (creating the Podman machine, volume/prune/`down -v`, overwriting `.env`, installing a CA, proxy changes) go through the risk gate. Order when several areas are involved: backend, frontend, containers.
+
+## Pipelines (CI/CD)
+
+Tasks with `pipelines` in the spec `Area` go to `Pipeline Orchestrator`; the spec `Pipeline scope` (`ci`, `cd`) selects the builders. `CI Pipeline Builder` writes the verification workflow (build and test every area, container build check, no deployment); `CD Pipeline Builder` writes the promotion workflow (after CI succeeds on the integration branch, merge the tested commit into the release branch; nothing is deployed); `Pipeline Reviewer` checks permissions, secrets, actions, triggers and merge behaviour; `Pipeline Task-to-PR` prepares the commit/PR. Workflows cannot be run locally, so builders validate with `actionlint`/YAML parsing and there is no test-fix loop. Settings (platform, workflow files and names, branches, `cdMode`): `.github/config.json` -> `pipelines`; design: `docs/context/pipelines.md`. Merging or pushing from a workflow, write permissions and secrets are risk-gate items. Order when several areas are involved: backend, frontend, containers, pipelines.
 
 ## Scope-based routing
 

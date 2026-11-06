@@ -30,5 +30,14 @@
     },
     "caCertDir": "certs",
     "allowedRegistries": ["docker.io/library", "quay.io", "ghcr.io"]
+  },
+  "pipelines": {
+    "enabled": true,
+    "platform": "github-actions",
+    "workflowDir": ".github/workflows",
+    "ciWorkflow": { "file": "ci.yml", "name": "CI" },
+    "cdWorkflow": { "file": "cd.yml", "name": "CD" },
+    "branches": { "integration": "dev", "release": "main" },
+    "cdMode": "merge-only"
   }
 }
