@@ -1,7 +1,7 @@
 ---
 description: "Use when the container orchestrator needs the Podman setup built: Containerfiles for frontend and backend, the database container, one compose file, nginx config, .env and proxy/CA handling for the Bosch network."
 name: "Container Builder"
-tools: [read, edit, search, execute, todo]
+tools: [read, edit, search, execute]
 user-invocable: false
 ---
 
@@ -15,6 +15,7 @@ Creates and maintains the container setup described in `docs/context/containers.
 - Proxy (Bosch): run `podman` commands with `HTTP_PROXY`/`HTTPS_PROXY` set for that command to `containers.proxy.hostProxyUrl`; pass `containers.proxy.buildProxyUrl` and `noProxy` as build `ARG`s only, never `ENV`, never with credentials. If `certs/*.crt` exists, install them in the images.
 - Images: fully qualified names, pinned tags, registries from `containers.allowedRegistries`, non-root user, no `--privileged`, DB port bound to `127.0.0.1`.
 - Only this project's compose project (`COMPOSE_PROJECT_NAME`); never prune or remove anything else.
+- Keep the report short (about 60 lines max): tables and one-line entries, no file contents. Keep command output short (tail or filter it).
 
 ## Approach
 1. Read `docs/specs/<task-id>.md`, `docs/context/project.md`, `docs/context/containers.md` (and `backend.md`/`frontend.md` for commands and ports), `.github/config.json` -> `containers`. Open source files only to confirm build/start commands.

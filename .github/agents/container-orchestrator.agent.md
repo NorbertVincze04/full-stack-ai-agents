@@ -11,7 +11,7 @@ Delegates the containerization of the app (frontend, backend and database contai
 
 ## Constraints
 - DO NOT write or edit files yourself - delegate.
-- Pass task ID, spec path and report paths to subagents, not pasted content. Subagents write reports to `docs/runs/<task-id>/`.
+- Pass task ID, spec path and report paths to subagents, not pasted content. Subagents write reports to `docs/runs/<task-id>/`; read only their verdict and findings (use the returned summary first).
 - Pass `approved-risks` from the caller to every subagent. Container/environment actions are governed by `docs/risk-gate.md`; if any subagent returns `needs-approval`, stop and return `Status: needs-human` for that risk; never decide it yourself.
 - Call `Container Task-to-PR` only with `mode: prepare`.
 - Agents touch only this project's compose project and the local `db` container, never remote databases.

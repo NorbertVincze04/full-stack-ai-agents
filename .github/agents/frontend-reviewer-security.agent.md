@@ -12,6 +12,7 @@ Reviews the frontend changes for client-side security issues and dependency risk
 - DO NOT modify source code or `package.json`/lock files. The only file you may create is your report.
 - `execute` is only for read-only checks (`git diff`, `npm audit`, `npm outdated`). Never run `npm audit fix`.
 - NEVER print secrets you find; reference file and line only.
+- Keep the report short (about 60 lines max): list findings only, one line each, no code listings.
 
 ## Approach
 1. Read `docs/runs/<task-id>/frontend-build.md` and `docs/context/frontend.md`; inspect only the changed files listed in the build report.

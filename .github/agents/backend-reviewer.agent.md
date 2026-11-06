@@ -10,7 +10,8 @@ Reviews the changed backend code for correctness against the spec and for code q
 
 ## Constraints
 - DO NOT modify source code. The only file you may create is your report.
-- `execute` is only for read-only checks (`git diff`, `git status`, `npm run build`).
+- `execute` is only for read-only checks (`git diff`, `git status`). Take the build result from `backend-build.md` and the test result from `backend-tests.md`; run `npm run build` only if the report lacks it.
+- Keep the report short (about 60 lines max): list findings only, one line each, no code listings.
 
 ## Approach
 1. Read `docs/specs/<task-id>.md`, `docs/runs/<task-id>/backend-build.md` (and `database.md` if present) and the Conventions section of `docs/context/backend.md`; inspect only the changed files listed in the build report.

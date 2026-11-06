@@ -33,6 +33,8 @@ flowchart TD
 | `runs/<task-id>/<step>.md` | Each builder/tester/reviewer, one report per step |
 | `handover/<task-id>.md` | Handover |
 
+Reports are read by several later agents, so every agent keeps them short (about 60 lines): tables and one-line entries, no code listings, no restating the spec.
+
 ## Configuration
 
 `.github/config.json` -> `workflow`: `frontendTester` / `backendTester` accept `always` or `on-demand`; `backendSecurity` accepts `always`, `auto` or `on-demand`; `reviewers` is `auto` (the orchestrators pick only the reviewers the task needs, based on the spec `Scope flags`) or `all` (run every reviewer); `maxFixIterations` bounds the review-fix loop; `maxTestFixLoops` bounds the test-fix loop per failing test.
@@ -73,6 +75,6 @@ Runs after the reviewers, in three human-gated stages:
 
 1. **prepare** (called by each orchestrator): no git changes; writes `runs/<task-id>/pr-<area>.md` and returns the current branch, proposed commit message and file list.
 2. **commit**: the principle orchestrator shows the proposals and asks the human to confirm; only then it calls the Task-to-PR agents with `mode: commit`, `human-confirmed: true` and the confirmed files. All areas commit on the currently checked-out branch; agents never create or switch branches.
-3. **push**: a separate confirmation; only then `push: true` pushes and opens one PR (`gh` or `az repos pr create`).
+3. **push**: a separate confirmation; only then `push: true` pushes the checked-out branch (never `main`/`master`/the release branch) and opens one PR (`gh` or `az repos pr create`), except when the branch is the integration or release branch, where CI/CD promotes the code and no PR is opened.
 
 The workspace must be a git repository; otherwise the step is skipped. `Handover` runs after the commit step, so `docs/handover/` and the final task status are not part of the commits.

@@ -2,6 +2,8 @@
 
 A web application for reserving office desks. Employees register, sign in, pick a date and a desk on an office map and book it. Admins manage all bookings. The repo also contains an AI-based security-review agent that runs in the Azure DevOps release pipeline.
 
+> **For AI agents:** target design, not the current state (`docs/context/*` wins). Read by section, never the whole file: §3.5 database, §3.6 API, §3.7-3.8 middleware/auth, §4 frontend (§4.4 routes, §4.5 features), §6 conventions, §9 known issues. Skip §7 (workflows) and §8 (security agent): those pipelines and tools are not in this repo.
+
 ---
 
 ## 1. Repository layout

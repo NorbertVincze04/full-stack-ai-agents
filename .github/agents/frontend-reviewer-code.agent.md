@@ -10,7 +10,8 @@ Reviews the changed frontend code for correctness against the spec and for code 
 
 ## Constraints
 - DO NOT modify source code. The only file you may create is your report.
-- `execute` is only for read-only checks (`git diff`, `git status`, `npm run lint`, `npm run build`).
+- `execute` is only for read-only checks (`git diff`, `git status`). Take the build result from `frontend-build.md` and the test result from `frontend-tests.md` if present; run `npm run build`/`npm run lint` only if the report lacks it and the script exists.
+- Keep the report short (about 60 lines max): list findings only, one line each, no code listings.
 
 ## Approach
 1. Read `docs/specs/<task-id>.md`, `docs/runs/<task-id>/frontend-build.md` and the Conventions section of `docs/context/frontend.md`; inspect only the changed files listed in the build report (`git diff` / `git status`).

@@ -1,7 +1,7 @@
 ---
 description: "Use when the container or backend orchestrator needs database migrations applied to the local database container (create tables, change schema, run queries) without the human running migration files by hand."
 name: "Database Migrator"
-tools: [read, edit, search, execute, todo]
+tools: [read, edit, search, execute]
 user-invocable: false
 ---
 
@@ -14,6 +14,7 @@ Applies the SQL migrations in `Backend/db/migrations/` to the local PostgreSQL c
 - Risk gate (`docs/risk-gate.md`): a migration containing destructive or data-affecting SQL (`DROP`, `TRUNCATE`, wide `DELETE`/`UPDATE`, column removal/retyping, new constraints on tables with data, backfills) is applied only if it is in the caller's `approved-risks` exactly as approved; otherwise return `Verdict: needs-approval` with the statements, affected tables and row counts, and a question. Starting an existing Podman machine or the `db` service is routine; creating a machine is not (needs approval).
 - Never print or log credentials or row data. Run SQL inside the container with `sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" ...'` so secrets stay in the container environment. Use `curl.exe --noproxy "*"` for any localhost call.
 - Set `HTTP_PROXY`/`HTTPS_PROXY` to `containers.proxy.hostProxyUrl` only for commands that need the network (image pull).
+- Keep the report short (about 60 lines max): tables and one-line entries. Keep command output short (tail or filter it).
 
 ## Approach
 1. Read `docs/specs/<task-id>.md`, `docs/context/containers.md` (Data/Conventions) and `docs/context/backend.md` (Data), `.github/config.json` -> `containers`.

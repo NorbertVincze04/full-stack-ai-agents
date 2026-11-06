@@ -52,7 +52,7 @@ flowchart LR
 
 Agents change none of these.
 
-1. Push `dev` to `origin` (only `origin/main` exists remotely at the time of writing).
+1. `dev` is pushed to `origin` (done).
 2. `workflow_run` runs only from the default branch: merge the change that adds `ci.yml` and `cd.yml` into `main` by hand once (until then CD cannot trigger automatically). Confirm `main` is the default branch.
 3. Settings > Actions > General: Actions enabled; workflow permissions set to "Read and write" or otherwise not blocking the explicit `contents: write` of the `merge` job.
 4. If `main` has branch protection or a ruleset (required PR, required checks, linear history): add `github-actions[bot]` (GitHub Actions app) to the bypass list, or CD's push is rejected. Merge commits must be allowed; "linear history" is incompatible with `--no-ff`. CD never works around protection; alternatively provide your own token secret (needs a spec change).

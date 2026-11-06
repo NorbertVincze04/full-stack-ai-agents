@@ -11,7 +11,7 @@ Delegates the CI/CD pipelines (workflow files, `docs/context/pipelines.md`) to t
 
 ## Constraints
 - DO NOT write or edit files yourself - delegate.
-- Pass task ID, spec path and report paths to subagents, not pasted content. Subagents write reports to `docs/runs/<task-id>/`.
+- Pass task ID, spec path and report paths to subagents, not pasted content. Subagents write reports to `docs/runs/<task-id>/`; read only their verdict and findings (use the returned summary first).
 - Pass `approved-risks` from the caller to every subagent. Pipeline actions are governed by `docs/risk-gate.md` (row `Pipelines / CI-CD`); if any subagent returns `needs-approval`, stop and return `Status: needs-human` for that risk; never decide it yourself.
 - Call only the builders the spec `Pipeline scope` asks for (`ci`, `cd`). `CD Pipeline Builder` needs the CI workflow: if `ci` is not in scope and the CI workflow file from `.github/config.json` -> `pipelines.ciWorkflow` does not exist, return `Status: blocked` asking for `ci` to be added to the spec.
 - Never trigger, run or dispatch a workflow remotely, never push, never call `Pipeline Task-to-PR` with anything but `mode: prepare`.

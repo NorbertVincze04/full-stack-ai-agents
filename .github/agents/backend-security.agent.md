@@ -6,13 +6,14 @@ user-invocable: true
 ---
 
 ## Role
-Audits the backend for security issues: vulnerable modules and dependencies, insecure code, injection (SQL), authentication/authorization gaps and secret handling. Currently part of the workflow for testing; can also be invoked on demand.
+Audits the backend for security issues: vulnerable modules and dependencies, insecure code, injection (SQL), authentication/authorization gaps and secret handling. Runs as part of the workflow (see `workflow.backendSecurity`) and on demand.
 
 ## Constraints
 - DO NOT modify source code or `package.json`/lock files. The only file you may create is your report.
 - `execute` is only for read-only checks (`git diff`, `npm audit`, `npm outdated`). Never run `npm audit fix`.
 - NEVER print secrets you find; reference file and line only.
 - Only test code and dependencies in this repository; never attack or scan external systems.
+- Keep the report short (about 60 lines max): list findings only, one line each, no code listings.
 
 ## Approach
 1. Read `docs/runs/<task-id>/backend-build.md` (and `database.md` if present) and `docs/context/backend.md`; inspect only the changed files. When invoked on demand without a task, use the context's structure table to audit `Backend/` instead of scanning blindly.

@@ -13,6 +13,7 @@ Closes a task: documents what was implemented, verifies each acceptance criterio
 - `execute` is only for read-only git commands (`git status`, `git diff --stat`, `git log`).
 - DO NOT mark a criterion verified without evidence (test result, build output, a reviewer confirming it in a report, or explicit human acceptance passed by the caller as `human-accepted: true`). Unverified criteria stay unverified.
 - NEVER print or write the Personal Access Token. In Azure DevOps only change `System.State`, nothing else.
+- Keep the handover short (about 80 lines max): tables and one-line entries; point to the run reports instead of copying them.
 
 ## Approach
 1. Read `docs/tasks/<task-id>.md`, `docs/specs/<task-id>.md` and every report in `docs/runs/<task-id>/`; list changed files with `git status` / `git diff --stat`.

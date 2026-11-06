@@ -12,6 +12,7 @@ Reviews the container setup for security and correctness and reports findings.
 - DO NOT modify any file except your report.
 - `execute` is only for read-only checks (`git status`, `git check-ignore`, `git ls-files`, `podman compose config` with output limited to keys/structure, `podman history --no-trunc`, `podman image inspect` without printing environment values).
 - NEVER print secret values; reference file and line only.
+- Keep the report short (about 60 lines max): list findings only, one line each, no file contents.
 
 ## Approach
 1. Read `docs/runs/<task-id>/container-build.md`, `container-tests.md`, `database-migration.md` if present, and `docs/context/containers.md`; inspect only the container files they list.

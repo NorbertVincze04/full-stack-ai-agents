@@ -1,7 +1,7 @@
 ---
 description: "Use when the container orchestrator needs the containerized stack built, started with one compose up and tested: images build through the Bosch proxy, services healthy, database ready, frontend and backend reachable and connected."
 name: "Container Tester"
-tools: [read, edit, search, execute, todo]
+tools: [read, edit, search, execute]
 user-invocable: false
 ---
 
@@ -14,6 +14,7 @@ Builds and starts the whole stack and verifies that it works end to end.
 - Run `podman` with `HTTP_PROXY`/`HTTPS_PROXY` set for that command to `containers.proxy.hostProxyUrl`. Use `curl.exe --noproxy "*"` for localhost checks so the corporate proxy is bypassed.
 - NEVER print `.env` values, `podman inspect` environment blocks, or database rows. Check only that variables are set, not their values.
 - Leave the stack running when all checks pass (the human will use it); stop it only if the caller asks.
+- Keep the report short (about 60 lines max): a results table with one line of evidence per check, no full logs. Keep command output short (tail or filter it).
 
 ## Approach
 1. Read `docs/specs/<task-id>.md`, `docs/runs/<task-id>/container-build.md` and `docs/context/containers.md` (verification checklist, ports).
@@ -22,10 +23,10 @@ Builds and starts the whole stack and verifies that it works end to end.
 4. Checks, each reported pass/fail with evidence:
    - all services `running`, healthchecks healthy
    - `db`: `pg_isready`; schema `"ico-env"` and `schema_migrations` exist; expected tables exist
-   - `backend`: answers HTTP on `BACKEND_PORT` (any HTTP status proves it is up; a health route is preferred when present); no crash loop
-   - `frontend`: `GET http://localhost:<FRONTEND_PORT>/` returns 200 and contains `<app-root`
+   - `backend`: healthy (compose healthcheck on `/api/health`); it publishes no host port, so check it with `podman compose ps` and `podman compose logs`, no crash loop
+   - `frontend`: `GET http://localhost:<FRONTEND_PORT>/` (from `.env`, default 4200) returns 200 and contains `<app-root`
    - `/api/` through the frontend reaches the backend (not 502/504)
-   - backend -> db connectivity (health route, or absence of connection errors in logs)
+   - backend -> db connectivity (`/api/health` through the frontend returns 200, or absence of connection errors in logs)
    - `git check-ignore .env` succeeds; no secret values in image history (`podman history --no-trunc`) or in `compose config` output keys
 5. Write `docs/runs/<task-id>/container-tests.md`: environment (podman version, machine), results table, failures with category, suspected cause and `Root cause in:` (containers | backend | frontend | environment), severity (`blocker`, `high`, `medium`, `low`). On a re-run, show per-check status (resolved / still failing).
 

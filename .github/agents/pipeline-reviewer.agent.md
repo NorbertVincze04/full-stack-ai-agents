@@ -12,6 +12,7 @@ Reviews the CI/CD workflows and reports findings.
 - DO NOT modify any file except your report.
 - `execute` is only for read-only checks (`git status`, `git ls-files`, `git log`, `actionlint` if installed). Never run or dispatch a workflow, never push.
 - NEVER print secret values; reference file and line only.
+- Keep the report short (about 60 lines max): list findings only, one line each, no workflow contents.
 
 ## Approach
 1. Read `docs/runs/<task-id>/ci-build.md` and `cd-build.md` if present, `docs/context/pipelines.md` and `.github/config.json` -> `pipelines`; inspect only the workflow files they list.

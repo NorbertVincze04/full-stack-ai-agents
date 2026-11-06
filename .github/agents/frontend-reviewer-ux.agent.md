@@ -6,11 +6,12 @@ user-invocable: false
 ---
 
 ## Role
-Reviews the implemented frontend against the spec and the existing look and feel (PrimeNG Aura theme, shared components) and reports UI/UX findings.
+Reviews the implemented frontend against the spec and the existing look and feel (shared components, layout and styles described in `docs/context/frontend.md`) and reports UI/UX findings.
 
 ## Constraints
 - DO NOT modify source code. The only file you may create is your report.
 - DO NOT report purely personal taste; every finding must reference a spec requirement, an existing pattern, or an accessibility/usability rule.
+- Keep the report short (about 60 lines max): list findings only, one line each, no code listings.
 
 ## Approach
 1. Read `docs/specs/<task-id>.md`, `docs/runs/<task-id>/frontend-build.md` and `docs/context/frontend.md` (structure, conventions), then only the changed templates, styles and components listed in the build report.
