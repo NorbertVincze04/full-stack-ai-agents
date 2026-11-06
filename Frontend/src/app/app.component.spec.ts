@@ -55,6 +55,22 @@ describe('AppComponent', () => {
     expect(link.injector.get(RouterLink).urlTree?.toString()).toBe('/');
   });
 
+  it('should render a Help link to /info before the Login button', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    fixture.detectChanges();
+    const header = fixture.debugElement.query(By.css('header'));
+    const help = header.queryAll(By.directive(RouterLink))
+      .find(d => d.nativeElement.textContent.trim() === 'Help');
+    expect(help).toBeDefined();
+    expect(help?.nativeElement.tagName).toBe('A');
+    expect(help?.nativeElement.getAttribute('href')).toBe('/info');
+    expect(help?.nativeElement.hasAttribute('aria-label')).toBeFalse();
+    const button = (fixture.nativeElement as HTMLElement).querySelector('header button') as HTMLElement;
+    expect(
+      help?.nativeElement.compareDocumentPosition(button) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  });
+
   it('should render a Login button of type button in the header', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();

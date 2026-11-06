@@ -33,6 +33,20 @@ header a:hover {
   text-decoration: underline;
 }
 
+.header-actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-actions a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 0.5rem;
+}
+
 header a:focus-visible,
 header button:focus-visible {
   outline: 2px solid #ffffff;

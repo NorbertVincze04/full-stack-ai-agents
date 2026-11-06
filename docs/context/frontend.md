@@ -15,9 +15,10 @@ Angular 18.2 (NgModule, not standalone), TypeScript 5.5, RxJS 7.8, plain CSS, Ka
 | --- | --- |
 | `src/main.ts` | bootstraps `AppModule` |
 | `src/app/app.module.ts` | root module: declares `AppComponent`, imports `BrowserModule`, `AppRoutingModule` |
-| `src/app/app-routing.module.ts` | `RouterModule.forRoot(routes)`; `routes` is empty |
-| `src/app/app.component.*` | shell: `<header>` (app name link to `/`, placeholder Login button) + `<main><router-outlet/></main>` + footer with `currentYear` |
-| `src/app/app.component.spec.ts` | specs for title, header, link, Login button, footer |
+| `src/app/app-routing.module.ts` | `RouterModule.forRoot(routes)`; lazy route `info` -> `InfoModule` |
+| `src/app/app.component.*` | shell: `<header>` (app name link to `/`, `.header-actions` with "Help" link to `/info` then placeholder Login button) + `<main><router-outlet/></main>` + footer with `currentYear` |
+| `src/app/app.component.spec.ts` | 8 specs for title, header, app-name link, Help link, Login button, footer |
+| `src/app/features/info/` | `InfoModule`, `InfoRoutingModule` (child route `''`), `InfoComponent` (static h1 "How it works" + 3-step `<ol>`), `info.component.spec.ts` (2 specs) |
 | `src/styles.css`, `src/app/app.component.css` | global and shell styles |
 | `src/index.html` | host page (`<app-root>`, `<noscript>` fallback) |
 
@@ -27,7 +28,11 @@ Target structure when features arrive: `core/` (services, guards, interceptors, 
 None (no `environment.ts`). Backend API would be `http://localhost:3000/api`.
 
 ## API or routes
-No routes. No API calls.
+| Route | Target |
+| --- | --- |
+| `/info` | lazy `InfoModule` -> `InfoComponent` (static page) |
+
+No API calls.
 
 ## Conventions
 - NgModule architecture; one module per feature; declare components in modules.
@@ -35,9 +40,10 @@ No routes. No API calls.
 - Accessible markup: landmarks (`header`, `main`, `footer`), labels, keyboard operable controls.
 
 ## Tests
-Jasmine specs next to the code (`*.spec.ts`), 7 specs in `app.component.spec.ts`.
+Jasmine specs next to the code (`*.spec.ts`): 10 total (8 in `app.component.spec.ts`, 2 in `info.component.spec.ts`).
 
 ## Decisions and known gaps
 - Login button is a placeholder; real login is a separate task.
 - Angular 18.2.x has known `npm audit` findings; upgrade is a tracked follow-up (see `docs/handover/601.md`).
 - No ESLint, no CSP, no 404 route.
+- Header link label is "Help"; page heading stays "How it works".
