@@ -1,0 +1,99 @@
+name: CD
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cd-merge
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'dev')
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      sha: ${{ steps.resolve.outputs.sha }}
+    steps:
+      - name: Resolve and validate the commit to promote
+        id: resolve
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          EVENT_NAME: ${{ github.event_name }}
+          DISPATCH_REF: ${{ github.ref }}
+          RUN_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            if [ "$DISPATCH_REF" != "refs/heads/dev" ]; then
+              echo "::error::Manual runs must be dispatched from dev (got $DISPATCH_REF)."
+              exit 1
+            fi
+            sha=$(gh api "repos/$REPO/git/ref/heads/dev" --jq .object.sha)
+            count=$(gh api "repos/$REPO/actions/workflows/ci.yml/runs?head_sha=$sha&branch=dev&event=push&status=success" --jq .total_count)
+            if [ "$count" -lt 1 ]; then
+              echo "::error::No successful CI run found for the dev head ($sha). Not promoting."
+              exit 1
+            fi
+          else
+            sha="$RUN_SHA"
+          fi
+          if ! printf '%s' "$sha" | grep -Eq '^[0-9a-f]{40}$'; then
+            echo "::error::Resolved value is not a commit SHA."
+            exit 1
+          fi
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "Commit to promote: $sha"
+
+  merge:
+    name: merge dev into main
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: verify
+    permissions:
+      contents: write
+    steps:
+      # Credentials stay persisted: this is the only job that fetches and pushes with the token.
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Merge the tested commit into main
+        env:
+          SHA: ${{ needs.verify.outputs.sha }}
+        run: |
+          set -euo pipefail
+          short="${SHA:0:7}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin dev
+          if ! git merge-base --is-ancestor "$SHA" origin/dev; then
+            echo "::error::$SHA is not reachable from origin/dev. Not promoting."
+            exit 1
+          fi
+          if git merge-base --is-ancestor "$SHA" HEAD; then
+            echo "::notice::main already contains $short. Nothing to do."
+            exit 0
+          fi
+          if ! git merge --no-ff "$SHA" -m "chore: merge dev into main (CI passed for $short)"; then
+            git merge --abort || true
+            echo "::error::Merge conflict merging $short into main. Resolve manually; nothing was pushed."
+            exit 1
+          fi
+          git push origin HEAD:refs/heads/main

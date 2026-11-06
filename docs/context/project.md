@@ -10,6 +10,7 @@ Desk reservation web app: employees pick a date and a desk and book it; admins m
 | Frontend | Angular 18 NgModule shell: header (app name link, Help link, Login button or signed-in user name + logout icon), footer, lazy pages `/info`, `/login`, `/register`; `AuthService` (login/register/logout, `sessionStorage` session). See `frontend.md`. |
 | Database | PostgreSQL database `ico-env` (schema `public`), reachable only through a Cloud Foundry tunnel. `users` migration written (`Backend/migrations/001_create_users.sql`), applied by a human. Local `db` container: schema `"ico-env"` with `users`, `bookings`, `schema_migrations` from `Backend/db/migrations` (init SQL, first start only). |
 | Containers | Podman compose stack written (`compose.yaml`, Containerfiles, nginx, `.env.example`), **not yet verified end to end by a build**; the Podman machine (WSL mirrored networking) and docker-compose v5.6.1 provider exist, builds use the classic builder only (see `containers.md`). Only the frontend is published (`127.0.0.1:4200`); backend and db are internal. |
+| Pipelines | GitHub Actions written, **not yet run**: `ci.yml` (`CI`: backend/frontend build+test, container image builds, on push to `dev` and PRs) and `cd.yml` (`CD`: after green CI on `dev`, merges the tested commit into `main` with `--no-ff`; merge-only, no deployment). Needs human repository settings (push `dev`, first manual merge of the workflows into `main`, bot bypass on `main`); see `pipelines.md`. |
 
 ## Cross-cutting conventions
 
