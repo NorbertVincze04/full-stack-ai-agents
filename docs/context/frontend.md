@@ -23,6 +23,7 @@ Angular 18.2 (NgModule, not standalone), TypeScript 5.5, RxJS 7.8, plain CSS, Ka
 | `src/app/features/auth/` | `AuthModule`, `AuthRoutingModule` (guarded `login`, `register`), `auth-validators.ts` (client mirror of server rules), shared `auth-form.css`, `login/` and `register/` components |
 | `src/environments/` | `environment.ts` (`apiUrl: http://localhost:3000/api`), `environment.prod.ts` (`/api`, swapped by `fileReplacements` in the production build) |
 | `src/app/features/info/` | `InfoModule`, `InfoRoutingModule` (child route `''`), `InfoComponent` (static h1 "How it works" + 3-step `<ol>`), `info.component.spec.ts` (2 specs) |
+| `src/app/features/booking/` | task 648, lazy `BookingModule` on `/`: `BookingComponent` (top bar: selected date left, `Book Now`/`Withdraw booking` button right, `aria-live` message; holds selected/booked state, `BOOKING_NOW` token for tests), `calendar/CalendarComponent` (custom Mon-first month grid, prev/next month, disabled days `disabled`+`aria-disabled`, `aria-pressed` on selected), `booking-dates.ts` (4 bookable weekdays, `Mon, 9 Nov 2026` formatting, local dates), `BookingService` (`listMine`/`book`/`withdraw` with Bearer token; no token -> 401 without a call) |
 | `src/styles.css`, `src/app/app.component.css` | global and shell styles |
 | `src/index.html` | host page (`<app-root>`, `<noscript>` fallback) |
 
@@ -34,11 +35,14 @@ Target structure when features arrive: `core/` (services, guards, interceptors, 
 ## API or routes
 | Route | Target |
 | --- | --- |
+| `/` | lazy `BookingModule` -> `BookingComponent` (top bar + calendar, public; `pathMatch: 'full'`) |
 | `/info` | lazy `InfoModule` -> `InfoComponent` (static page) |
 | `/login` | lazy `AuthModule` -> `LoginComponent` (`?registered=1` shows the success message); `guestGuard` |
 | `/register` | lazy `AuthModule` -> `RegisterComponent`; `guestGuard` |
 
 API calls (via `AuthService`): `POST {apiUrl}/auth/login` `{ email, password }`; `POST {apiUrl}/auth/register` `{ fullName, email, password }` (`confirmPassword` never sent). Status handling: 400 field errors inline, 401/409/429/other generic messages.
+
+Booking calls (via `BookingService`, `Authorization: Bearer`): `GET {apiUrl}/bookings/mine`, `POST {apiUrl}/bookings` `{ date }`, `DELETE {apiUrl}/bookings/:date`. 401 -> `AuthService.logout()` + `You must log in first`; other errors -> generic message; 404 on withdraw also drops the date locally. `AuthService.getToken()` returns the token or null when signed out/expired.
 
 ## Conventions
 - NgModule architecture; one module per feature; declare components in modules.
@@ -50,6 +54,7 @@ Jasmine specs next to the code (`*.spec.ts`): 97 total (13 existing + 84 new). T
 
 ## Decisions and known gaps
 - Session (approved R2/R4): JWT and `{ fullName, email, type }` in `sessionStorage` (XSS-readable within the tab, no CSP); no password stored; register does not sign in.
+- Booking (task 648): client date rules are UX only (server enforces); the 4-weekday window uses the browser date; no frontend specs for the booking feature yet (tester); no interceptor, the token is attached in `BookingService`.
 - Expiry is checked on load, in `login()`, in `guestGuard` and by a timer; no interceptor, no refresh, no protected-route guard yet.
 - Header wraps (`flex-wrap`) so the signed-in state fits 320 px; user name has a `title`.
 - No 404 route yet (unknown URLs match nothing).

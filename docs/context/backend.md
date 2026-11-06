@@ -14,7 +14,7 @@ Node >= 22.18, TypeScript ESM (`module: nodenext`, `.ts` import extensions, `era
 
 | Path | Role |
 | --- | --- |
-| `src/app.ts` | `createApp(options?)`: CORS (guarded `*`), `express.json()`, `/api/auth` and `/api/health` routers, error handler. Options: `userRepository`, `loginRateLimit` ({ max, windowMs }), `registerRateLimit` ({ max, windowMs }), `dbProbe` (`Queryable`; none -> health answers 503), `healthTimeoutMs` (default 2000) |
+| `src/app.ts` | `createApp(options?)`: CORS (guarded `*`), `express.json()`, `/api/auth`, `/api/bookings` and `/api/health` routers, error handler. Options: `userRepository`, `bookingRepository`, `authMiddleware` (default JWT verifier), `now` (clock, default `new Date()`), `loginRateLimit` ({ max, windowMs }), `registerRateLimit` ({ max, windowMs }), `dbProbe` (`Queryable`; none -> health answers 503), `healthTimeoutMs` (default 2000) |
 | `src/server.ts` | loads `dotenv`, fails fast (exit 1) if `JWT_SECRET`/`DATABASE_URL` missing or `DB_SCHEMA` invalid, creates the `pg` Pool (5 s connection/query timeouts), passes it as repository DB and `dbProbe`, listens, logs `hello world`; SIGTERM/SIGINT close the server and pool (forced exit after 5 s) |
 | `src/config/dbSchema.ts` | `parseDbSchema(raw)`: unset/empty -> `public`, else must match `^[A-Za-z0-9_-]+$` (throws otherwise) |
 | `src/routes/authRoutes.ts` | `POST /login` + login limiter, `POST /register` + register limiter |
@@ -22,11 +22,13 @@ Node >= 22.18, TypeScript ESM (`module: nodenext`, `.ts` import extensions, `era
 | `src/controllers/authController.ts` | login and register body validation (400), maps results to 200/201/401/409 |
 | `src/services/authService.ts` | `login` and `register`: email normalisation, bcrypt (cost 10; compare with dummy hash for unknown user), JWT signing (HS256), `EmailAlreadyRegisteredError` (pre-check or pg `23505`), returns `{ token, user: { fullName, email, type } }` |
 | `src/repositories/userRepository.ts` | `createUserRepository(db, schema = "public")`, `findByEmail` (incl. `full_name`) and `create` (INSERT with `type` fixed to `'user'`, `RETURNING` id, email, type, full_name); parameterised; `public.users` for `public`, `"<schema>".users` otherwise; `Queryable` type so a Pool or a fake can be injected |
+| `src/routes/bookingRoutes.ts`, `controllers/bookingController.ts`, `services/bookingService.ts`, `services/bookingDates.ts`, `repositories/bookingRepository.ts` | task 648: `/api/bookings` (all routes behind `authenticate`); controller validates the date format (400) and maps service errors (400/401/404/409); service checks the date window (`bookableDates(now())`: 4 weekdays from today/next weekday, server-local date) and maps pg `23505` -> 409, `23503` -> 401; repository (`createBookingRepository(db, schema)`, `public.bookings` or `"<schema>".bookings`) uses `to_char(booking_date, 'YYYY-MM-DD')`, deletes by `booking_date` AND `user_id` |
+| `src/middleware/authenticate.ts` | `createAuthenticate()`: Bearer token verified with `JWT_SECRET`, HS256 only; `id` claim must be a uuid; sets `res.locals.user` ({ id, email, type }); missing/invalid/expired -> 401 `Authentication required`; no secret -> throws (500) |
 | `src/middleware/loginRateLimit.ts` | `express-rate-limit` factory (10 / 15 min / IP, failed attempts only); exports `positiveInt` |
 | `src/middleware/registerRateLimit.ts` | `express-rate-limit` factory (10 / 1 h / IP, every request counted) |
 | `src/middleware/errorHandler.ts` | invalid JSON -> 400, anything else -> 500 `Internal server error` (message-only log) |
-| `migrations/001_create_users.sql` | `CREATE TABLE IF NOT EXISTS public.users`; applied by a human only |
-| `db/migrations/001..003_ico_env_*.sql` | container init SQL: schema `"ico-env"`, `users`, `bookings`, `schema_migrations`; idempotent; mounted into the `db` container (not applied by the app) |
+| `migrations/001_create_users.sql`, `002_create_bookings.sql` | `CREATE TABLE IF NOT EXISTS public.users` / `public.bookings`; applied by a human only |
+| `db/migrations/001..004_ico_env_*.sql` | container init SQL: schema `"ico-env"`, `users`, `bookings` (004 reshapes it to `user_id`), `schema_migrations`; idempotent; mounted into the `db` container (not applied by the app) |
 | `tests/app.test.ts`, `tests/auth.test.ts`, `tests/register.test.ts`, `tests/server.test.ts`, `tests/health.schema.test.ts`, `tests/health.extra.test.ts`, `tests/login.acceptance.test.ts` | app/CORS, login + rate limit with a fake repository, register (validation, 201/409/429, type forced to user), startup, health route, `DB_SCHEMA` validation and login query schema, extra health and login acceptance cases |
 | `.env.example` | documented env vars |
 
@@ -56,6 +58,14 @@ Layering: routes -> controllers -> services -> repositories.
 
 JWT claims: `id`, `email`, `type`. Everything else returns 404.
 
+| Method, path | Auth | Request | Responses |
+| --- | --- | --- | --- |
+| `POST /api/bookings` | Bearer JWT | `{ date: "YYYY-MM-DD" }` | 201 `{ success, payload: { booking: { date } } }`; 400 validation (bad format, past, weekend, outside window); 401; 409 `Booking already exists` |
+| `DELETE /api/bookings/:date` | Bearer JWT | none | 200 `{ success: true }`; 400 bad date format (window not checked); 401; 404 `Booking not found` (also another user's date) |
+| `GET /api/bookings/mine` | Bearer JWT | none | 200 `{ success, payload: { bookings: [{ date }] } }` (own, date >= server today, ascending); 401 |
+
+User id comes only from the verified token. A booking for a user id missing from `users` (FK) -> 401. Booking routes are not rate limited.
+
 | Method, path | Auth | Responses |
 | --- | --- | --- |
 | `GET /api/health` | none, no rate limit (public; reachable via nginx at `/api/health`) | 200 `{ success: true, payload: { status: "ok" } }` when `SELECT 1` succeeds within 2000 ms; 503 `{ success: false, message: "Database unavailable" }` on DB error, timeout or no probe configured |
@@ -64,8 +74,8 @@ Health bodies are fixed; error detail is neither returned nor logged (the log li
 
 ## Data
 Two targets, selected by `DB_SCHEMA`:
-- Cloud Foundry database `ico-env`, schema `public` (default): `public.users` (`id` uuid, `full_name`, `email` unique, `password_hash` bcrypt, `type` admin|user, `created_at`) from `migrations/001_create_users.sql`, human-applied, not by the app.
-- Local `db` container (database `POSTGRES_DB`, default `deskbooking`), schema `"ico-env"` (`DB_SCHEMA=ico-env`): `users` (same shape), `bookings` (`id` serial PK, `user_name`, `booking_date`, `booking_desk`, `created_at`, `UNIQUE (booking_date, booking_desk)`) and `schema_migrations`, created by `db/migrations/001..003_ico_env_*.sql` on first start of an empty volume (idempotent, no drops). No backend code uses `bookings` yet.
+- Cloud Foundry database `ico-env`, schema `public` (default): `public.users` (`id` uuid, `full_name`, `email` unique, `password_hash` bcrypt, `type` admin|user, `created_at`) from `migrations/001_create_users.sql`, and `public.bookings` (`id` serial, `user_id` uuid NOT NULL FK `users(id)` ON DELETE CASCADE, `booking_date` date, `created_at`, `UNIQUE (booking_date, user_id)`, index on `user_id`) from `migrations/002_create_bookings.sql` (task 648, written, not yet applied); both human-applied, not by the app.
+- Local `db` container (database `POSTGRES_DB`, default `deskbooking`), schema `"ico-env"` (`DB_SCHEMA=ico-env`): `users` (same shape), `bookings` (`id` serial PK, `user_name` and `booking_desk` nullable/unused, `booking_date`, `user_id` uuid FK `users(id)` ON DELETE CASCADE, `created_at`, `UNIQUE (booking_date, user_id)`, index on `user_id`) and `schema_migrations`, created by `db/migrations/001..003_ico_env_*.sql` on first start of an empty volume (idempotent, no drops); `004_ico_env_bookings_user_id.sql` (task 648) reshapes `bookings` (idempotent, drops only the old `(booking_date, booking_desk)` unique) and must be applied by hand on existing volumes; until then booking calls fail with a 500. `/api/bookings` code uses `user_id` only (task 648).
 
 No seed: users are inserted by hand (lower-case email) or through `POST /api/auth/register` (type `user` only; admins are still created by hand).
 

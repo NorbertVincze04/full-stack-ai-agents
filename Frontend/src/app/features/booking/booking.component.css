@@ -1,0 +1,49 @@
+.top-bar {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: #e5e7eb;
+  color: #1f2937;
+}
+
+.top-bar-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.selected-date {
+  margin: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.book-button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.5rem 1rem;
+  border: 2px solid #1f2937;
+  border-radius: 4px;
+  background-color: #1f2937;
+  color: #ffffff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.book-button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.book-button:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.top-bar-message {
+  min-height: 1.5rem;
+  color: #b91c1c;
+  overflow-wrap: anywhere;
+}

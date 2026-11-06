@@ -90,6 +90,11 @@ export class AuthService {
     return isValidSession(this.session);
   }
 
+  // Token for API calls; null when signed out or expired.
+  getToken(): string | null {
+    return isValidSession(this.session) ? this.session.token : null;
+  }
+
   // Single place that updates the user stream and the expiry timer.
   private applySession(session: StoredSession | null): void {
     clearTimeout(this.expiryTimer);

@@ -1,0 +1,39 @@
+<section class="calendar" aria-label="Booking calendar">
+  <div class="calendar-nav">
+    <button type="button" class="nav-button" aria-label="Previous month" (click)="shiftMonth(-1)">&lsaquo;</button>
+    <h2 class="month-label" aria-live="polite">{{ monthLabel }}</h2>
+    <button type="button" class="nav-button" aria-label="Next month" (click)="shiftMonth(1)">&rsaquo;</button>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        @for (name of weekdays; track name) {
+          <th scope="col">{{ name }}</th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (week of weeks; track $index) {
+        <tr>
+          @for (cell of week; track $index) {
+            <td>
+              @if (cell) {
+                <button
+                  type="button"
+                  class="day"
+                  [class.selected]="cell.selected"
+                  [class.booked]="cell.booked"
+                  [disabled]="!cell.enabled"
+                  [attr.aria-disabled]="!cell.enabled"
+                  [attr.aria-pressed]="cell.selected"
+                  [attr.aria-label]="cell.label"
+                  (click)="select(cell)"
+                >{{ cell.day }}</button>
+              }
+            </td>
+          }
+        </tr>
+      }
+    </tbody>
+  </table>
+</section>

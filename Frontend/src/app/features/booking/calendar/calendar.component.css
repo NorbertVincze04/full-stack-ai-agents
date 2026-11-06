@@ -1,0 +1,93 @@
+.calendar {
+  box-sizing: border-box;
+  max-width: 24rem;
+  margin: 1rem auto;
+  padding: 0 1rem;
+  color: #1f2937;
+}
+
+.calendar-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.month-label {
+  margin: 0;
+  font-size: 1.125rem;
+  text-align: center;
+}
+
+.nav-button {
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid #1f2937;
+  border-radius: 4px;
+  background-color: #ffffff;
+  color: #1f2937;
+  font: inherit;
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+table {
+  width: 100%;
+  margin-top: 0.5rem;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+th {
+  padding: 0.25rem 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+td {
+  padding: 2px;
+  text-align: center;
+}
+
+.day {
+  position: relative;
+  width: 100%;
+  min-height: 40px;
+  padding: 0;
+  border: 1px solid #1f2937;
+  border-radius: 4px;
+  background-color: #ffffff;
+  color: #1f2937;
+  font: inherit;
+  cursor: pointer;
+}
+
+.day:disabled {
+  border-color: #d1d5db;
+  background-color: #f3f4f6;
+  color: #9ca3af;
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+
+.day.selected {
+  background-color: #1f2937;
+  color: #ffffff;
+}
+
+.day.booked::after {
+  content: '';
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #16a34a;
+}
+
+.nav-button:focus-visible,
+.day:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}

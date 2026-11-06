@@ -1,0 +1,10 @@
+<section class="top-bar" aria-label="Booking">
+  <div class="top-bar-row">
+    <p class="selected-date">{{ selectedLabel }}</p>
+    <button type="button" class="book-button" [disabled]="busy" [attr.aria-busy]="busy" (click)="toggleBooking()">
+      {{ isBooked ? 'Withdraw booking' : 'Book Now' }}
+    </button>
+  </div>
+  <div class="top-bar-message" aria-live="polite">{{ error }}</div>
+</section>
+<app-calendar [bookable]="bookable" [selected]="selected" [booked]="booked" (dateSelected)="select($event)" />
