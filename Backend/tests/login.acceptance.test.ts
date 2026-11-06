@@ -248,6 +248,7 @@ describe("login acceptance (fake repository)", () => {
       });
       assert.deepEqual(await repository.findByEmail("e@x.y"), {
         id: "i",
+        fullName: "N",
         email: "e@x.y",
         passwordHash: "h",
         type: "user",

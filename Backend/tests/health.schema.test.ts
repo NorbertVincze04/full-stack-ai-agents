@@ -165,7 +165,10 @@ describe("login query schema", () => {
 
   it("uses public.users by default", async () => {
     const q = await capture();
-    assert.equal(q.text, "SELECT id, email, password_hash, type FROM public.users WHERE email = $1");
+    assert.equal(
+      q.text,
+      "SELECT id, email, password_hash, type, full_name FROM public.users WHERE email = $1",
+    );
     assert.deepEqual(q.values, ["a@b.c"]);
   });
 

@@ -9,7 +9,7 @@ export interface LoginRateLimitOptions {
 export const DEFAULT_LOGIN_RATE_LIMIT_MAX = 10;
 export const DEFAULT_LOGIN_RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
 
-function positiveInt(value: string | undefined, fallback: number): number {
+export function positiveInt(value: string | undefined, fallback: number): number {
   const parsed = Number(value);
   return value !== undefined && Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
 }

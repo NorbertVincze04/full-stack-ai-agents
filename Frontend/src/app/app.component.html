@@ -2,8 +2,19 @@
   <h1><a routerLink="/">{{ title }}</a></h1>
   <div class="header-actions">
     <a routerLink="/info">Help</a>
-    <!-- Placeholder: real login is a separate task. -->
-    <button type="button">Login</button>
+    @if (user$ | async; as user) {
+      <span class="user-name" [title]="user.fullName">{{ user.fullName }}</span>
+      <button type="button" class="logout-button" aria-label="Log out" (click)="logout()">
+        <svg aria-hidden="true" focusable="false" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 21V4a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v17" />
+          <path d="M3 21h18" />
+          <path d="M15 6l4 1.5V21" />
+          <circle cx="12" cy="13" r="0.75" fill="currentColor" />
+        </svg>
+      </button>
+    } @else {
+      <button type="button" routerLink="/login">Login</button>
+    }
   </div>
 </header>
 <main>

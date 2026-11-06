@@ -1,0 +1,73 @@
+<h2>Register</h2>
+
+<form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  @if (errorMessage) {
+    <p class="form-error" role="alert">{{ errorMessage }}</p>
+  }
+
+  <div class="field">
+    <label for="register-full-name">Full name</label>
+    <input
+      id="register-full-name"
+      type="text"
+      formControlName="fullName"
+      autocomplete="name"
+      [attr.aria-invalid]="errorFor('fullName') !== null"
+      [attr.aria-describedby]="errorFor('fullName') ? 'register-full-name-error' : null"
+    />
+    @if (errorFor('fullName'); as msg) {
+      <p class="field-error" id="register-full-name-error">{{ msg }}</p>
+    }
+  </div>
+
+  <div class="field">
+    <label for="register-email">Email</label>
+    <input
+      id="register-email"
+      type="email"
+      formControlName="email"
+      autocomplete="email"
+      [attr.aria-invalid]="errorFor('email') !== null"
+      [attr.aria-describedby]="errorFor('email') ? 'register-email-error' : null"
+    />
+    @if (errorFor('email'); as msg) {
+      <p class="field-error" id="register-email-error">{{ msg }}</p>
+    }
+  </div>
+
+  <div class="field">
+    <label for="register-password">Password</label>
+    <input
+      id="register-password"
+      type="password"
+      formControlName="password"
+      autocomplete="new-password"
+      [attr.aria-invalid]="errorFor('password') !== null"
+      [attr.aria-describedby]="errorFor('password') ? 'register-password-error' : null"
+    />
+    @if (errorFor('password'); as msg) {
+      <p class="field-error" id="register-password-error">{{ msg }}</p>
+    }
+  </div>
+
+  <div class="field">
+    <label for="register-confirm-password">Confirm password</label>
+    <input
+      id="register-confirm-password"
+      type="password"
+      formControlName="confirmPassword"
+      autocomplete="new-password"
+      [attr.aria-invalid]="errorFor('confirmPassword') !== null"
+      [attr.aria-describedby]="errorFor('confirmPassword') ? 'register-confirm-password-error' : null"
+    />
+    @if (errorFor('confirmPassword'); as msg) {
+      <p class="field-error" id="register-confirm-password-error">{{ msg }}</p>
+    }
+  </div>
+
+  <button type="submit" [disabled]="submitting" [attr.aria-busy]="submitting">
+    {{ submitting ? 'Registering...' : 'Register' }}
+  </button>
+</form>
+
+<p class="alt-link">Already have an account? <a routerLink="/login">Login</a></p>

@@ -71,7 +71,7 @@ describe("POST /api/auth/login", () => {
     assert.equal(res.status, 200);
     const body = await res.json();
     assert.equal(body.success, true);
-    assert.deepEqual(Object.keys(body.payload), ["token"]);
+    assert.deepEqual(Object.keys(body.payload), ["token", "user"]);
     const decoded = jwt.verify(body.payload.token, SECRET, { algorithms: ["HS256"] }) as jwt.JwtPayload;
     assert.equal(decoded.id, user.id);
     assert.equal(decoded.email, user.email);

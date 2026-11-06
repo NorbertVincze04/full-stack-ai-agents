@@ -1,0 +1,75 @@
+:host {
+  display: block;
+  box-sizing: border-box;
+  max-width: 28rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h2 {
+  margin-top: 0;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.5rem;
+  border: 1px solid #6b7280;
+  border-radius: 4px;
+  font: inherit;
+}
+
+input[aria-invalid='true'] {
+  border-color: #b91c1c;
+}
+
+input:focus-visible,
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid #1f2937;
+  outline-offset: 2px;
+}
+
+.field-error,
+.form-error {
+  margin: 0;
+  color: #b91c1c;
+}
+
+.form-success {
+  margin: 0 0 1rem;
+  color: #166534;
+}
+
+.form-error {
+  margin-bottom: 1rem;
+}
+
+button[type='submit'] {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.5rem 1.5rem;
+  border: 2px solid #1f2937;
+  border-radius: 4px;
+  background-color: #1f2937;
+  color: #ffffff;
+  font: inherit;
+  cursor: pointer;
+}
+
+button[type='submit']:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.alt-link {
+  margin-top: 1.5rem;
+}

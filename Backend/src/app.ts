@@ -6,6 +6,8 @@ import { createHealthController } from "./controllers/healthController.ts";
 import { errorHandler } from "./middleware/errorHandler.ts";
 import { createLoginRateLimiter } from "./middleware/loginRateLimit.ts";
 import type { LoginRateLimitOptions } from "./middleware/loginRateLimit.ts";
+import { createRegisterRateLimiter } from "./middleware/registerRateLimit.ts";
+import type { RegisterRateLimitOptions } from "./middleware/registerRateLimit.ts";
 import {
   createHealthRepository,
   unconfiguredHealthRepository,
@@ -20,6 +22,7 @@ import { createHealthService } from "./services/healthService.ts";
 export interface AppOptions {
   userRepository?: UserRepository;
   loginRateLimit?: LoginRateLimitOptions;
+  registerRateLimit?: RegisterRateLimitOptions;
   dbProbe?: Queryable;
   healthTimeoutMs?: number;
 }
@@ -42,6 +45,7 @@ export function createApp(options: AppOptions = {}): Express {
     createAuthRouter(
       createAuthController(authService),
       createLoginRateLimiter(options.loginRateLimit),
+      createRegisterRateLimiter(options.registerRateLimit),
     ),
   );
 

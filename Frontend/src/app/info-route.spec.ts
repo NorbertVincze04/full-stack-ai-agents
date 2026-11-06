@@ -1,4 +1,6 @@
 import { Location } from '@angular/common';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { Router, RouterModule } from '@angular/router';
 import { AppComponent } from './app.component';
@@ -8,7 +10,8 @@ describe('/info route integration', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AppRoutingModule, RouterModule],
-      declarations: [AppComponent]
+      declarations: [AppComponent],
+      providers: [provideHttpClient(), provideHttpClientTesting()]
     }).compileComponents();
   });
 
