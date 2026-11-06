@@ -52,12 +52,28 @@ flowchart LR
 
 Agents change none of these.
 
-1. `dev` is pushed to `origin` (done).
-2. `workflow_run` runs only from the default branch: merge the change that adds `ci.yml` and `cd.yml` into `main` by hand once (until then CD cannot trigger automatically). Confirm `main` is the default branch.
+1. `dev` must exist on `origin` with the workflow files for `CI` to run. Check: `git ls-remote origin dev` shows it; `git ls-tree origin/main .github/workflows` is empty until the workflows are merged into `main` (step 2 below). Repo state is not recorded here; verify it.
+2. `workflow_run` runs only from the default branch: merge the change that adds `ci.yml` and `cd.yml` into `main` by hand once (until then CD cannot trigger automatically). Confirm `main` is the default branch. The `.github/workflows/**` files on `main` must be identical to `dev` (see "Workflow-file changes").
 3. Settings > Actions > General: Actions enabled; workflow permissions set to "Read and write" or otherwise not blocking the explicit `contents: write` of the `merge` job.
 4. If `main` has branch protection or a ruleset (required PR, required checks, linear history): add `github-actions[bot]` (GitHub Actions app) to the bypass list, or CD's push is rejected. Merge commits must be allowed; "linear history" is incompatible with `--no-ff`. CD never works around protection; alternatively provide your own token secret (needs a spec change).
 5. Optional: make the CI jobs required checks on PRs into `dev` and `main`, but not on the direct CD push to `main`.
 6. Pushes made with `GITHUB_TOKEN` start no other workflows (acceptable: CI does not run on `main` pushes).
+
+## Enablement and verification (human, in this order)
+
+A push to `dev` starts `CI`; `CD` starts only from the `workflow_run` of a successful `CI` push run on `dev`.
+
+| Step | Action | Expected observation |
+| --- | --- | --- |
+| 1 | Ensure `dev` is on `origin` (`git ls-remote origin dev`); if it is, open the existing `CI` run for the `dev` push in the Actions tab, otherwise push `dev` | `CI` run on `dev` with jobs `backend`, `frontend`, `containers (Backend)`, `containers (Frontend)`. No `CD` run while `cd.yml` is not on `main`. |
+| 2 | Merge the workflow files into `main` once (merge commit or fast-forward; squash is also fine if `.github/workflows/**` content is identical to `dev`) | `cd.yml` is on the default branch; no run starts (CI does not trigger on `main` pushes). |
+| 3 | Confirm default branch is `main` and the Actions settings above (permissions, bot bypass, no linear history) | Settings match the list above. |
+| 4 | Push a new commit to `dev` | `CI` run on `dev`; when green, a `CD` run with event `workflow_run`, jobs `verify` then `merge dev into main`; `main` gets a `--no-ff` merge commit `chore: merge dev into main (CI passed for <sha>)`. |
+
+- Safer order: have `dev` on `origin` first while `cd.yml` is not on `main` (CI only), confirm it is green, then merge the workflows into `main`. Once `cd.yml` is on `main`, the first green push to `dev` promotes to `main` automatically (intended).
+- Negative cases: a red or cancelled `CI` run on `dev` still starts a `CD` run, but `verify` is skipped and `merge` does not run. `workflow_run.branches` filters on the head branch, so only a PR whose head branch is `dev` starts a `CD` run (`verify` skipped); CI runs of other PRs start no `CD` run. Nothing reaches `main` in either case.
+- Workflow-file changes: `GITHUB_TOKEN` cannot push commits that change `.github/workflows/**`, so CD's push is rejected if the merge would alter workflow files. Merge workflow-file changes into `main` by hand and keep them identical to `dev` before the next push to `dev`.
+- Human check: after step 4, confirm `CI` started on the push and `CD` updated `main`, or report the failing step.
 
 ## Conventions
 
@@ -72,4 +88,4 @@ Agents change none of these.
 - Docker Hub anonymous pull limits may occasionally fail the `containers` job.
 - A bad commit that passes CI reaches `main` automatically (intended with `merge-only`).
 - Manual dispatch lets anyone with write access promote the `dev` head (guarded by the CI-success check).
-- Workflows were not run locally; `actionlint` and a YAML parser were unavailable. First real run is the validation.
+- Run results are not recorded here; the human confirms them in the Actions tab. `actionlint` and a YAML parser were unavailable locally, so the first real run is the validation.
