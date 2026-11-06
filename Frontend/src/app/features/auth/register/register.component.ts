@@ -23,6 +23,7 @@ interface ServerFieldError {
 
 @Component({
   selector: 'app-register',
+  standalone: false,
   templateUrl: './register.component.html',
   styleUrl: '../auth-form.css'
 })
