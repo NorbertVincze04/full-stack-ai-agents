@@ -18,13 +18,14 @@ function fakeDb(rows: Array<Record<string, unknown>> = []) {
 }
 
 describe("bookingRepository", () => {
-  it("create inserts user_id and booking_date only, parameterised", async () => {
+  it("create inserts the user's database name with the booking", async () => {
     const { db, calls } = fakeDb([{ date: "2026-11-09" }]);
     const result = await createBookingRepository(db).create(USER, "2026-11-09");
     assert.deepEqual(result, { date: "2026-11-09" });
-    assert.match(calls[0].text, /^INSERT INTO public\.bookings \(user_id, booking_date\) VALUES \(\$1, \$2\)/);
+    assert.match(calls[0].text, /^INSERT INTO public\.bookings \(user_id, booking_date, user_name\)/);
+    assert.match(calls[0].text, /SELECT full_name FROM public\.users WHERE id = \$1/);
     assert.deepEqual(calls[0].values, [USER, "2026-11-09"]);
-    assert.doesNotMatch(calls[0].text, /email|user_name/i);
+    assert.doesNotMatch(calls[0].text, /email/i);
   });
 
   it("delete filters on date AND user_id and reports hit/miss (FR11)", async () => {
@@ -49,6 +50,7 @@ describe("bookingRepository", () => {
     const { db, calls } = fakeDb([{ date: "2026-11-09" }]);
     await createBookingRepository(db, "ico-env").create(USER, "2026-11-09");
     assert.match(calls[0].text, /INSERT INTO "ico-env"\.bookings /);
+    assert.match(calls[0].text, /SELECT full_name FROM "ico-env"\.users WHERE id = \$1/);
   });
 
   it("rejects an invalid schema name", () => {

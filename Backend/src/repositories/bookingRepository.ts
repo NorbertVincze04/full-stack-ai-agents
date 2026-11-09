@@ -23,7 +23,8 @@ export function createBookingRepository(
   schema: string = DEFAULT_DB_SCHEMA,
 ): BookingRepository {
   const table = bookingsTable(schema);
-  const insertQuery = `INSERT INTO ${table} (user_id, booking_date) VALUES ($1, $2) RETURNING ${DATE_TEXT} AS date`;
+  const users = schema === DEFAULT_DB_SCHEMA ? "public.users" : `"${parseDbSchema(schema)}".users`;
+  const insertQuery = `INSERT INTO ${table} (user_id, booking_date, user_name) VALUES ($1, $2, (SELECT full_name FROM ${users} WHERE id = $1)) RETURNING ${DATE_TEXT} AS date`;
   const deleteQuery = `DELETE FROM ${table} WHERE booking_date = $1 AND user_id = $2 RETURNING id`;
   const listQuery = `SELECT ${DATE_TEXT} AS date FROM ${table} WHERE user_id = $1 AND booking_date >= $2 ORDER BY booking_date`;
   return {
