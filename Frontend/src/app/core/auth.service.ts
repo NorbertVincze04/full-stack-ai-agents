@@ -43,6 +43,9 @@ function isValidSession(session: Partial<StoredSession> | null | undefined): ses
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  getCurrentUserName(): string {
+    return this.session?.user?.fullName ?? '';
+  }
   private readonly userSubject = new BehaviorSubject<AuthUser | null>(null);
   readonly currentUser$: Observable<AuthUser | null> = this.userSubject.asObservable();
   private session: StoredSession | null = null;

@@ -3,6 +3,7 @@ import type { RequestHandler } from "express";
 
 export interface AuthenticatedUser {
   id: string;
+  name?: string;
   email?: string;
   type?: string;
 }
@@ -38,6 +39,7 @@ export function createAuthenticate(): RequestHandler {
     }
     const user: AuthenticatedUser = {
       id: claims.id,
+      ...(typeof claims.name === "string" ? { name: claims.name } : {}),
       email: typeof claims.email === "string" ? claims.email : undefined,
       type: typeof claims.type === "string" ? claims.type : undefined,
     };
