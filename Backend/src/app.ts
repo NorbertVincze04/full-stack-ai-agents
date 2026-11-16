@@ -3,6 +3,7 @@ import express from "express";
 import type { Express, RequestHandler } from "express";
 import { createAuthController } from "./controllers/authController.ts";
 import { createBookingController } from "./controllers/bookingController.ts";
+import { createDeskController } from "./controllers/deskController.ts";
 import { createHealthController } from "./controllers/healthController.ts";
 import { createAuthenticate } from "./middleware/authenticate.ts";
 import { errorHandler } from "./middleware/errorHandler.ts";
@@ -16,18 +17,23 @@ import {
 } from "./repositories/healthRepository.ts";
 import { unconfiguredBookingRepository } from "./repositories/bookingRepository.ts";
 import type { BookingRepository } from "./repositories/bookingRepository.ts";
+import { unconfiguredDeskRepository } from "./repositories/deskRepository.ts";
+import type { DeskRepository } from "./repositories/deskRepository.ts";
 import { unconfiguredUserRepository } from "./repositories/userRepository.ts";
 import type { Queryable, UserRepository } from "./repositories/userRepository.ts";
 import { createAuthRouter } from "./routes/authRoutes.ts";
 import { createBookingRouter } from "./routes/bookingRoutes.ts";
+import { createDeskRouter } from "./routes/deskRoutes.ts";
 import { createHealthRouter } from "./routes/healthRoutes.ts";
 import { createAuthService } from "./services/authService.ts";
 import { createBookingService } from "./services/bookingService.ts";
+import { createDeskService } from "./services/deskService.ts";
 import { createHealthService } from "./services/healthService.ts";
 
 export interface AppOptions {
   userRepository?: UserRepository;
   bookingRepository?: BookingRepository;
+  deskRepository?: DeskRepository;
   authMiddleware?: RequestHandler;
   now?: () => Date;
   loginRateLimit?: LoginRateLimitOptions;
@@ -58,17 +64,21 @@ export function createApp(options: AppOptions = {}): Express {
     ),
   );
 
+  const authenticate = options.authMiddleware ?? createAuthenticate();
   const bookingService = createBookingService(
     options.bookingRepository ?? unconfiguredBookingRepository,
     options.now,
   );
   app.use(
     "/api/bookings",
-    createBookingRouter(
-      createBookingController(bookingService),
-      options.authMiddleware ?? createAuthenticate(),
-    ),
+    createBookingRouter(createBookingController(bookingService), authenticate),
   );
+
+  const deskService = createDeskService(
+    options.deskRepository ?? unconfiguredDeskRepository,
+    options.now,
+  );
+  app.use("/api/desks", createDeskRouter(createDeskController(deskService), authenticate));
 
   const healthService = createHealthService(
     options.dbProbe

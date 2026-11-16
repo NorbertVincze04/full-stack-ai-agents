@@ -3,10 +3,11 @@ import { Injectable } from '@angular/core';
 import { Observable, map, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/auth.service';
+import { MyBooking } from './booking.models';
 
 interface BookingsResponse {
   success: boolean;
-  payload: { bookings: { date: string }[] };
+  payload: { bookings: { date: string; desk?: string | null }[] };
 }
 
 @Injectable({ providedIn: 'root' })
@@ -15,14 +16,16 @@ export class BookingService {
 
   constructor(private readonly http: HttpClient, private readonly auth: AuthService) {}
 
-  listMine(): Observable<string[]> {
+  listMine(): Observable<MyBooking[]> {
     return this.withAuth(headers =>
-      this.http.get<BookingsResponse>(`${this.url}/mine`, { headers }).pipe(map(res => res.payload.bookings.map(b => b.date)))
+      this.http
+        .get<BookingsResponse>(`${this.url}/mine`, { headers })
+        .pipe(map(res => res.payload.bookings.map(b => ({ date: b.date, desk: b.desk ?? null }))))
     );
   }
 
-  book(date: string): Observable<void> {
-    return this.withAuth(headers => this.http.post(this.url, { date }, { headers }).pipe(map(() => undefined)));
+  book(date: string, desk: string): Observable<void> {
+    return this.withAuth(headers => this.http.post(this.url, { date, desk }, { headers }).pipe(map(() => undefined)));
   }
 
   withdraw(date: string): Observable<void> {

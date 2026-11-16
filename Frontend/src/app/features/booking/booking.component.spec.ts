@@ -3,8 +3,16 @@ import { HttpTestingController, TestRequest, provideHttpClientTesting } from '@a
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AuthService, SESSION_STORAGE_KEY } from '../../core/auth.service';
 import { TEST_USER, makeToken } from '../../testing/auth-test-utils';
-import { BOOKING_NOW, BookingComponent, GENERIC_ERROR_MESSAGE, LOGIN_REQUIRED_MESSAGE } from './booking.component';
+import {
+  BOOKING_CONFLICT_MESSAGE,
+  BOOKING_NOW,
+  BookingComponent,
+  GENERIC_ERROR_MESSAGE,
+  LOGIN_REQUIRED_MESSAGE
+} from './booking.component';
+import { MyBooking } from './booking.models';
 import { CalendarComponent } from './calendar/calendar.component';
+import { DeskPlanComponent } from './desk-plan/desk-plan.component';
 import { environment } from '../../../environments/environment';
 
 describe('BookingComponent', () => {
@@ -12,16 +20,19 @@ describe('BookingComponent', () => {
   let http: HttpTestingController;
   let root: HTMLElement;
   const url = `${environment.apiUrl}/bookings`;
+  const desksUrl = `${environment.apiUrl}/desks`;
   const token = makeToken(3600);
+  const deskIds = Array.from({ length: 12 }, (_, i) => `D${String(i + 1).padStart(2, '0')}`);
+  const layout = deskIds.map((id, i) => ({ id, label: id, row: Math.floor(i / 4) + 1, col: (i % 4) + 1 }));
 
   // Fixed "today": Friday 6 Nov 2026 -> window 6, 9, 10, 11 Nov.
-  function setup(opts: { loggedIn: boolean; now?: Date; mine?: string[] }): void {
+  function setup(opts: { loggedIn: boolean; now?: Date; mine?: MyBooking[] }): void {
     sessionStorage.clear();
     if (opts.loggedIn) {
       sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ token, user: TEST_USER }));
     }
     TestBed.configureTestingModule({
-      declarations: [BookingComponent, CalendarComponent],
+      declarations: [BookingComponent, CalendarComponent, DeskPlanComponent],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
@@ -32,15 +43,35 @@ describe('BookingComponent', () => {
     fixture = TestBed.createComponent(BookingComponent);
     root = fixture.nativeElement;
     fixture.detectChanges();
+    http.expectOne(desksUrl).flush({ success: true, payload: { desks: layout } });
     if (opts.loggedIn) {
       flushMine(opts.mine ?? []);
+      flushAvailability(opts.mine ?? []);
     }
-  }
-
-  function flushMine(dates: string[]): void {
-    http.expectOne(`${url}/mine`).flush({ success: true, payload: { bookings: dates.map(date => ({ date })) } });
     fixture.detectChanges();
   }
+
+  function flushMine(bookings: MyBooking[]): void {
+    http.expectOne(`${url}/mine`).flush({ success: true, payload: { bookings } });
+    fixture.detectChanges();
+  }
+
+  // Every desk is free except the desks of the user's own bookings for the requested date.
+  function flushAvailability(mine: MyBooking[] = []): void {
+    const req = http.expectOne(r => r.url === `${desksUrl}/availability`);
+    const date = req.request.params.get('date');
+    const own = mine.find(b => b.date === date)?.desk;
+    req.flush({
+      success: true,
+      payload: { desks: deskIds.map(id => (id === own ? { id, booked: true, bookedBy: TEST_USER.fullName } : { id, booked: false })) }
+    });
+    fixture.detectChanges();
+  }
+
+  const pickDesk = (id: string) => {
+    root.querySelector<HTMLButtonElement>(`button.desk[aria-label^="Desk ${id},"]`)!.click();
+    fixture.detectChanges();
+  };
 
   const button = () => root.querySelector<HTMLButtonElement>('.book-button')!;
   const dateLabel = () => root.querySelector('.selected-date')?.textContent?.trim();
@@ -125,36 +156,44 @@ describe('BookingComponent', () => {
 
   describe('logged in (FR4, FR5, FR6, FR8)', () => {
     it('should load booked dates on load and show Withdraw booking for a booked selected date (FR8)', () => {
-      setup({ loggedIn: true, mine: ['2026-11-06'] });
+      setup({ loggedIn: true, mine: [{ date: '2026-11-06', desk: 'D01' }] });
       expect(button().textContent?.trim()).toBe('Withdraw booking');
     });
 
     it('should show Book Now when the selected date is not booked', () => {
-      setup({ loggedIn: true, mine: ['2026-11-09'] });
+      setup({ loggedIn: true, mine: [{ date: '2026-11-09', desk: 'D02' }] });
       expect(button().textContent?.trim()).toBe('Book Now');
     });
 
     it('should make the label follow the selected date (FR4)', () => {
-      setup({ loggedIn: true, mine: ['2026-11-09', '2026-11-11'] });
+      const mine = [
+        { date: '2026-11-09', desk: 'D02' },
+        { date: '2026-11-11', desk: null }
+      ];
+      setup({ loggedIn: true, mine });
       day(9).click();
       fixture.detectChanges();
+      flushAvailability(mine);
       expect(button().textContent?.trim()).toBe('Withdraw booking');
       day(10).click();
       fixture.detectChanges();
+      flushAvailability(mine);
       expect(button().textContent?.trim()).toBe('Book Now');
       day(11).click();
       fixture.detectChanges();
+      flushAvailability(mine);
       expect(button().textContent?.trim()).toBe('Withdraw booking');
     });
 
-    it('should POST { date } with Bearer token on Book Now and switch to Withdraw booking (FR5)', () => {
+    it('should POST { date, desk } with Bearer token on Book Now and switch to Withdraw booking (FR5)', () => {
       setup({ loggedIn: true });
+      pickDesk('D03');
       click();
       const req = http.expectOne(url);
       expect(req.request.method).toBe('POST');
-      expect(req.request.body).toEqual({ date: '2026-11-06' });
+      expect(req.request.body).toEqual({ date: '2026-11-06', desk: 'D03' });
       expect(req.request.headers.get('Authorization')).toBe(`Bearer ${token}`);
-      req.flush({ success: true, payload: { booking: { date: '2026-11-06' } } }, { status: 201, statusText: 'Created' });
+      req.flush({ success: true, payload: { booking: { date: '2026-11-06', desk: 'D03' } } }, { status: 201, statusText: 'Created' });
       fixture.detectChanges();
       expect(button().textContent?.trim()).toBe('Withdraw booking');
       expect(message()).toBe('');
@@ -162,14 +201,17 @@ describe('BookingComponent', () => {
 
     it('should allow bookings for several dates (FR5)', () => {
       setup({ loggedIn: true });
+      pickDesk('D03');
       click();
       http.expectOne(url).flush({ success: true }, { status: 201, statusText: 'Created' });
       day(9).click();
       fixture.detectChanges();
+      flushAvailability();
       expect(button().textContent?.trim()).toBe('Book Now');
+      pickDesk('D03');
       click();
       const req = http.expectOne(url);
-      expect(req.request.body).toEqual({ date: '2026-11-09' });
+      expect(req.request.body).toEqual({ date: '2026-11-09', desk: 'D03' });
       req.flush({ success: true }, { status: 201, statusText: 'Created' });
       fixture.detectChanges();
       expect(button().textContent?.trim()).toBe('Withdraw booking');
@@ -178,7 +220,11 @@ describe('BookingComponent', () => {
     });
 
     it('should DELETE /bookings/<date> on Withdraw booking and return to Book Now (FR6)', () => {
-      setup({ loggedIn: true, mine: ['2026-11-06', '2026-11-09'] });
+      const mine = [
+        { date: '2026-11-06', desk: 'D01' },
+        { date: '2026-11-09', desk: 'D02' }
+      ];
+      setup({ loggedIn: true, mine });
       click();
       const req: TestRequest = http.expectOne(`${url}/2026-11-06`);
       expect(req.request.method).toBe('DELETE');
@@ -188,11 +234,13 @@ describe('BookingComponent', () => {
       expect(button().textContent?.trim()).toBe('Book Now');
       day(9).click();
       fixture.detectChanges();
+      flushAvailability(mine);
       expect(button().textContent?.trim()).toBe('Withdraw booking'); // other date untouched
     });
 
     it('should disable the button while a request is in flight and re-enable afterwards', () => {
       setup({ loggedIn: true });
+      pickDesk('D03');
       click();
       expect(button().disabled).toBeTrue();
       button().click();
@@ -202,18 +250,20 @@ describe('BookingComponent', () => {
       expect(button().disabled).toBeFalse();
     });
 
-    it('should show a generic error on 409 and keep the state unchanged', () => {
+    it('should show an error on 409, refresh availability and keep the state unchanged', () => {
       setup({ loggedIn: true });
+      pickDesk('D03');
       click();
       http.expectOne(url).flush({ success: false }, { status: 409, statusText: 'Conflict' });
-      fixture.detectChanges();
-      expect(message()).toBe(GENERIC_ERROR_MESSAGE);
+      flushAvailability();
+      expect(message()).toBe(BOOKING_CONFLICT_MESSAGE);
       expect(button().textContent?.trim()).toBe('Book Now');
       expect(button().disabled).toBeFalse();
     });
 
     it('should show a generic error on 500 when booking', () => {
       setup({ loggedIn: true });
+      pickDesk('D03');
       click();
       http.expectOne(url).flush({ success: false }, { status: 500, statusText: 'Server Error' });
       fixture.detectChanges();
@@ -221,7 +271,7 @@ describe('BookingComponent', () => {
     });
 
     it('should show a generic error and keep Withdraw booking on a 500 withdraw', () => {
-      setup({ loggedIn: true, mine: ['2026-11-06'] });
+      setup({ loggedIn: true, mine: [{ date: '2026-11-06', desk: 'D01' }] });
       click();
       http.expectOne(`${url}/2026-11-06`).flush({ success: false }, { status: 500, statusText: 'Server Error' });
       fixture.detectChanges();
@@ -230,7 +280,7 @@ describe('BookingComponent', () => {
     });
 
     it('should drop the date locally when withdraw returns 404', () => {
-      setup({ loggedIn: true, mine: ['2026-11-06'] });
+      setup({ loggedIn: true, mine: [{ date: '2026-11-06', desk: 'D01' }] });
       click();
       http.expectOne(`${url}/2026-11-06`).flush({ success: false }, { status: 404, statusText: 'Not Found' });
       fixture.detectChanges();
@@ -242,7 +292,7 @@ describe('BookingComponent', () => {
       sessionStorage.clear();
       sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ token, user: TEST_USER }));
       TestBed.configureTestingModule({
-        declarations: [BookingComponent, CalendarComponent],
+        declarations: [BookingComponent, CalendarComponent, DeskPlanComponent],
         providers: [provideHttpClient(), provideHttpClientTesting()]
       });
       http = TestBed.inject(HttpTestingController);
@@ -260,6 +310,7 @@ describe('BookingComponent', () => {
     it('should log out and show "You must log in first" when booking returns 401', () => {
       setup({ loggedIn: true });
       const auth = TestBed.inject(AuthService);
+      pickDesk('D03');
       click();
       http.expectOne(url).flush({ success: false }, { status: 401, statusText: 'Unauthorized' });
       fixture.detectChanges();
@@ -269,7 +320,7 @@ describe('BookingComponent', () => {
     });
 
     it('should log out and show the message when withdraw returns 401', () => {
-      setup({ loggedIn: true, mine: ['2026-11-06'] });
+      setup({ loggedIn: true, mine: [{ date: '2026-11-06', desk: 'D01' }] });
       const auth = TestBed.inject(AuthService);
       click();
       http.expectOne(`${url}/2026-11-06`).flush({ success: false }, { status: 401, statusText: 'Unauthorized' });
@@ -282,7 +333,7 @@ describe('BookingComponent', () => {
       sessionStorage.clear();
       sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ token, user: TEST_USER }));
       TestBed.configureTestingModule({
-        declarations: [BookingComponent, CalendarComponent],
+        declarations: [BookingComponent, CalendarComponent, DeskPlanComponent],
         providers: [provideHttpClient(), provideHttpClientTesting()]
       });
       http = TestBed.inject(HttpTestingController);
@@ -296,7 +347,7 @@ describe('BookingComponent', () => {
     });
 
     it('should clear booked state after logout so the button shows Book Now', () => {
-      setup({ loggedIn: true, mine: ['2026-11-06'] });
+      setup({ loggedIn: true, mine: [{ date: '2026-11-06', desk: 'D01' }] });
       expect(button().textContent?.trim()).toBe('Withdraw booking');
       TestBed.inject(AuthService).logout();
       fixture.detectChanges();

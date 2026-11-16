@@ -7,4 +7,18 @@
   </div>
   <div class="top-bar-message" aria-live="polite">{{ error }}</div>
 </section>
-<app-calendar [bookable]="bookable" [selected]="selected" [booked]="booked" (dateSelected)="select($event)" />
+<div class="booking-layout">
+  <div class="layout-calendar">
+    <app-calendar [bookable]="bookable" [selected]="selected" [booked]="booked" (dateSelected)="select($event)" />
+  </div>
+  <div class="layout-plan">
+    <app-desk-plan
+      [desks]="desks"
+      [availability]="availability"
+      [selectedDesk]="selectedDesk"
+      [yourDesk]="yourDesk"
+      [signedIn]="signedIn"
+      (deskSelected)="selectDesk($event)"
+    />
+  </div>
+</div>

@@ -4,16 +4,20 @@ import { isValidDateString } from "../services/bookingDates.ts";
 import {
   BookingAlreadyExistsError,
   BookingNotFoundError,
+  DeskAlreadyBookedError,
   InvalidBookingDateError,
+  UnknownDeskError,
   UnknownUserError,
 } from "../services/bookingService.ts";
 import type { BookingService } from "../services/bookingService.ts";
 
-function validationFailed(res: Response, message: string): void {
+const DESK_PATTERN = /^[A-Za-z0-9_-]{1,10}$/;
+
+function validationFailed(res: Response, message: string, field = "date"): void {
   res.status(400).json({
     success: false,
     message: "Validation failed",
-    errors: [{ field: "date", message }],
+    errors: [{ field, message }],
   });
 }
 
@@ -25,17 +29,31 @@ export function createBookingController(service: BookingService) {
   return {
     async create(req: Request, res: Response): Promise<void> {
       const user = res.locals.user as AuthenticatedUser;
-      const date = (req.body as { date?: unknown } | undefined)?.date;
+      const body = req.body as { date?: unknown; desk?: unknown } | undefined;
+      const date = body?.date;
       if (typeof date !== "string" || !isValidDateString(date)) {
         validationFailed(res, "date is required and must be a valid date in YYYY-MM-DD format");
         return;
       }
+      const desk = body?.desk;
+      if (typeof desk !== "string" || !DESK_PATTERN.test(desk)) {
+        validationFailed(res, "desk is required and must be an existing desk id", "desk");
+        return;
+      }
       try {
-        const booking = await service.book(user.id, date);
+        const booking = await service.book(user.id, date, desk);
         res.status(201).json({ success: true, payload: { booking } });
       } catch (err) {
         if (err instanceof InvalidBookingDateError) {
           validationFailed(res, "date must be one of the 4 bookable weekdays starting today");
+          return;
+        }
+        if (err instanceof UnknownDeskError) {
+          validationFailed(res, "desk is required and must be an existing desk id", "desk");
+          return;
+        }
+        if (err instanceof DeskAlreadyBookedError) {
+          res.status(409).json({ success: false, message: "Desk already booked" });
           return;
         }
         if (err instanceof BookingAlreadyExistsError) {

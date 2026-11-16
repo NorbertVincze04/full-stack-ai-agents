@@ -1,0 +1,38 @@
+<section class="desk-plan" aria-label="Office floor plan">
+  <h2 class="plan-title">Office floor plan</h2>
+  @if (!signedIn) {
+    <p class="plan-hint">Log in to see which desks are available and to book one.</p>
+  }
+  <div class="plan-grid" role="group" aria-label="Desks">
+    @for (cell of cells; track cell.id) {
+      <button
+        type="button"
+        class="desk"
+        [class.available]="cell.state === 'available'"
+        [class.booked]="cell.state === 'booked'"
+        [class.selected]="cell.state === 'selected'"
+        [class.yours]="cell.state === 'yours'"
+        [style.grid-row]="cell.row"
+        [style.grid-column]="cell.col"
+        [disabled]="!cell.enabled"
+        [attr.aria-disabled]="!cell.enabled"
+        [attr.aria-pressed]="cell.enabled ? cell.state === 'selected' : null"
+        [attr.aria-label]="cell.accessibleName"
+        (click)="select(cell)"
+      >
+        <span class="desk-label">{{ cell.label }}</span>
+        @if (cell.stateText) {
+          <span class="desk-state"><span aria-hidden="true">{{ cell.icon }}</span> {{ cell.stateText }}</span>
+        }
+        @if (cell.bookedBy) {
+          <span class="desk-by">{{ cell.bookedBy }}</span>
+        }
+      </button>
+    }
+  </div>
+  <ul class="legend" aria-label="Legend">
+    @for (item of legend; track item.state) {
+      <li><span class="legend-swatch" [class]="item.state" aria-hidden="true">{{ item.icon }}</span> {{ item.text }}</li>
+    }
+  </ul>
+</section>
