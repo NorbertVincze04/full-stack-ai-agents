@@ -12,11 +12,12 @@
         [class.booked]="cell.state === 'booked'"
         [class.selected]="cell.state === 'selected'"
         [class.yours]="cell.state === 'yours'"
+        [class.picked]="cell.state === 'yours' && cell.pressed"
         [style.grid-row]="cell.row"
         [style.grid-column]="cell.col"
         [disabled]="!cell.enabled"
         [attr.aria-disabled]="!cell.enabled"
-        [attr.aria-pressed]="cell.enabled ? cell.state === 'selected' : null"
+        [attr.aria-pressed]="cell.enabled ? cell.pressed : null"
         [attr.aria-label]="cell.accessibleName"
         (click)="select(cell)"
       >

@@ -5,7 +5,7 @@ Agent: `.github/agents/tester.agent.md` | Skills: `tdd`, `test` | Replaces: Fron
 Backend tests: `node:test` in `Backend/tests/` (`npm test`). Frontend: Karma/Jasmine (`npm run test:ci`). There is no e2e runner in the repository.
 
 > Read this file first instead of re-reading old reports. Update it at the end of every task (rules: `docs/context/README.md`, Agent context files). Keep it under ~80 lines.
-> Updated: 2026-11-16 (initial history from handovers)
+> Updated: 2026-11-16 (task 649)
 
 ## Tasks
 
@@ -20,11 +20,13 @@ Backend tests: `node:test` in `Backend/tests/` (`npm test`). Frontend: Karma/Jas
 | 648 | 216 pass, 0 fail, 2 skipped | 145/145 | |
 | create a mockup office | 287 pass, 2 skipped (`tdd-backend.md`) | 191/191 (`tdd-frontend.md`) | e2e: `skipped: no e2e runner`, journeys listed in [e2e.md](../runs/manual-create-a-mockup-office-for-booking/e2e.md) |
 | containerize | 72 backend tests at the AC7 check | n/a | Stack tests are in [container-engineer.md](container-engineer.md) |
+| 649 select/deselect | n/a | 247/247 (56 new: calendar +8, desk plan +11, `booking.component.toggle.spec.ts` +37); 38 red specs adapted to the spec | [tdd-frontend.md](../runs/649/tdd-frontend.md); e2e `skipped: no e2e runner` ([e2e.md](../runs/649/e2e.md)) |
 
 ## Defects and lessons
 
 - 601: no `npm test` script (added during the login endpoint task); `PORT` not validated; `tests/` not type-checked.
 - Info page: `info-route.spec.ts` lacked `provideLocationMocks()`, so specs push into real browser history.
+- 649: the implementer changed behaviour (no preselected day, own desk toggles) without touching specs, so 38 specs were red; the fix was in the specs (`setup` clicks a day, `day: null` = none), not a defect. No fix loop.
 - No test-fix loop (`maxTestFixLoops`) was triggered in any recorded task.
 
 ## Open items
@@ -33,6 +35,7 @@ Backend tests: `node:test` in `Backend/tests/` (`npm test`). Frontend: Karma/Jas
 - No test of nginx or the container stack beyond the Container Tester checks.
 - No e2e runner; adding Playwright or Cypress is a dependency and project change, so it needs an approved spec.
 - Layout checks at 320 px and 200% zoom were manual or deferred.
+- Enter/Space and highlight colours are only asserted by element type and CSS class, not by key events or pixels (needs an e2e runner).
 
 ## Notes for the new skills
 

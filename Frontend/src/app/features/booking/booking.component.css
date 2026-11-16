@@ -34,6 +34,10 @@
 
 .book-button:disabled {
   opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.book-button[aria-busy='true']:disabled {
   cursor: progress;
 }
 

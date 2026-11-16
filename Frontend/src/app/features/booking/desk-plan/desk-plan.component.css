@@ -75,6 +75,12 @@
   color: #1e3a8a;
 }
 
+.desk.yours.picked {
+  border-color: #1e3a8a;
+  background-color: #1e3a8a;
+  color: #ffffff;
+}
+
 .desk:disabled {
   cursor: not-allowed;
 }
