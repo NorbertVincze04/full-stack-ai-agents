@@ -1,6 +1,6 @@
 # Task ingestion
 
-Rules used by the `Task Ingestion` agent to turn a work item (Azure DevOps or manual) into `docs/tasks/<task-id>.md`.
+Rules used by the `get-task` skill (`Task Analyst` agent) to turn a work item (Azure DevOps or manual) into `docs/tasks/<task-id>.md`.
 
 ## Task template
 
@@ -24,7 +24,7 @@ status: new
 - <field that could not be found>
 ```
 
-`status` lifecycle: `new` -> `specified` -> `in-progress` -> `implemented` -> `done` (set by `Handover`).
+`status` lifecycle: `new` -> `specified` -> `in-progress` -> `implemented` -> `done` (set by `/approve-pr`).
 
 ## Azure DevOps field mapping
 
@@ -58,4 +58,4 @@ When the human supplies the task text directly (or a path to a file), the agent 
 
 ## Secure access
 
-The `ado` MCP server is defined in `.vscode/mcp.json`. The Personal Access Token is requested through a password input (stored encrypted by VS Code), passed to `scripts/ado-mcp.mjs` as an environment variable and never written to disk. Required PAT scope: **Work Items (Read & Write)** (write is only used by `Handover` to mark the task done).
+The `ado` MCP server is defined in `.vscode/mcp.json`. The Personal Access Token is requested through a password input (stored encrypted by VS Code), passed to `scripts/ado-mcp.mjs` as an environment variable and never written to disk. Required PAT scope: **Work Items (Read & Write)** (write is only used by `/approve-pr` to mark the task done).

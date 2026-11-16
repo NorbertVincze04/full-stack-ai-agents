@@ -11,9 +11,9 @@
     "doneState": "Done"
   },
   "workflow": {
-    "frontendTester": "on-demand",
-    "backendTester": "always",
-    "backendSecurity": "auto",
+    "tdd": "always",
+    "e2e": "auto",
+    "security": "auto",
     "reviewers": "auto",
     "maxFixIterations": 2,
     "maxTestFixLoops": 2
