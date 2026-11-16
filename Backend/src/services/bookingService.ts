@@ -30,33 +30,52 @@ export class UnknownUserError extends Error {
   }
 }
 
+export class UnknownDeskError extends Error {
+  constructor() {
+    super("Unknown desk");
+    this.name = "UnknownDeskError";
+  }
+}
+
+export class DeskAlreadyBookedError extends Error {
+  constructor() {
+    super("Desk already booked");
+    this.name = "DeskAlreadyBookedError";
+  }
+}
+
 export interface BookingService {
-  book(userId: string, date: string): Promise<{ date: string }>;
+  book(userId: string, date: string, desk: string): Promise<{ date: string; desk: string }>;
   withdraw(userId: string, date: string): Promise<void>;
-  listMine(userId: string): Promise<Array<{ date: string }>>;
+  listMine(userId: string): Promise<Array<{ date: string; desk: string | null }>>;
 }
 
 const PG_UNIQUE_VIOLATION = "23505";
 const PG_FOREIGN_KEY_VIOLATION = "23503";
+// Constraint names from the desks migrations.
+const DESK_UNIQUE_INDEX = "ux_bookings_date_desk";
+const DESK_FOREIGN_KEY = "bookings_booking_desk_fkey";
 
 export function createBookingService(
   repository: BookingRepository,
   now: () => Date = () => new Date(),
 ): BookingService {
   return {
-    async book(userId, date) {
+    async book(userId, date, desk) {
       if (!bookableDates(now()).includes(date)) {
         throw new InvalidBookingDateError();
       }
       try {
-        return await repository.create(userId, date);
+        return await repository.create(userId, date, desk);
       } catch (err) {
-        const code = (err as { code?: unknown } | null)?.code;
+        const { code, constraint } = (err ?? {}) as { code?: unknown; constraint?: unknown };
         if (code === PG_UNIQUE_VIOLATION) {
-          throw new BookingAlreadyExistsError();
+          throw constraint === DESK_UNIQUE_INDEX
+            ? new DeskAlreadyBookedError()
+            : new BookingAlreadyExistsError();
         }
         if (code === PG_FOREIGN_KEY_VIOLATION) {
-          throw new UnknownUserError();
+          throw constraint === DESK_FOREIGN_KEY ? new UnknownDeskError() : new UnknownUserError();
         }
         throw err;
       }
@@ -67,8 +86,7 @@ export function createBookingService(
       }
     },
     async listMine(userId) {
-      const dates = await repository.listByUser(userId, toDateString(now()));
-      return dates.map((date) => ({ date }));
+      return repository.listByUser(userId, toDateString(now()));
     },
   };
 }

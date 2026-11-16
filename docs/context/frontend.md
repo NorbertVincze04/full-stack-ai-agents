@@ -23,7 +23,7 @@ Angular 18.2 (NgModule, not standalone), TypeScript 5.5, RxJS 7.8, plain CSS, Ka
 | `src/app/features/auth/` | `AuthModule`, `AuthRoutingModule` (guarded `login`, `register`), `auth-validators.ts` (client mirror of server rules), shared `auth-form.css`, `login/` and `register/` components |
 | `src/environments/` | `environment.ts` (`apiUrl: http://localhost:3000/api`), `environment.prod.ts` (`/api`, swapped by `fileReplacements` in the production build) |
 | `src/app/features/info/` | `InfoModule`, `InfoRoutingModule` (child route `''`), `InfoComponent` (static h1 "How it works" + 3-step `<ol>`), `info.component.spec.ts` (2 specs) |
-| `src/app/features/booking/` | task 648, lazy `BookingModule` on `/`: `BookingComponent` (top bar: selected date left, `Book Now`/`Withdraw booking` button right, `aria-live` message; holds selected/booked state, `BOOKING_NOW` token for tests), `calendar/CalendarComponent` (custom Mon-first month grid, prev/next month, disabled days `disabled`+`aria-disabled`, `aria-pressed` on selected), `booking-dates.ts` (4 bookable weekdays, `Mon, 9 Nov 2026` formatting, local dates), `BookingService` (`listMine`/`book`/`withdraw` with Bearer token; no token -> 401 without a call) |
+| `src/app/features/booking/` | task 648 + mockup office, lazy `BookingModule` on `/`: `BookingComponent` (top bar: selected date left, `Book Now`/`Withdraw booking` right, `aria-live` message; below, `.booking-layout` with calendar and plan side by side (wrap, stacked when narrow); holds selected date, `selectedDesk`, own bookings, desks, availability; `BOOKING_NOW` token for tests), `calendar/CalendarComponent` (custom Mon-first month grid, prev/next month, disabled days `disabled`+`aria-disabled`, `aria-pressed` on selected), `desk-plan/DeskPlanComponent` (presentational: 4-column grid of desk buttons from `row`/`col`, states `neutral` (signed out/not loaded), `available`, `booked` (shows booker name as text), `selected`, `yours`; icon + text + colour, `aria-label` "Desk D03, available" / "Desk D04, booked by Ana", `disabled`+`aria-disabled` unless selectable, `aria-pressed`; legend; log-in hint when signed out), `booking.models.ts` (`Desk`, `DeskAvailability`, `MyBooking`), `booking-dates.ts` (4 bookable weekdays, `Mon, 9 Nov 2026` formatting, local dates), `BookingService` (`listMine` -> `{date, desk|null}[]`, `book(date, desk)`, `withdraw(date)` with Bearer token; no token -> 401 without a call), `DeskService` (`list()` public, `availability(date)` Bearer; no token -> 401 without a call) |
 | `src/styles.css`, `src/app/app.component.css` | global and shell styles |
 | `src/index.html` | host page (`<app-root>`, `<noscript>` fallback) |
 
@@ -35,14 +35,16 @@ Target structure when features arrive: `core/` (services, guards, interceptors, 
 ## API or routes
 | Route | Target |
 | --- | --- |
-| `/` | lazy `BookingModule` -> `BookingComponent` (top bar + calendar, public; `pathMatch: 'full'`) |
+| `/` | lazy `BookingModule` -> `BookingComponent` (top bar + calendar + desk plan, public; `pathMatch: 'full'`) |
 | `/info` | lazy `InfoModule` -> `InfoComponent` (static page) |
 | `/login` | lazy `AuthModule` -> `LoginComponent` (`?registered=1` shows the success message); `guestGuard` |
 | `/register` | lazy `AuthModule` -> `RegisterComponent`; `guestGuard` |
 
 API calls (via `AuthService`): `POST {apiUrl}/auth/login` `{ email, password }`; `POST {apiUrl}/auth/register` `{ fullName, email, password }` (`confirmPassword` never sent). Status handling: 400 field errors inline, 401/409/429/other generic messages.
 
-Booking calls (via `BookingService`, `Authorization: Bearer`): `GET {apiUrl}/bookings/mine`, `POST {apiUrl}/bookings` `{ date }`, `DELETE {apiUrl}/bookings/:date`. 401 -> `AuthService.logout()` + `You must log in first`; other errors -> generic message; 404 on withdraw also drops the date locally. `AuthService.getToken()` returns the token or null when signed out/expired.
+Booking calls (via `BookingService`, `Authorization: Bearer`): `GET {apiUrl}/bookings/mine` (`[{date, desk|null}]`), `POST {apiUrl}/bookings` `{ date, desk }`, `DELETE {apiUrl}/bookings/:date`. 401 -> `AuthService.logout()` + `You must log in first`; 409 on book -> conflict message + availability reload; no desk selected -> `Please select a desk first` (no request); other errors -> generic message; 404 on withdraw also drops the date locally. `AuthService.getToken()` returns the token or null when signed out/expired.
+
+Desk calls (via `DeskService`): `GET {apiUrl}/desks` (public, on page load, layout error -> generic message), `GET {apiUrl}/desks/availability?date=` (Bearer; reloaded on login and on every date change, desk selection resets; own book/withdraw updates the plan locally).
 
 ## Conventions
 - NgModule architecture; one module per feature; declare components in modules.
@@ -50,11 +52,12 @@ Booking calls (via `BookingService`, `Authorization: Bearer`): `GET {apiUrl}/boo
 - Accessible markup: landmarks (`header`, `main`, `footer`), labels, keyboard operable controls.
 
 ## Tests
-Jasmine specs next to the code (`*.spec.ts`): 97 total (13 existing + 84 new). The existing 13 remain (8 in `app.component.spec.ts`, 3 in `info-route.spec.ts`, 2 in `info.component.spec.ts`). The new specs are in `core/auth.service.spec.ts`, `core/guest.guard.spec.ts`, `features/auth/login/login.component.spec.ts`, `features/auth/register/register.component.spec.ts` and `app.component.auth.spec.ts`, with shared helper `Frontend/src/app/testing/auth-test-utils.ts`.
+Jasmine specs next to the code (`*.spec.ts`): 145 total. The booking specs (`booking.component.spec.ts`, `booking.service.spec.ts`) were adapted to the desk contract (desk requests flushed in `setup`); no specs yet for `DeskPlanComponent`/`DeskService` or the desk flows (tester). The auth/shell specs are as before: `core/auth.service.spec.ts`, `core/guest.guard.spec.ts`, `features/auth/*`, `app.component*.spec.ts`, `info-route.spec.ts`, `features/info`, with shared helper `Frontend/src/app/testing/auth-test-utils.ts`.
 
 ## Decisions and known gaps
 - Session (approved R2/R4): JWT and `{ fullName, email, type }` in `sessionStorage` (XSS-readable within the tab, no CSP); no password stored; register does not sign in.
-- Booking (task 648): client date rules are UX only (server enforces); the 4-weekday window uses the browser date; no frontend specs for the booking feature yet (tester); no interceptor, the token is attached in `BookingService`.
+- Booking (task 648): client date rules are UX only (server enforces); the 4-weekday window uses the browser date; no interceptor, the token is attached in `BookingService`/`DeskService`.
+- Mockup office: desk is required for new bookings; the plan is neutral and not selectable when signed out; booker names are shown as text only; legacy bookings (`desk: null`) count as booked for the date but occupy no desk; a stale availability (other users' changes) is only refreshed on date change, login or a 409.
 - Expiry is checked on load, in `login()`, in `guestGuard` and by a timer; no interceptor, no refresh, no protected-route guard yet.
 - Header wraps (`flex-wrap`) so the signed-in state fits 320 px; user name has a `title`.
 - No 404 route yet (unknown URLs match nothing).

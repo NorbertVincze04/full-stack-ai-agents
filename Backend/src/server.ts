@@ -3,6 +3,7 @@ import pg from "pg";
 import { createApp } from "./app.ts";
 import { parseDbSchema } from "./config/dbSchema.ts";
 import { createBookingRepository } from "./repositories/bookingRepository.ts";
+import { createDeskRepository } from "./repositories/deskRepository.ts";
 import { createUserRepository } from "./repositories/userRepository.ts";
 
 const missing = ["JWT_SECRET", "DATABASE_URL"].filter((name) => !process.env[name]);
@@ -33,6 +34,7 @@ pool.on("error", (err) => {
 const server = createApp({
   userRepository: createUserRepository(pool, dbSchema),
   bookingRepository: createBookingRepository(pool, dbSchema),
+  deskRepository: createDeskRepository(pool, dbSchema),
   dbProbe: pool,
 }).listen(port, () => {
   console.log("hello world");
