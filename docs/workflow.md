@@ -1,80 +1,100 @@
-# Agent workflow
+# Agent workflows
 
-Entry point: `Principle Orchestrator` (or the `/start-workflow` prompt).
+Three workflows, started by slash commands (skills in `.github/skills/`), run by 8 agents (`.github/agents/`). `Orchestrator` is the entry point and the only agent that talks to the human.
+
+## Commands
+
+| Command | Skill owner (agent) | Use |
+| --- | --- | --- |
+| `/start-task <id \| list \| text>` | Orchestrator | Run the standard workflow end to end |
+| `/get-task <id \| list \| text>` | Task Analyst | Ingest a task from Azure DevOps or manual text |
+| `/spec <id>` | Task Analyst | Write the spec, list questions |
+| `/clarify-task <id> [spec \| decision]` | Orchestrator | Ask the human the spec questions, or a decision after a loop ran out |
+| `/implement <id> <area>` | Implementer | Build frontend, backend or database; apply fixes |
+| `/test <id> [tdd \| e2e \| all]` | Tester | TDD suite, then e2e (`tdd` is the inner skill) |
+| `/review <id> [scope]` | Reviewer | Code, security, UX, containers, pipelines |
+| `/create-pr <id>` | Release Manager | Prepare PR description, handover and commit proposal (no git changes) |
+| `/approve-pr <id> [commit \| push]` | Release Manager | Commit, then push and open the PR (Azure DevOps or GitHub) |
+| `/containerize [podman \| docker]` | Container Engineer | Containerization workflow |
+| `/ci-cd [ci \| cd \| both]` | Pipeline Engineer | CI/CD workflow |
+
+Each command can also be run on its own to resume or repeat one stage. `container-runtime` (Container Engineer) and `tdd` (Tester) are inner skills, not slash commands.
+
+Every skill has the same layout: frontmatter (`name`, `description`, `argument-hint`, `user-invocable`), `# Get task`, `## Steps`, `## When it fails`, `## Never`.
+
+## 1. Standard workflow (`/start-task`)
 
 ```mermaid
 flowchart TD
-  H[Human] --> PO[Principle Orchestrator]
-  PO --> TI[Task Ingestion]
-  PO --> SP[Spec]
-  SP -. questions .-> H
-  PO --> FO[Frontend Orchestrator]
-  PO --> BO[Backend Orchestrator]
-  PO --> CO[Container Orchestrator]
-  PO --> PL[Pipeline Orchestrator]
-  PL --> CI[CI Pipeline Builder] --> CD[CD Pipeline Builder] --> PLR[Pipeline Reviewer]
-  CO --> CB[Container Builder] --> DM[Database Migrator] --> CT[Container Tester] --> CR[Container Reviewer]
-  FO --> FB[Frontend Builder] --> FT[Frontend Tester - on demand] --> FR[UI/UX + Code + Security reviewers]
-  BO --> DB[Database Builder] --> BB[Backend Builder] --> BT[Backend Tester] --> BR[Code Reviewer + Security]
-  PO --> HO[Handover]
-  FR --> PR1[Frontend Task-to-PR: prepare]
-  BR --> PR2[Backend Task-to-PR: prepare]
-  PR1 & PR2 --> PO
-  PO -. confirm commit / push .-> H
-  PO --> PRC[Task-to-PR: commit, then push]
+  T[get-task] --> S[spec]
+  S -->|Ready: no| C[clarify-task spec] --> S
+  S -->|Ready: yes| A{human approves spec and risks}
+  A --> I[implement: database, backend, frontend]
+  I --> TD[test: TDD] --> E[test: e2e]
+  TD -->|fail| F[implement fix] --> TD
+  E --> R[review: code, security, ux]
+  R -->|changes-requested, retry < 2| F2[implement fix + test + review again] --> R
+  R -->|still failing after 2 retries| H[clarify-task decision: human discussion]
+  H --> I
+  R -->|approved| P[create-pr]
+  P --> G{human confirms commit} --> AP[approve-pr commit] --> G2{human confirms push} --> AP2[approve-pr push + PR]
 ```
+
+- The spec `Area` (`frontend`, `backend`, `containers`, `pipelines`) selects the stages; a `containers` or `pipelines` area runs workflow 2 or 3 as its implement stage.
+- Test-fix loop: per failing test up to `maxTestFixLoops` (2) rounds (`implement fix` then `test rerun`); then human decision.
+- Review retry: up to `maxFixIterations` (2) retries of implement -> test -> review for scopes with `blocker`/`high` findings; then human discussion. `medium`/`low` findings go to the PR.
+- Reviewers are chosen from the spec `Scope flags` (`ui-changes`, `logic-changes`, `security-relevant`, `dependencies-changed`, `database-changes`, `scaffolding-only`); every run or skip is recorded under `Review coverage` in `pr.md`.
+
+## 2. Containerization workflow (`/containerize`)
+
+`get-task (manual) -> spec (area containers, risk gate) -> containerize -> review containers -> create-pr -> approve-pr`
+
+`containerize` detects what exists and picks a mode: `create`, `verify` or `convert` (an existing Podman setup is converted to Docker and the other way round, shared files stay, only runtime-specific parts change; see `container-runtime`). It builds the files, applies the migrations to the local `db` container, starts the stack with one compose up, tests it (test-fix loop `maxTestFixLoops`), and has it reviewed (retries `maxFixIterations`). Design and decisions: `docs/context/containers.md`; settings: `.github/config.json` -> `containers`.
+
+## 3. CI/CD workflow (`/ci-cd`)
+
+`get-task (manual) -> spec (area pipelines) -> ci-cd (write ci.yml + cd.yml) -> security review of the workflows -> local validation -> create-pr -> approve-pr`
+
+Generated CI (on push to `dev` and PRs): security check (`npm audit --omit=dev --audit-level=critical`) -> `npm run build` -> tests -> container build check (`push: false`). Generated CD: after CI succeeds on `dev`, merge the tested commit into `main` (`--no-ff`); nothing is deployed (`pipelines.cdMode: merge-only`). Design: `docs/context/pipelines.md`; settings: `.github/config.json` -> `pipelines`.
+
+## Agents and skills
+
+| Agent | Skills | Replaces |
+| --- | --- | --- |
+| Orchestrator | `start-task`, `clarify-task` | Principle, Frontend, Backend, Container, Pipeline orchestrators |
+| Task Analyst | `get-task`, `spec` | Task Ingestion, Spec |
+| Implementer | `implement` | Frontend, Backend, Database builders, Database Migrator |
+| Tester | `tdd`, `test` | Frontend, Backend, Container testers |
+| Reviewer | `review` | Frontend (code, security, UX), Backend (code, security), Container, Pipeline reviewers |
+| Release Manager | `create-pr`, `approve-pr` | four Task-to-PR agents, Handover |
+| Container Engineer | `containerize`, `container-runtime` | Container Builder |
+| Pipeline Engineer | `ci-cd` | CI and CD Pipeline Builders |
 
 ## Artifacts (all under `docs/`)
 
 | Path | Written by |
 | --- | --- |
-| `tasks/<task-id>.md` | Task Ingestion (status updated by later agents) |
-| `specs/<task-id>.md` | Spec |
-| `runs/<task-id>/<step>.md` | Each builder/tester/reviewer, one report per step |
-| `handover/<task-id>.md` | Handover |
+| `tasks/<task-id>.md` | `get-task` (status updated by later stages) |
+| `specs/<task-id>.md` | `spec` |
+| `runs/<task-id>/implement-<area>.md`, `tdd-<area>.md`, `e2e.md`, `review-<scope>.md`, `containerize.md`, `ci-cd.md` | one report per step, about 60 lines |
+| `runs/<task-id>/pr.md`, `handover/<task-id>.md` | `create-pr` |
 
-Reports are read by several later agents, so every agent keeps them short (about 60 lines): tables and one-line entries, no code listings, no restating the spec.
+Task `status`: `new` -> `specified` -> `in-progress` -> `implemented` -> `done` (`approve-pr`).
 
-## Configuration
+## Configuration (`.github/config.json` -> `workflow`)
 
-`.github/config.json` -> `workflow`: `frontendTester` / `backendTester` accept `always` or `on-demand`; `backendSecurity` accepts `always`, `auto` or `on-demand`; `reviewers` is `auto` (the orchestrators pick only the reviewers the task needs, based on the spec `Scope flags`) or `all` (run every reviewer); `maxFixIterations` bounds the review-fix loop; `maxTestFixLoops` bounds the test-fix loop per failing test.
+`tdd`: `always` or `on-demand`. `e2e`: `auto`, `always` or `off`. `security`: `always`, `auto` or `on-demand`. `reviewers`: `auto` (from the scope flags) or `all`. `maxFixIterations`: review retries. `maxTestFixLoops`: fix rounds per failing test.
 
-## Risk gate
+## Human gates and risk gate
 
-Security changes, anything that can damage the database, and changes to major functionality need your approval first (`docs/risk-gate.md`). `Spec` lists them under `Risk gate`; the principle orchestrator asks you per item before any build. If a builder finds an unapproved risky change mid-build, it stops with `needs-approval`, the orchestrator returns `needs-human`, and you are asked. Agents never run SQL against anything except the local `db` container; `Database Migrator` applies migrations there (backup first for risky ones), so you do not run migration files by hand. `Handover` records the approved risks.
-
-## Test-fix loop
-
-When a tester reports a failing test, the orchestrator does not go on to the reviewers. Per failing test, up to `maxTestFixLoops` (2) rounds: builder diagnoses the root cause and fixes it, then the tester re-runs. If a test still fails afterwards, the orchestrator returns `needs-human` with the root cause, what was tried and a question with options; the principle orchestrator asks you, passes your answer back, and the counter for those tests restarts.
+The Orchestrator asks the human: spec questions (`/clarify-task spec`), approval of the spec and of each risky item (`docs/risk-gate.md`), decisions after exhausted loops (`/clarify-task decision`), the commit confirmation and, separately, the push confirmation. Subagents cannot ask: they return `needs-human` or `needs-approval`. When a command is started directly by the human, the top-level chat asks. Agents never run SQL against anything except the local `db` container.
 
 ## Context files
 
-`docs/context/` (`project.md`, `backend.md`, `frontend.md`, `containers.md`, `pipelines.md`) hold a compact, current map of the app so agents do not re-analyse the codebase per task. Builders update them at the end of each task and they are committed with the code; every other agent reads them first and opens only the files they point to. Protocol, freshness check and template: `docs/context/README.md`.
-
-## Containers (Podman, local)
-
-Tasks with `containers` in the spec `Area` go to `Container Orchestrator`: `Container Builder` (compose file, Containerfiles for frontend/backend/db, nginx, `.env`), `Database Migrator` (applies `Backend/db/migrations` to the `db` container), `Container Tester` (`podman compose up -d --build`, health and connectivity checks), `Container Reviewer`. Design, ports, env variables and the Bosch proxy/CA handling: `docs/context/containers.md`; settings: `.github/config.json` -> `containers`. Sensitive actions (creating the Podman machine, volume/prune/`down -v`, overwriting `.env`, installing a CA, proxy changes) go through the risk gate. Order when several areas are involved: backend, frontend, containers.
-
-## Pipelines (CI/CD)
-
-Tasks with `pipelines` in the spec `Area` go to `Pipeline Orchestrator`; the spec `Pipeline scope` (`ci`, `cd`) selects the builders. `CI Pipeline Builder` writes the verification workflow (build and test every area, container build check, no deployment); `CD Pipeline Builder` writes the promotion workflow (after CI succeeds on the integration branch, merge the tested commit into the release branch; nothing is deployed); `Pipeline Reviewer` checks permissions, secrets, actions, triggers and merge behaviour; `Pipeline Task-to-PR` prepares the commit/PR. Workflows cannot be run locally, so builders validate with `actionlint`/YAML parsing and there is no test-fix loop. Settings (platform, workflow files and names, branches, `cdMode`): `.github/config.json` -> `pipelines`; design: `docs/context/pipelines.md`. Merging or pushing from a workflow, write permissions and secrets are risk-gate items. Order when several areas are involved: backend, frontend, containers, pipelines.
-
-## Scope-based routing
-
-- The spec chooses the smallest `Area`. A `frontend` task never calls any backend agent (orchestrator, builder, tester, reviewers, Task-to-PR) and vice versa.
-- Each orchestrator selects reviewers from the spec `Scope flags` (`ui-changes`, `logic-changes`, `security-relevant`, `dependencies-changed`, `database-changes`, `scaffolding-only`) and reports every run/skip with a reason; `Handover` records it under `Review coverage`.
+`docs/context/` (`project.md`, `backend.md`, `frontend.md`, `containers.md`, `pipelines.md`) is the compact, current map of the app. `implement`, `containerize` and `ci-cd` update them; every other skill reads them first. Protocol: `docs/context/README.md`.
 
 ## Prerequisites
 
-- VS Code setting `chat.subagents.allowInvocationsFromSubagents` = `true` (set in `.vscode/settings.json`); orchestrators call sub-agents from sub-agents.
-- Start the `ado` server from the MCP view and enter the PAT when prompted (Azure tasks only).
-
-## Task-to-PR
-
-Runs after the reviewers, in three human-gated stages:
-
-1. **prepare** (called by each orchestrator): no git changes; writes `runs/<task-id>/pr-<area>.md` and returns the current branch, proposed commit message and file list.
-2. **commit**: the principle orchestrator shows the proposals and asks the human to confirm; only then it calls the Task-to-PR agents with `mode: commit`, `human-confirmed: true` and the confirmed files. All areas commit on the currently checked-out branch; agents never create or switch branches.
-3. **push**: a separate confirmation; only then `push: true` pushes the checked-out branch (never `main`/`master`/the release branch) and opens one PR (`gh` or `az repos pr create`), except when the branch is the integration or release branch, where CI/CD promotes the code and no PR is opened.
-
-The workspace must be a git repository; otherwise the step is skipped. `Handover` runs after the commit step, so `docs/handover/` and the final task status are not part of the commits.
+- VS Code setting `chat.subagents.allowInvocationsFromSubagents` = `true` (in `.vscode/settings.json`).
+- Start the `ado` MCP server and enter the PAT when prompted (Azure tasks only).
+- The workspace must be a git repository for `/create-pr` and `/approve-pr`.
