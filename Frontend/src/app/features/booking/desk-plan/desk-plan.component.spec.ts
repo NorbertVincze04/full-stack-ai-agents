@@ -136,17 +136,131 @@ describe('DeskPlanComponent', () => {
       expect(desk('D03').getAttribute('aria-pressed')).toBe('false');
     });
 
-    it('should mark the own desk as yours and not selectable', () => {
+    it('should mark the own desk as yours and selectable (spec 649 R3), not pressed by default', () => {
       const availability = ids.map(id => (id === 'D05' ? { id, booked: true, bookedBy: 'Ada Lovelace' } : { id, booked: false }));
       render({ signedIn: true, availability, yourDesk: 'D05' });
       expect(desk('D05').getAttribute('aria-label')).toBe('Desk D05, yours');
       expect(desk('D05').querySelector('.desk-state')?.textContent).toMatch(/Yours/);
-      expect(desk('D05').disabled).toBeTrue();
+      expect(desk('D05').disabled).toBeFalse();
+      expect(desk('D05').getAttribute('aria-pressed')).toBe('false');
+      expect(desk('D05').classList).not.toContain('picked');
+    });
+
+    it('should keep the own desk labelled yours with aria-pressed true when it is the selected desk', () => {
+      const availability = ids.map(id => (id === 'D05' ? { id, booked: true, bookedBy: 'Ada Lovelace' } : { id, booked: false }));
+      render({ signedIn: true, availability, yourDesk: 'D05', selectedDesk: 'D05' });
+      expect(desk('D05').getAttribute('aria-pressed')).toBe('true');
+      expect(desk('D05').getAttribute('aria-label')).toBe('Desk D05, yours');
+      expect(desk('D05').querySelector('.desk-state')?.textContent).toMatch(/Yours/);
+      expect(desk('D05').classList).toContain('yours');
+      expect(desk('D05').classList).toContain('picked');
+    });
+
+    it('should show a selected desk as available with aria-pressed false after the selection is cleared', () => {
+      render({ signedIn: true, availability: allFree, selectedDesk: 'D02' });
+      fixture.componentRef.setInput('selectedDesk', null);
+      fixture.detectChanges();
+      expect(desk('D02').getAttribute('aria-pressed')).toBe('false');
+      expect(desk('D02').getAttribute('aria-label')).toBe('Desk D02, available');
+      expect(desk('D02').querySelector('.desk-state')?.textContent).toMatch(/Available/);
     });
 
     it('should not set aria-pressed on disabled desks', () => {
       render({ signedIn: false, availability: null });
       expect(desk('D01').hasAttribute('aria-pressed')).toBeFalse();
+    });
+
+    it('should not mark a desk booked by someone else as pressed even if it is the selected desk', () => {
+      const availability = ids.map(id => (id === 'D04' ? { id, booked: true, bookedBy: 'Ana' } : { id, booked: false }));
+      render({ signedIn: true, availability, selectedDesk: 'D04' });
+      expect(desk('D04').disabled).toBeTrue();
+      expect(desk('D04').hasAttribute('aria-pressed')).toBeFalse();
+      expect(desk('D04').getAttribute('aria-label')).toBe('Desk D04, booked by Ana');
+    });
+  });
+
+  describe('toggle (spec 649 AC2, AC8, AC9, AC10)', () => {
+    const ownAvailability: DeskAvailability[] = ids.map(id =>
+      id === 'D05' ? { id, booked: true, bookedBy: 'Ada Lovelace' } : id === 'D04' ? { id, booked: true, bookedBy: 'Ana' } : { id, booked: false }
+    );
+    let selected: string[];
+    let deselected: number;
+
+    function track(): void {
+      selected = [];
+      deselected = 0;
+      fixture.componentInstance.deskSelected.subscribe(id => selected.push(id));
+      fixture.componentInstance.deskDeselected.subscribe(() => deselected++);
+    }
+
+    it('should emit deskSelected and not deskDeselected when an unselected free desk is clicked', () => {
+      render({ signedIn: true, availability: ownAvailability, yourDesk: 'D05' });
+      track();
+      desk('D03').click();
+      expect(selected).toEqual(['D03']);
+      expect(deselected).toBe(0);
+    });
+
+    it('should emit deskDeselected and not deskSelected when the selected desk is clicked', () => {
+      render({ signedIn: true, availability: ownAvailability, yourDesk: 'D05', selectedDesk: 'D03' });
+      track();
+      desk('D03').click();
+      expect(deselected).toBe(1);
+      expect(selected).toEqual([]);
+    });
+
+    it('should emit deskSelected when another desk is clicked while one is selected', () => {
+      render({ signedIn: true, availability: ownAvailability, yourDesk: 'D05', selectedDesk: 'D03' });
+      track();
+      desk('D08').click();
+      expect(selected).toEqual(['D08']);
+      expect(deselected).toBe(0);
+    });
+
+    it('should emit deskSelected when the own desk is clicked and it is not selected', () => {
+      render({ signedIn: true, availability: ownAvailability, yourDesk: 'D05' });
+      track();
+      desk('D05').click();
+      expect(selected).toEqual(['D05']);
+      expect(deselected).toBe(0);
+    });
+
+    it('should emit deskDeselected when the selected own desk is clicked', () => {
+      render({ signedIn: true, availability: ownAvailability, yourDesk: 'D05', selectedDesk: 'D05' });
+      track();
+      desk('D05').click();
+      expect(deselected).toBe(1);
+      expect(selected).toEqual([]);
+    });
+
+    it('should emit nothing when a desk booked by someone else is clicked', () => {
+      render({ signedIn: true, availability: ownAvailability, yourDesk: 'D05', selectedDesk: 'D04' });
+      track();
+      desk('D04').click();
+      expect(selected).toEqual([]);
+      expect(deselected).toBe(0);
+    });
+
+    it('should emit nothing for neutral desks, also when a selection is still set', () => {
+      render({ signedIn: true, availability: null, selectedDesk: 'D03' });
+      track();
+      desk('D03').click();
+      desk('D01').click();
+      expect(selected).toEqual([]);
+      expect(deselected).toBe(0);
+    });
+
+    it('should render every desk as a native type=button element so Enter and Space toggle it', () => {
+      render({ signedIn: true, availability: ownAvailability, yourDesk: 'D05', selectedDesk: 'D03' });
+      for (const b of buttons()) {
+        expect(b.tagName).toBe('BUTTON');
+        expect(b.getAttribute('type')).toBe('button');
+      }
+      for (const id of ['D03', 'D05', 'D08']) {
+        desk(id).focus();
+        expect(document.activeElement).toBe(desk(id));
+      }
+      expect(desk('D03').getAttribute('aria-label')).toBe('Desk D03, selected');
     });
   });
 

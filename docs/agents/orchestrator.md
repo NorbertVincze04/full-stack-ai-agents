@@ -22,6 +22,7 @@ Runs the three workflows, owns the retry loops and every human gate. History bel
 | containerize the app with Podman | containers | manual | containers (+ backend, database prerequisites) | last test round 7: pass; no handover ([report](../runs/manual-containerize-the-app-with-podman/container-tests.md)) |
 | add CI and CD pipelines | pipelines | manual | pipelines | `done` ([handover](../handover/manual-add-ci-and-cd-pipelines-with-github-actions.md)) |
 | CI on dev push, then CD after CI success | pipelines (verification, docs) | manual | pipelines | `implemented`, AC5 needs a real Actions run ([handover](../handover/manual-ci-on-dev-push-then-cd-after-ci-success.md)) |
+| 649 select/deselect | feature | Azure | frontend | tests 247/247, review code+ux approved (0 blocker/high, 1 medium); PR proposal pending ([reports](../runs/649/)) |
 
 ## Defects and lessons
 
@@ -33,11 +34,13 @@ Runs the three workflows, owns the retry loops and every human gate. History bel
 | 648 | R1 JWT middleware and endpoints approved; R2 migrations human-applied; R3 personal data: safer alternative (store `user_id`, never the e-mail); skipped both commits |
 | containerize | Approved environment fixes (compose provider, proxy path); D8 build-only host networking; D9 classic builder only; reran after a host `ng serve` held port 4200 |
 | pipelines | R1 (first green CI auto-merges into `main`) and R2 (human changes repository settings) approved as documentation only; commit skipped for the CI-on-dev task |
+| 649 | Q1 no-date state (desks neutral, Book Now disabled), Q2 no day on load, Q3 own day and own desk toggle selection only (no request); R1-R3 approved as described; e2e skipped (no runner), journeys listed in `e2e.md`; Azure tag missing, not changed |
 | header, info, 602 | Acceptance check passed (`human-accepted`); 602 needed fix iteration 1 first |
 
 ## Loops
 
 - Review-fix loop: 602 (1 iteration), login and register pages (1 re-review round), CI-on-dev pipelines (1 round).
+- 649: no test-fix or review-fix loop needed (specs were adapted by the Tester in the first test round).
 - Test-fix loop: not needed in any handover. Containerization ran test rounds 0-7 (see [container-engineer.md](container-engineer.md)).
 - No handover records a task that exhausted `maxFixIterations`; `/clarify-task decision` is new and has not been used yet.
 

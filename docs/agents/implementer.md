@@ -5,7 +5,7 @@ Agent: `.github/agents/implementer.agent.md` | Skill: `implement` (+ `database.m
 Stack: Angular 18 NgModule + RxJS (`Frontend/`), Express 5 + TypeScript ESM (`Backend/`), PostgreSQL schema `"ico-env"`. Current state of each area: `docs/context/frontend.md`, `backend.md`.
 
 > Read this file first instead of re-reading old reports. Update it at the end of every task (rules: `docs/context/README.md`, Agent context files). Keep it under ~80 lines.
-> Updated: 2026-11-16 (initial history from handovers)
+> Updated: 2026-11-16 (task 649 added)
 
 ## Tasks
 
@@ -20,6 +20,7 @@ Stack: Angular 18 NgModule + RxJS (`Frontend/`), Express 5 + TypeScript ESM (`Ba
 | 648 booking_calendar | frontend, backend, database | Lazy `BookingModule` (calendar, top bar, `BookingService`); `authenticate` middleware and `/api/bookings` (POST, DELETE, GET `/mine`); migrations `002` (public) and `004` (`"ico-env"`) |
 | containerize (prerequisites) | backend, database | `/api/health` backed by `SELECT 1`; init migrations `001_ico_env_schema`, `002_ico_env_users`, `003_ico_env_bookings`; `DB_SCHEMA` support |
 | create a mockup office for booking | frontend, backend, database | `DeskPlanComponent` (12 desks, 4 x 3), `GET /api/desks`, `GET /api/desks/availability`, `desk` required on `POST /api/bookings`; local migration `005_ico_env_desks.sql` (applied to the local container after a `pg_dump` backup) and Cloud Foundry `004_create_desks_and_booking_desk.sql` (human applies) |
+| 649 select/deselect | frontend | Toggle on calendar days and desks (`dateDeselected`/`deskDeselected` outputs), no day selected on load, `No date selected` state with disabled `Book Now` and neutral desks, own desk (`yours`) selectable with `pressed` flag; no API change |
 
 ## Defects and lessons
 

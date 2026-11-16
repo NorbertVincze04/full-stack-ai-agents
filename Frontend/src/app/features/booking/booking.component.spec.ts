@@ -25,8 +25,8 @@ describe('BookingComponent', () => {
   const deskIds = Array.from({ length: 12 }, (_, i) => `D${String(i + 1).padStart(2, '0')}`);
   const layout = deskIds.map((id, i) => ({ id, label: id, row: Math.floor(i / 4) + 1, col: (i % 4) + 1 }));
 
-  // Fixed "today": Friday 6 Nov 2026 -> window 6, 9, 10, 11 Nov.
-  function setup(opts: { loggedIn: boolean; now?: Date; mine?: MyBooking[] }): void {
+  // Fixed "today": Friday 6 Nov 2026 -> window 6, 9, 10, 11 Nov. The page starts without a day (spec 649), so setup clicks `day` (null = leave unselected).
+  function setup(opts: { loggedIn: boolean; now?: Date; mine?: MyBooking[]; day?: number | null }): void {
     sessionStorage.clear();
     if (opts.loggedIn) {
       sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ token, user: TEST_USER }));
@@ -46,7 +46,14 @@ describe('BookingComponent', () => {
     http.expectOne(desksUrl).flush({ success: true, payload: { desks: layout } });
     if (opts.loggedIn) {
       flushMine(opts.mine ?? []);
-      flushAvailability(opts.mine ?? []);
+    }
+    const initialDay = opts.day === undefined ? 6 : opts.day;
+    if (initialDay !== null) {
+      day(initialDay).click();
+      fixture.detectChanges();
+      if (opts.loggedIn) {
+        flushAvailability(opts.mine ?? []);
+      }
     }
     fixture.detectChanges();
   }
@@ -92,7 +99,7 @@ describe('BookingComponent', () => {
   describe('selection (FR2, FR3)', () => {
     beforeEach(() => setup({ loggedIn: false }));
 
-    it('should preselect the first bookable date and show it on the left of the bar', () => {
+    it('should show the selected date on the left of the bar and the button on the right', () => {
       expect(dateLabel()).toBe('Fri, 6 Nov 2026');
       expect(day(6).getAttribute('aria-pressed')).toBe('true');
       const row = root.querySelector('.top-bar-row')!;
@@ -117,11 +124,12 @@ describe('BookingComponent', () => {
       expect(dateLabel()).toBe('Fri, 6 Nov 2026');
     });
 
-    it('should preselect the next Monday when today is a Saturday', () => {
+    it('should select nothing on load and enable Monday as the first bookable day when today is a Saturday', () => {
       TestBed.resetTestingModule();
-      setup({ loggedIn: false, now: new Date(2026, 10, 7) });
-      expect(dateLabel()).toBe('Mon, 9 Nov 2026');
+      setup({ loggedIn: false, now: new Date(2026, 10, 7), day: null });
+      expect(dateLabel()).toBe('No date selected');
       expect(day(9).getAttribute('aria-disabled')).toBe('false');
+      expect(day(9).getAttribute('aria-pressed')).toBe('false');
       expect(day(6).getAttribute('aria-disabled')).toBe('true');
     });
   });

@@ -57,6 +57,98 @@ describe('CalendarComponent', () => {
     expect(emitted).toEqual(['2026-11-10']);
   });
 
+  describe('toggle (spec 649 AC1, AC7, AC9, AC10)', () => {
+    let selected: string[];
+    let deselected: number;
+
+    beforeEach(() => {
+      selected = [];
+      deselected = 0;
+      component.dateSelected.subscribe(d => selected.push(d));
+      component.dateDeselected.subscribe(() => deselected++);
+    });
+
+    it('should emit dateDeselected and not dateSelected when the selected day is clicked', () => {
+      dayButton(6).click();
+      expect(deselected).toBe(1);
+      expect(selected).toEqual([]);
+    });
+
+    it('should emit dateSelected and not dateDeselected when an unselected enabled day is clicked', () => {
+      dayButton(9).click();
+      expect(selected).toEqual(['2026-11-09']);
+      expect(deselected).toBe(0);
+    });
+
+    it('should show no pressed day and no highlight when nothing is selected, keeping the 4 bookable days enabled', () => {
+      component.selected = null;
+      component.ngOnChanges();
+      fixture.detectChanges();
+      expect(dayButtons().some(b => b.getAttribute('aria-pressed') === 'true')).toBeFalse();
+      expect(dayButtons().filter(b => b.classList.contains('selected')).length).toBe(0);
+      expect(dayButtons().filter(b => !b.disabled).map(b => b.textContent?.trim())).toEqual(['6', '9', '10', '11']);
+      expect(dayButton(6).getAttribute('aria-pressed')).toBe('false');
+    });
+
+    it('should select a day again after it was deselected', () => {
+      component.selected = null;
+      component.ngOnChanges();
+      fixture.detectChanges();
+      dayButton(6).click();
+      expect(selected).toEqual(['2026-11-06']);
+      expect(deselected).toBe(0);
+    });
+
+    it('should render the month of the first bookable day when it starts without a selection', () => {
+      const other = TestBed.createComponent(CalendarComponent);
+      other.componentInstance.bookable = ['2026-12-01', '2026-12-02'];
+      other.componentInstance.selected = null;
+      other.componentInstance.booked = [];
+      other.componentInstance.ngOnChanges();
+      other.detectChanges();
+      expect(other.nativeElement.querySelector('.month-label')?.textContent).toContain('December 2026');
+      expect(other.nativeElement.querySelectorAll('button.day[aria-pressed="true"]').length).toBe(0);
+    });
+
+    it('should deselect a selected day the user has booked and keep its booked marker and label', () => {
+      component.booked = ['2026-11-06'];
+      component.ngOnChanges();
+      fixture.detectChanges();
+      expect(dayButton(6).getAttribute('aria-pressed')).toBe('true');
+      dayButton(6).click();
+      expect(deselected).toBe(1);
+      expect(selected).toEqual([]);
+      component.selected = null;
+      component.ngOnChanges();
+      fixture.detectChanges();
+      expect(dayButton(6).getAttribute('aria-pressed')).toBe('false');
+      expect(dayButton(6).classList).toContain('booked');
+      expect(dayButton(6).getAttribute('aria-label')).toBe('Fri, 6 Nov 2026, booked');
+    });
+
+    it('should emit nothing when a disabled day is clicked, even a disabled selected day', () => {
+      component.selected = '2026-11-07';
+      component.ngOnChanges();
+      fixture.detectChanges();
+      dayButton(7).click();
+      dayButton(12).click();
+      expect(selected).toEqual([]);
+      expect(deselected).toBe(0);
+      component.select({ iso: '2026-11-07', day: 7, enabled: false, selected: true, booked: false, label: '' });
+      expect(deselected).toBe(0);
+    });
+
+    it('should render days as native type=button elements so Enter and Space toggle them', () => {
+      for (const b of dayButtons()) {
+        expect(b.tagName).toBe('BUTTON');
+        expect(b.getAttribute('type')).toBe('button');
+      }
+      dayButton(6).focus();
+      expect(document.activeElement).toBe(dayButton(6));
+      expect(dayButton(6).getAttribute('aria-label')).toBe('Fri, 6 Nov 2026');
+    });
+  });
+
   it('should not emit when a disabled day is clicked or selected programmatically', () => {
     const emitted: string[] = [];
     component.dateSelected.subscribe(d => emitted.push(d));

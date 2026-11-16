@@ -5,7 +5,7 @@ Agent: `.github/agents/reviewer.agent.md` | Skill: `review` (+ `checklists.md`) 
 Scopes: `code`, `security`, `ux`, `containers`, `pipelines`. Dependency advisories: npm `critical` blocks, everything lower is a follow-up.
 
 > Read this file first instead of re-reading old reports. Update it at the end of every task (rules: `docs/context/README.md`, Agent context files). Keep it under ~80 lines.
-> Updated: 2026-11-16 (initial history from handovers)
+> Updated: 2026-11-16 (task 649)
 
 ## Tasks
 
@@ -22,6 +22,7 @@ Scopes: `code`, `security`, `ux`, `containers`, `pipelines`. Dependency advisori
 | containerize | containers (static, before the first build) | Approved: 0 blocker, 0 high, 3 medium, 9 low |
 | add CI and CD pipelines | pipelines | 0 blocker, 0 high, 4 medium (M1 concurrency drops a pending promotion, M2 `GITHUB_TOKEN` cannot push workflow changes, M3 bot bypass plus dispatch, M4 Chrome `--no-sandbox`), 6 low |
 | CI on dev, CD after CI | pipelines (twice) | Round 1: 1 high, 2 medium, 2 low, all fixed; re-review approved with 0 findings |
+| 649 select/deselect | frontend code, UX (security skipped by scope flags) | Both approved. Code: 4 low (duplicate `selectedDesk` reset, `select`/`deselect` duplication, stale docs, no e2e runner). UX: 1 medium (no plan hint for signed-in user without a day), 2 low (picked own desk colour-only, no live region on `No date selected`) |
 
 ## Defects and lessons
 
@@ -29,11 +30,13 @@ Scopes: `code`, `security`, `ux`, `containers`, `pipelines`. Dependency advisori
 - No rate limit on new routes; `req.ip` behind nginx shares one bucket.
 - No CSP or security headers in `Frontend/nginx.conf`.
 - Frontend race conditions around in-flight booking requests.
-- Stale test counts in `docs/context/*.md` after a task.
+- Stale test counts in `docs/context/*.md` after a task (again in 649: 145 vs 247, "specs pending").
+- Colour-only state cues and missing hints for disabled/neutral states in the booking UI.
 
 ## Open items
 
-- The `review` skill has not run yet; the first run may adjust scope selection.
+- 649: the `review` skill ran (code + ux); scope selection from the flags worked. No e2e runner exists (decision for the human, see `docs/runs/649/e2e.md`).
+- 649 follow-ups: plan hint when signed in without a day (UX medium); refresh the counts and "pending" wording in `frontend.md` and `project.md`.
 
 ## Notes for the new skill
 

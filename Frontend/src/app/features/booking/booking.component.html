@@ -1,7 +1,7 @@
 <section class="top-bar" aria-label="Booking">
   <div class="top-bar-row">
     <p class="selected-date">{{ selectedLabel }}</p>
-    <button type="button" class="book-button" [disabled]="busy" [attr.aria-busy]="busy" (click)="toggleBooking()">
+    <button type="button" class="book-button" [disabled]="busy || !selected" [attr.aria-busy]="busy" (click)="toggleBooking()">
       {{ isBooked ? 'Withdraw booking' : 'Book Now' }}
     </button>
   </div>
@@ -9,7 +9,7 @@
 </section>
 <div class="booking-layout">
   <div class="layout-calendar">
-    <app-calendar [bookable]="bookable" [selected]="selected" [booked]="booked" (dateSelected)="select($event)" />
+    <app-calendar [bookable]="bookable" [selected]="selected" [booked]="booked" (dateSelected)="select($event)" (dateDeselected)="deselect()" />
   </div>
   <div class="layout-plan">
     <app-desk-plan
@@ -19,6 +19,7 @@
       [yourDesk]="yourDesk"
       [signedIn]="signedIn"
       (deskSelected)="selectDesk($event)"
+      (deskDeselected)="deselectDesk()"
     />
   </div>
 </div>

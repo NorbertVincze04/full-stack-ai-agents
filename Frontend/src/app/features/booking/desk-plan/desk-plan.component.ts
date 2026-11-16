@@ -13,6 +13,7 @@ interface DeskCell {
   icon: string;
   bookedBy: string | null;
   enabled: boolean;
+  pressed: boolean;
   accessibleName: string;
 }
 
@@ -43,6 +44,7 @@ export class DeskPlanComponent implements OnChanges {
   @Input() yourDesk: string | null = null;
   @Input() signedIn = false;
   @Output() deskSelected = new EventEmitter<string>();
+  @Output() deskDeselected = new EventEmitter<void>();
 
   readonly legend = (Object.keys(STATE_TEXT) as Exclude<DeskState, 'neutral'>[]).map(state => ({
     state,
@@ -69,7 +71,12 @@ export class DeskPlanComponent implements OnChanges {
   }
 
   select(cell: DeskCell): void {
-    if (cell.enabled) {
+    if (!cell.enabled) {
+      return;
+    }
+    if (cell.pressed) {
+      this.deskDeselected.emit();
+    } else {
       this.deskSelected.emit(cell.id);
     }
   }
@@ -90,7 +97,8 @@ export class DeskPlanComponent implements OnChanges {
       stateText,
       icon: neutral ? '' : STATE_ICON[state],
       bookedBy,
-      enabled: state === 'available' || state === 'selected',
+      enabled: state === 'available' || state === 'selected' || state === 'yours',
+      pressed: !neutral && state !== 'booked' && desk.id === this.selectedDesk,
       accessibleName
     };
   }

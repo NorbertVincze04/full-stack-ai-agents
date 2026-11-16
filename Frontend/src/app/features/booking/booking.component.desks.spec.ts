@@ -29,8 +29,14 @@ describe('BookingComponent desk plan', () => {
   const free = (overrides: Record<string, string> = {}): DeskAvailability[] =>
     ids.map(id => (overrides[id] ? { id, booked: true, bookedBy: overrides[id] } : { id, booked: false }));
 
-  // Fixed "today": Friday 6 Nov 2026 -> window 6, 9, 10, 11 Nov.
-  function setup(opts: { loggedIn: boolean; mine?: MyBooking[]; booked?: Record<string, string>; flushLayout?: boolean }): void {
+  // Fixed "today": Friday 6 Nov 2026 -> window 6, 9, 10, 11 Nov. The page starts without a day (spec 649), so setup clicks `day` (null = leave unselected).
+  function setup(opts: {
+    loggedIn: boolean;
+    mine?: MyBooking[];
+    booked?: Record<string, string>;
+    flushLayout?: boolean;
+    day?: number | null;
+  }): void {
     sessionStorage.clear();
     if (opts.loggedIn) {
       sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ token, user: TEST_USER }));
@@ -52,7 +58,14 @@ describe('BookingComponent desk plan', () => {
     }
     if (opts.loggedIn) {
       http.expectOne(`${bookingsUrl}/mine`).flush({ success: true, payload: { bookings: opts.mine ?? [] } });
-      flushAvailability(opts.booked ?? {});
+    }
+    const initialDay = opts.day === undefined ? 6 : opts.day;
+    if (initialDay !== null) {
+      day(initialDay).click();
+      fixture.detectChanges();
+      if (opts.loggedIn) {
+        flushAvailability(opts.booked ?? {});
+      }
     }
     fixture.detectChanges();
   }
@@ -148,7 +161,7 @@ describe('BookingComponent desk plan', () => {
   });
 
   describe('AC2: availability for the selected date', () => {
-    it('should request availability for the preselected date after login and mark booked desks with the booker name', () => {
+    it('should request availability for the clicked date, not on load, and mark booked desks with the booker name', () => {
       sessionStorage.clear();
       sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ token, user: TEST_USER }));
       TestBed.configureTestingModule({
@@ -165,6 +178,9 @@ describe('BookingComponent desk plan', () => {
       fixture.detectChanges();
       http.expectOne(desksUrl).flush({ success: true, payload: { desks: layout } });
       http.expectOne(`${bookingsUrl}/mine`).flush({ success: true, payload: { bookings: [] } });
+      http.expectNone(r => r.url === `${desksUrl}/availability`);
+      day(6).click();
+      fixture.detectChanges();
       const req = http.expectOne(r => r.url === `${desksUrl}/availability`);
       expect(req.request.params.get('date')).toBe('2026-11-06');
       expect(req.request.headers.get('Authorization')).toBe(`Bearer ${token}`);
@@ -262,7 +278,7 @@ describe('BookingComponent desk plan', () => {
       expect(bookButton().textContent?.trim()).toBe('Book Now');
     });
 
-    it('should POST { date, desk }, show the desk as yours and switch to Withdraw booking', () => {
+    it('should POST { date, desk }, show the desk as yours (still selectable, spec 649 R3) and switch to Withdraw booking', () => {
       setup({ loggedIn: true });
       pick('D03');
       clickBook();
@@ -273,7 +289,8 @@ describe('BookingComponent desk plan', () => {
       req.flush({ success: true, payload: { booking: { date: '2026-11-06', desk: 'D03' } } }, { status: 201, statusText: 'Created' });
       fixture.detectChanges();
       expect(desk('D03').getAttribute('aria-label')).toBe('Desk D03, yours');
-      expect(desk('D03').disabled).toBeTrue();
+      expect(desk('D03').disabled).toBeFalse();
+      expect(desk('D03').getAttribute('aria-pressed')).toBe('false');
       expect(bookButton().textContent?.trim()).toBe('Withdraw booking');
     });
 

@@ -15,6 +15,7 @@ export const BOOKING_NOW = new InjectionToken<() => Date>('BOOKING_NOW', {
 
 export const LOGIN_REQUIRED_MESSAGE = 'You must log in first';
 export const GENERIC_ERROR_MESSAGE = 'Something went wrong. Please try again.';
+export const NO_DATE_MESSAGE = 'No date selected';
 export const SELECT_DESK_MESSAGE = 'Please select a desk first';
 export const BOOKING_CONFLICT_MESSAGE = 'This desk or date is already booked. Please choose another desk.';
 
@@ -45,7 +46,7 @@ export class BookingComponent implements OnInit {
   ) {}
 
   get selectedLabel(): string {
-    return this.selected ? formatDate(this.selected) : '';
+    return this.selected ? formatDate(this.selected) : NO_DATE_MESSAGE;
   }
 
   get isBooked(): boolean {
@@ -58,7 +59,6 @@ export class BookingComponent implements OnInit {
 
   ngOnInit(): void {
     this.bookable = bookableDates(this.now());
-    this.selected = this.bookable[0];
     this.loadDesks();
     this.auth.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
       this.signedIn = !!user;
@@ -81,8 +81,20 @@ export class BookingComponent implements OnInit {
     this.loadAvailability();
   }
 
+  deselect(): void {
+    this.selected = null;
+    this.selectedDesk = null;
+    this.error = null;
+    this.loadAvailability();
+  }
+
   selectDesk(desk: string): void {
     this.selectedDesk = desk;
+    this.error = null;
+  }
+
+  deselectDesk(): void {
+    this.selectedDesk = null;
     this.error = null;
   }
 
@@ -110,6 +122,7 @@ export class BookingComponent implements OnInit {
         if (withdrawing) {
           this.setBookings(this.myBookings.filter(b => b.date !== date));
           this.markDesk(previousDesk, { booked: false });
+          this.selectedDesk = null;
         } else {
           this.setBookings([...this.myBookings, { date, desk }]);
           this.markDesk(desk, { booked: true, bookedBy: this.auth.getCurrentUserName() });

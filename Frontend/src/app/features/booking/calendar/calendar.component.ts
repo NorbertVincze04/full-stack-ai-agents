@@ -20,6 +20,7 @@ export class CalendarComponent implements OnChanges {
   @Input() selected: string | null = null;
   @Input() booked: string[] = [];
   @Output() dateSelected = new EventEmitter<string>();
+  @Output() dateDeselected = new EventEmitter<void>();
 
   readonly weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   monthLabel = '';
@@ -46,7 +47,12 @@ export class CalendarComponent implements OnChanges {
   }
 
   select(cell: DayCell): void {
-    if (cell.enabled) {
+    if (!cell.enabled) {
+      return;
+    }
+    if (cell.selected) {
+      this.dateDeselected.emit();
+    } else {
       this.dateSelected.emit(cell.iso);
     }
   }
