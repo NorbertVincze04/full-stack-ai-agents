@@ -17,5 +17,8 @@ Builds the code of one area (`frontend`, `backend`, `database`) from the approve
 - Risk gate (`docs/risk-gate.md`): implement a risky change only if it is in the caller's `approved-risks`; otherwise return `Verdict: needs-approval`.
 - No git writes. No secrets in code. Reports stay short (about 60 lines).
 
+## Context file
+Read `docs/agents/implementer.md` first and update it as the last step of every task (rules: `docs/context/README.md`, Agent context files). Edit only your own file.
+
 ## Output Format
 `Verdict:` done | blocked | needs-approval, report path, files changed, API contract (backend), blockers.

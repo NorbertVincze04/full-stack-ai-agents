@@ -8,7 +8,7 @@ user-invocable: true
 Agent: `Tester`. If you are another agent, run this skill through a `Tester` subagent.
 
 # Get task
-Read `docs/specs/<task-id>.md` (acceptance criteria, `Scope flags`) and the `implement-*.md` reports; read `.github/config.json` -> `workflow` (`tdd`, `e2e`). Default mode is `all`. e2e tests run against the local stack only.
+Read `docs/specs/<task-id>.md` (acceptance criteria, `Scope flags`) and the `implement-*.md` reports; read `.github/config.json` -> `workflow` (`tdd`, `e2e`). Default mode is `all`. Read `docs/agents/tester.md` first (test history, known gaps, e2e status). e2e tests run against the local stack only.
 
 ## Steps
 1. Run the `tdd` skill for the areas of the task (mode `tdd` or `all`). If it fails, return the failing tests and stop: e2e is not run on red unit tests.
@@ -17,7 +17,8 @@ Read `docs/specs/<task-id>.md` (acceptance criteria, `Scope flags`) and the `imp
    - Use the running local stack (`http://localhost:<FRONTEND_PORT>` from `.env`, default 4200; start it with `<runtime> compose up -d` from `containers.runtime` if it exists and is not running). If there is no stack, record `skipped: no stack`.
    - Map each user-visible acceptance criterion to one journey (for example register -> login -> book a desk). Test data is created and removed by the test, with dummy values.
 3. Write `docs/runs/<task-id>/e2e.md` (about 60 lines): journeys, AC coverage, results, failures with cause and severity, skipped items and why.
-4. Return `Verdict: pass | fail | skipped`, report paths (`tdd-*.md`, `e2e.md`), failing tests with severity. The caller runs the fix loop and calls this skill again with `rerun:`.
+4. **Update context**: update `docs/agents/tester.md` per `docs/context/README.md` (Agent context files): this task's row (tests and results, e2e status), defects found, coverage gaps in `Open items`.
+5. Return `Verdict: pass | fail | skipped`, report paths (`tdd-*.md`, `e2e.md`), failing tests with severity. The caller runs the fix loop and calls this skill again with `rerun:`.
 
 ## When it fails
 - Stack does not start or is unhealthy: return `fail` with `Root cause in: containers` (not an app defect) and the stack logs summary.

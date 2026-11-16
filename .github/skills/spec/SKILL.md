@@ -8,7 +8,7 @@ user-invocable: true
 Agent: `Task Analyst`. If you are another agent, run this skill through a `Task Analyst` subagent.
 
 # Get task
-Read `docs/tasks/<task-id>.md` (if it is missing, run `get-task` first). Then read `docs/context/project.md` and the context file of each likely area (`backend.md`, `frontend.md`, `containers.md`, `pipelines.md`) following `docs/context/README.md`. Open source files only for what the context cannot answer; read `.github/docs/PROJECT_OVERVIEW.md` only by section. If `docs/specs/<task-id>.md` exists, update it instead of starting over.
+Read `docs/tasks/<task-id>.md` (if it is missing, run `get-task` first). Then read `docs/context/project.md` and the context file of each likely area (`backend.md`, `frontend.md`, `containers.md`, `pipelines.md`) following `docs/context/README.md`. Open source files only for what the context cannot answer; read `.github/docs/PROJECT_OVERVIEW.md` only by section. If `docs/specs/<task-id>.md` exists, update it instead of starting over. Read `docs/agents/task-analyst.md` first (history, known defects, open items) instead of older specs.
 
 ## Steps
 1. If the caller passed `answers:`, merge them into the spec and remove the answered questions. If it passed `decision:`, add it under a `Decisions` section (one line: what was decided and why) and change the spec only if the decision requires it.
@@ -22,7 +22,8 @@ Read `docs/tasks/<task-id>.md` (if it is missing, run `get-task` first). Then re
 5. `Risk gate`: list every risky item (`R1`, `R2`, ...) per `docs/risk-gate.md` with impact and a safer alternative; `none` if there are none.
 6. Questions: only those that block implementation or change the outcome, each with 2-4 suggested options and one recommended.
 7. Set the task `status` to `specified` only when there are no blocking questions; otherwise leave it `new`.
-8. Return: `Spec file`, `Area`, `Pipeline scope`, `Scope flags`, `Risk gate`, `Ready: yes | no`, `Questions for human` (numbered, with options), `Acceptance criteria`.
+8. **Update context**: update `docs/agents/task-analyst.md` per `docs/context/README.md` (Agent context files): add or update this task's row, defects or lessons (for example a risky request turned into a safer one), refresh `Open items`.
+9. Return: `Spec file`, `Area`, `Pipeline scope`, `Scope flags`, `Risk gate`, `Ready: yes | no`, `Questions for human` (numbered, with options), `Acceptance criteria`.
 
 ## When it fails
 - Task file missing: run `get-task`; if that also fails, return `Ready: no` with the reason.

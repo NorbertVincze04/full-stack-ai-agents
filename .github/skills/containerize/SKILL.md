@@ -10,7 +10,7 @@ Agent: `Container Engineer`. If you are another agent, run this skill through a 
 # Get task
 - Runtime: the argument, else `.github/config.json` -> `containers.runtime`.
 - Task: the given ID. Without one, ask `Task Analyst` for `/get-task manual: containerize the app for <runtime>` and `/spec` so a spec with `Area: containers` and a `Risk gate` exists (the Orchestrator runs the human gates). Take `approved-risks` from the caller.
-- Read `docs/context/project.md`, `docs/context/containers.md` (services, files, env vars, proxy, checklist), `.github/config.json` -> `containers`, `workflow`, and the build/start commands and ports from `backend.md` / `frontend.md`.
+- Read `docs/context/project.md`, `docs/context/containers.md` (services, files, env vars, proxy, checklist), `.github/config.json` -> `containers`, `workflow`, and the build/start commands and ports from `backend.md` / `frontend.md`. Read `docs/agents/container-engineer.md` first (what was built, runtime history, past failures and fixes) instead of older reports.
 
 ## Steps
 1. **Detect**: existing `compose.yaml`, `Backend/Containerfile`, `Frontend/Containerfile`, `Frontend/nginx.conf`, ignore files, `.env`, and which runtime they were built and verified for (`containers.runtime`, header comment in `compose.yaml`, `containers.md`). Installed runtimes: `podman --version`, `podman machine list`, `docker --version`, `docker info`, and the compose command of each.
@@ -22,7 +22,8 @@ Agent: `Container Engineer`. If you are another agent, run this skill through a 
 7. **Test-fix loop**: keep a counter per failing check; fix and re-run up to `workflow.maxTestFixLoops` rounds. Classify each failure: proxy (407, timeout), TLS (`x509`), registry, Containerfile error, runtime crash. If the root cause is application code, stop with `needs-human`, `Root cause in: backend | frontend`; if it is the machine, proxy or certificates, `Root cause in: environment` and say what the human must do.
 8. **Review**: call `Reviewer` `/review <id> containers`. On `blocker` or `high` findings fix them, re-run steps 6-7 and the review, up to `workflow.maxFixIterations` times; remaining findings are reported, then `needs-human`.
 9. **Record**: update `docs/context/containers.md` (runtime, status, files, commands) and the containers row in `docs/context/project.md`; when the runtime changed (and the human approved it), set `.github/config.json` -> `containers.runtime`. Write `docs/runs/<task-id>/containerize.md` (about 60 lines): mode, runtime, files, results table with one line of evidence per check, failures, required app changes, actions awaiting approval. Variable names only, never values.
-10. Return `Status`, runtime and mode, stack summary (services, URLs, start and stop commands, where `.env` is), open findings, report path. Next step: `/create-pr <id>`.
+10. **Update context**: update `docs/agents/container-engineer.md` per `docs/context/README.md` (Agent context files): task row (runtime, mode, result), each failure and its root cause and fix under `Defects and lessons`, refresh `Open items`.
+11. Return `Status`, runtime and mode, stack summary (services, URLs, start and stop commands, where `.env` is), open findings, report path. Next step: `/create-pr <id>`.
 
 ## When it fails
 - Actions from the risk gate row `Local environment / containers` that are not in `approved-risks`: `needs-approval` to the caller; if the human started this command directly, the top-level chat asks them the risk question and repeats the step with their decision.

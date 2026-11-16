@@ -13,7 +13,7 @@ Resolve the source from the argument:
 - `list`, `next` or empty -> list candidate tasks
 - a file path or free text -> manual task (`id: manual-<kebab-case-title>`, `source: manual`)
 
-Read `.github/config.json` -> `azureDevOps` (organization, project, `taskFilter`, `doneState`) and the template and field mapping in `docs/task-ingestion.md`.
+Read `.github/config.json` -> `azureDevOps` (organization, project, `taskFilter`, `doneState`) and the template and field mapping in `docs/task-ingestion.md`. Read `docs/agents/task-analyst.md` first (history, known defects, open items) instead of older tasks and reports.
 
 ## Steps
 1. If `docs/tasks/<task-id>.md` already exists with a `status` other than `new`, do not overwrite it: return its path and status so the workflow can resume.
@@ -22,7 +22,8 @@ Read `.github/config.json` -> `azureDevOps` (organization, project, `taskFilter`
 4. **Manual**: use the text or file content as the description; extract an `Acceptance Criteria:` section if present.
 5. Map the fields onto the task template (`id`, `title`, `description`, `acceptanceCriteria`, `tags`, `url`).
 6. Write `docs/tasks/<task-id>.md` with `status: new`. Every field that could not be found goes under `Open Questions`; leave it empty, do not fill it in.
-7. Return: task ID, file path, tags, open questions (or the candidate table in list mode).
+7. **Update context**: update `docs/agents/task-analyst.md` per `docs/context/README.md` (Agent context files): add this task's row, defects or lessons, refresh `Open items`.
+8. Return: task ID, file path, tags, open questions (or the candidate table in list mode).
 
 ## When it fails
 - `ado` tools unavailable: report that the MCP server `ado` must be started (PAT prompt) and stop.

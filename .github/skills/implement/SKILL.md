@@ -8,7 +8,7 @@ user-invocable: true
 Agent: `Implementer`. If you are another agent, run this skill through an `Implementer` subagent.
 
 # Get task
-Read `docs/specs/<task-id>.md`; it must have `status: specified` or `in-progress`, otherwise stop and ask for `/spec`. Take `approved-risks` from the caller. Read `docs/context/project.md` and `docs/context/<area>.md` following `docs/context/README.md` (reading rules, freshness check, bootstrap if the file is missing); for `database` read the `Data` section of `backend.md`. Open only the source files the context points to; read `.github/docs/PROJECT_OVERVIEW.md` only by section. With `fix:`, read the given tester/reviewer reports first.
+Read `docs/specs/<task-id>.md`; it must have `status: specified` or `in-progress`, otherwise stop and ask for `/spec`. Take `approved-risks` from the caller. Read `docs/context/project.md` and `docs/context/<area>.md` following `docs/context/README.md` (reading rules, freshness check, bootstrap if the file is missing); for `database` read the `Data` section of `backend.md`. Open only the source files the context points to; read `.github/docs/PROJECT_OVERVIEW.md` only by section. With `fix:`, read the given tester/reviewer reports first. Read `docs/agents/implementer.md` first (what was built before, known defects and gaps) instead of older reports.
 
 ## Steps
 1. Set the task `status` to `in-progress`.
@@ -20,7 +20,8 @@ Read `docs/specs/<task-id>.md`; it must have `status: specified` or `in-progress
 7. Run `npm run build` (and lint if configured) in the area; fix the errors you introduced. Do not write tests: the Tester owns them (TDD stage).
 8. Update `docs/context/<area>.md` and the status line in `docs/context/project.md` for what changed.
 9. Write `docs/runs/<task-id>/implement-<area>.md` (about 60 lines): acceptance criteria -> how implemented, API contract (method, path, auth, request, response, errors) for backend, files changed (including the context files), dependencies, commands run and results, diagnosis and fix for failing tests, known gaps.
-10. Return `Verdict: done | blocked | needs-approval`, report path, files changed, API contract summary, blockers or assumptions.
+10. **Update context**: update `docs/agents/implementer.md` per `docs/context/README.md` (Agent context files): this task's row (area, what was built), defects fixed or found, lessons, refresh `Open items`.
+11. Return `Verdict: done | blocked | needs-approval`, report path, files changed, API contract summary, blockers or assumptions.
 
 ## When it fails
 - Spec missing or not `specified`: return `blocked`.
