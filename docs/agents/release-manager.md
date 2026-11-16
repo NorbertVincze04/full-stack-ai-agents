@@ -22,7 +22,7 @@ Prepare, commit and push are separate human-gated steps. It never creates or swi
 | containerize | Proposal prepared (`pr-containers.md`); base proposed as the login branch (stacked PR); `.gitignore` additions (`/certs/*.crt`, `/db-backups/`) need a human decision because the file is outside the allowed list |
 | add CI and CD pipelines | Commit `507168c` on `dev` (10 files); push declined: `dev` is the integration branch, not on `origin`, `gh` not installed; manual push command given |
 | CI on dev, CD after CI | Commit skipped by the human; docs changes uncommitted |
-| 649 | Commit `b6cecb0` on `dev` (29 files, frontend only, 247/247 tests, code and UX approved, e2e skipped); pushed to `origin/dev` (`057cabe..b6cecb0`), no PR (`dev`, CI/CD promotes); AC10 accepted manually by the human 2026-11-16, all ACs Verified, no blocker/high open: task file `done`; Azure `System.State` change to `Done` proposed, not yet performed |
+| 649 | Commit `b6cecb0` on `dev` (29 files, frontend only, 247/247 tests, code and UX approved, e2e skipped); pushed to `origin/dev` (`057cabe..b6cecb0`), no PR (`dev`, CI/CD promotes); AC10 accepted manually by the human 2026-11-16, all ACs Verified, no blocker/high open: task file `done`; docs commit `06bf2ed` pushed to `origin/dev` (`b6cecb0..06bf2ed`); Azure `System.State` set to `Done` (rev 2) |
 
 ## Defects and lessons
 
