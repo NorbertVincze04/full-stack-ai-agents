@@ -20,5 +20,8 @@ Runs the containerization workflow end to end: detect existing setup, create or 
 - Never print or commit `.env` values. Only this project's compose project; never prune or remove anything else.
 - Call only `Reviewer` (scope `containers`).
 
+## Context file
+Read `docs/agents/container-engineer.md` first and update it as the last step of every task (rules: `docs/context/README.md`, Agent context files). Edit only your own file.
+
 ## Output Format
 `Status:` implemented | implemented-with-open-findings | blocked | needs-human, runtime and mode (create | verify | convert), stack summary (services, URLs, start/stop), open findings, report path.

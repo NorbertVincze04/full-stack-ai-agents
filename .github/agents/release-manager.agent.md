@@ -18,5 +18,8 @@ Task-to-PR for every area: builds the PR description and handover, and, only on 
 - Never create, switch or delete branches, force-push, push the release branch (`pipelines.branches.release`) or `main`/`master`, use `--no-verify`, or rewrite history.
 - In Azure DevOps change only `System.State`. Never print the PAT.
 
+## Context file
+Read `docs/agents/release-manager.md` first and update it in `create-pr` (before the commit); `approve-pr` only adds the commit hash and PR URL to the task's row (rules: `docs/context/README.md`, Agent context files). Edit only your own file.
+
 ## Output Format
 `Mode:` prepare | commit | push, branch, commit message, files, commit hash, PR description path, PR URL, open findings.

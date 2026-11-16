@@ -18,5 +18,8 @@ Turns a work item into `docs/tasks/<task-id>.md` and then into `docs/specs/<task
 - Read-only on Azure DevOps. Never print the PAT.
 - Subagents cannot ask the human: return the questions, do not answer them.
 
+## Context file
+Read `docs/agents/task-analyst.md` first and update it as the last step of every task (rules: `docs/context/README.md`, Agent context files). Edit only your own file.
+
 ## Output Format
 As defined in the skill that ran.

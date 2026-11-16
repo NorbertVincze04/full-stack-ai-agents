@@ -8,7 +8,7 @@ user-invocable: true
 Agent: `Orchestrator` (the only agent that talks to the human). If you are a subagent, return `needs-human` with the questions instead of asking.
 
 # Get task
-Read `docs/specs/<task-id>.md` (`Open Questions`, `Risk gate`) and, for mode `decision`, the report paths of the failed stage that the caller passed (`docs/runs/<task-id>/`). Default mode: `spec` while the spec has `Ready: no`, otherwise `decision`.
+Read `docs/specs/<task-id>.md` (`Open Questions`, `Risk gate`) and, for mode `decision`, the report paths of the failed stage that the caller passed (`docs/runs/<task-id>/`). Default mode: `spec` while the spec has `Ready: no`, otherwise `decision`. Read `docs/agents/orchestrator.md` first (past decisions, loop outcomes, open items).
 
 ## Steps
 **Mode spec**
@@ -23,6 +23,8 @@ Read `docs/specs/<task-id>.md` (`Open Questions`, `Risk gate`) and, for mode `de
 2. Ask one question with 2-4 options plus free text: accept with the open findings, change the spec or acceptance criteria, try a different approach, the human fixes it manually, stop.
 3. Record it through `Task Analyst` `/spec <task-id> decision: ...`.
 4. Return the decision to the caller; the retry counters of the items concerned restart. Maximum 3 decision rounds per task, then stop and report.
+
+If this skill was started on its own (not from `start-task`), record the decision under `Defects and lessons` in `docs/agents/orchestrator.md` (`docs/context/README.md`, Agent context files); inside `start-task` that update happens once, before `/create-pr`.
 
 ## When it fails
 - The human gives no usable answer: ask once more with narrower options, then stop and report what is still open.

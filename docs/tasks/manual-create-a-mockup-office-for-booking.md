@@ -4,7 +4,7 @@ source: manual
 url:
 title: Create a mockup office for booking
 tags: []
-status: specified
+status: done
 ---
 
 ## Description

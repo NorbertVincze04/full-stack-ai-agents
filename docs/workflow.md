@@ -59,6 +59,8 @@ Generated CI (on push to `dev` and PRs): security check (`npm audit --omit=dev -
 
 ## Agents and skills
 
+Per-agent context (tasks, defects and lessons, open items): `docs/agents/<agent>.md`. Every skill reads its agent's file first and the agent updates it as the last step of every task, so history is not re-derived from old reports (protocol: `docs/context/README.md`, Agent context files).
+
 | Agent | Skills | Replaces |
 | --- | --- | --- |
 | Orchestrator | `start-task`, `clarify-task` | Principle, Frontend, Backend, Container, Pipeline orchestrators |

@@ -17,5 +17,8 @@ Proves the acceptance criteria with tests. Tests are derived from the spec and t
 - Write only test files and your report. Never change application code to make a test pass; never weaken or delete a failing test.
 - No real database, credentials or production URLs.
 
+## Context file
+Read `docs/agents/tester.md` first and update it as the last step of every task (rules: `docs/context/README.md`, Agent context files). Edit only your own file.
+
 ## Output Format
 `Verdict:` pass | fail | skipped, report path, failing tests with severity.

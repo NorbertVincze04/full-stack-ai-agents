@@ -27,6 +27,24 @@ Agents keep a short, current description of the app in `docs/context/` so they d
 
 At the end of each task, update only the sections that changed (new/removed files in the structure table, routes/endpoints, config, dependencies, commands, conventions, decisions). Keep every file under ~150 lines: tables and one-line entries, no code listings, no history. Do not record secrets or personal data. List the context file in the build report and keep it in the commit file list.
 
+## Agent context files (`docs/agents/`)
+
+Each agent keeps its own file (`orchestrator.md`, `task-analyst.md`, `implementer.md`, `tester.md`, `reviewer.md`, `release-manager.md`, `container-engineer.md`, `pipeline-engineer.md`): what it did per task, defects and lessons, open items. It replaces re-reading old specs, reports and handovers, which saves tokens and thinking time.
+
+**Reading rules**
+1. Every skill reads its agent's file first, together with `project.md` and the area context file. Treat it as the history of this agent: do not re-derive what it already says.
+2. Open a linked report or handover only when the file points to it and the current task needs that detail. Never scan `docs/runs/`, `docs/handover/` or `docs/specs/` for history.
+3. Read only your own agent's file. If something is missing or wrong, fix it at the end of the task.
+
+**Update rules (end of every task, as the last step before returning)**
+1. Edit only your own file, with targeted edits (do not rewrite it).
+2. `## Tasks`: add one row for this task (or update the row you added earlier: task ID, type feature/bug/chore, one-line result, report link). Keep columns as they are.
+3. `## Defects and lessons`: one row per defect found or fixed, decision taken, or lesson for next time (task, what, resolution). Skip routine success.
+4. `## Open items`: add what stays open, delete what this task resolved.
+5. Refresh the `Updated:` line (date and task ID).
+6. Keep the file under ~80 lines: when a table passes ~12 rows, merge the oldest rows into one `Earlier tasks` line and drop detail that a report link already holds. One line per entry; no code, no logs, no secrets or personal data, no copied report text.
+7. Add the file to the commit list (`create-pr` allows `docs/agents/*.md`). Updates made after the commit (`Orchestrator` before `/create-pr` excepted, `Release Manager` recording the commit hash) stay in the working tree and ride along with the next task's commit.
+
 ## Template
 
 ```markdown

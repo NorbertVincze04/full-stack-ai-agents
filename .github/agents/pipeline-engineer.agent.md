@@ -19,5 +19,8 @@ Builds and maintains the two workflow files (CI and CD) from `.github/config.jso
 - Risk gate (`docs/risk-gate.md`, row `Pipelines / CI-CD`): `contents: write`, branch pushes/merges, secrets and non-`actions/*` actions only if in the caller's `approved-risks`; otherwise return `needs-approval`.
 - Never run, dispatch or push a workflow. Call only `Reviewer` (scope `pipelines`).
 
+## Context file
+Read `docs/agents/pipeline-engineer.md` first and update it as the last step of every task (rules: `docs/context/README.md`, Agent context files). Edit only your own file.
+
 ## Output Format
 `Status:` implemented | implemented-with-open-findings | blocked | needs-human, workflow files, triggers and jobs, what CD does and does not do, repository settings the human must configure, open findings, report path.
