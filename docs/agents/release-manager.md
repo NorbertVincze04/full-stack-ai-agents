@@ -5,7 +5,7 @@ Agent: `.github/agents/release-manager.agent.md` | Skills: `create-pr`, `approve
 Prepare, commit and push are separate human-gated steps. It never creates or switches branches and never pushes `main` or the release branch.
 
 > Read this file first instead of re-reading old reports. Update it at the end of every task (rules: `docs/context/README.md`, Agent context files). Keep it under ~80 lines.
-> Updated: 2026-11-16 (task 649 proposal prepared)
+> Updated: 2026-11-16 (task 649 AC10 acceptance recorded)
 
 ## Tasks
 
@@ -22,7 +22,7 @@ Prepare, commit and push are separate human-gated steps. It never creates or swi
 | containerize | Proposal prepared (`pr-containers.md`); base proposed as the login branch (stacked PR); `.gitignore` additions (`/certs/*.crt`, `/db-backups/`) need a human decision because the file is outside the allowed list |
 | add CI and CD pipelines | Commit `507168c` on `dev` (10 files); push declined: `dev` is the integration branch, not on `origin`, `gh` not installed; manual push command given |
 | CI on dev, CD after CI | Commit skipped by the human; docs changes uncommitted |
-| 649 | Proposal prepared on `dev` (frontend only, ~25 files, 247/247 tests, code and UX approved, e2e skipped); `pr.md` and `docs/handover/649.md` written; not committed |
+| 649 | Commit `b6cecb0` on `dev` (29 files, frontend only, 247/247 tests, code and UX approved, e2e skipped); pushed to `origin/dev` (`057cabe..b6cecb0`), no PR (`dev`, CI/CD promotes); AC10 accepted manually by the human 2026-11-16, all ACs Verified, no blocker/high open: task file `done`; Azure `System.State` change to `Done` proposed, not yet performed |
 
 ## Defects and lessons
 

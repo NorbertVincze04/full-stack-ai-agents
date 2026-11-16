@@ -23,13 +23,13 @@ Source: Azure DevOps work item 649. Area: frontend only.
 | AC7 own booked day toggle, no `DELETE` | Verified | Toggle spec "AC7" |
 | AC8 own desk toggle | Verified | Toggle spec "AC8", desk plan specs |
 | AC9 disabled/booked/neutral not selectable, flows unchanged | Verified | Existing and new specs (409/401/500, window) |
-| AC10 keyboard, `aria-pressed`, disabled `Book Now` | Partially | Native `<button type="button">`, focus and `aria-pressed` specs; Enter/Space and real browser not exercised (no e2e runner) |
+| AC10 keyboard, `aria-pressed`, disabled `Book Now` | Verified | Native `<button type="button">`, focus and `aria-pressed` specs; manual browser check accepted by the human ("AC10 accepted", 2026-11-16, steps in `docs/specs/649.md`); no runner |
 | AC11 specs added/adapted, suite green | Verified | 247/247 |
 
 ## Test results
 - TDD (`tdd-frontend.md`): `npm run test:ci` (Frontend, ChromeHeadless) 247 of 247 pass (before: 191 with 38 red). 56 specs added; 3 spec files adapted to the approved spec (preselected day and non-selectable own desk assumptions), none skipped or weakened.
 - Build: `npm run build` (Frontend) passed at the implement stage.
-- e2e: skipped, no runner (`workflow.e2e` = `auto`, no Playwright or Cypress config). Journeys listed in `e2e.md`.
+- e2e: skipped, no runner (`workflow.e2e` = `auto`, no Playwright or Cypress config). Journeys listed in `e2e.md`. AC10 verified manually by the human (2026-11-16).
 
 ## Review coverage
 - code: run, approved (0 blocker, 0 high, 0 medium, 4 low), `review-code.md`.

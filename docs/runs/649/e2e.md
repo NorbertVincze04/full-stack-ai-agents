@@ -1,5 +1,7 @@
 # e2e report - 649 select/deselect
 
+AC10: Verified manually by the human ("AC10 accepted", 2026-11-16, browser check per the manual steps in `docs/specs/649.md`); no runner.
+
 Verdict: skipped: no e2e runner (`workflow.e2e` = `auto`; spec has `ui-changes`). No Playwright or Cypress config in `Frontend/`, no `e2e` folder in `Backend/tests/`. Adding a runner is a dependency change and needs an approved spec; none was added.
 
 ## Journeys to automate when a runner exists
