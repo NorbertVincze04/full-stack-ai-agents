@@ -34,5 +34,5 @@ Read `docs/tasks/<task-id>.md` (if it is missing, run `get-task` first). Then re
 ## Never
 - Write implementation code or touch `Backend/` or `Frontend/`.
 - Answer your own open questions or assume answers; the Orchestrator relays them to the human.
-- Write outside `docs/specs/` except the task `status`.
+- Write outside `docs/specs/` except the task `status` and `docs/agents/task-analyst.md`.
 - Pad the spec: it stays short and every acceptance criterion stays testable.

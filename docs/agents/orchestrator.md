@@ -42,6 +42,7 @@ Runs the three workflows, owns the retry loops and every human gate. History bel
 - Review-fix loop: 602 (1 iteration), login and register pages (1 re-review round), CI-on-dev pipelines (1 round).
 - 649: no test-fix or review-fix loop needed (specs were adapted by the Tester in the first test round).
 - Test-fix loop: not needed in any handover. Containerization ran test rounds 0-7 (see [container-engineer.md](container-engineer.md)).
+- Rules fixed 2026-11-16: the approval gate now always runs once (before, it was skipped when the spec was `Ready: yes` at first); agents may edit their own `docs/agents` file; red tests run before implementing (`workflow.tddFirst`).
 - No handover records a task that exhausted `maxFixIterations`; `/clarify-task decision` is new and has not been used yet.
 
 ## Open items

@@ -11,7 +11,7 @@ Agent: `Tester`. If you are another agent, run this skill through a `Tester` sub
 Read `docs/specs/<task-id>.md` (acceptance criteria, `Scope flags`) and the `implement-*.md` reports; read `.github/config.json` -> `workflow` (`tdd`, `e2e`). Default mode is `all`. Read `docs/agents/tester.md` first (test history, known gaps, e2e status). e2e tests run against the local stack only.
 
 ## Steps
-1. Run the `tdd` skill for the areas of the task (mode `tdd` or `all`). If it fails, return the failing tests and stop: e2e is not run on red unit tests.
+1. Run the `tdd` skill in mode `green` for the areas of the task (mode `tdd` or `all`); it writes the tests that were deferred at the red phase and checks the red baseline in `tdd-<area>.md`. If it fails, return the failing tests and stop: e2e is not run on red unit tests.
 2. e2e (mode `e2e` or `all`, per `workflow.e2e`: `auto` = when the spec has `ui-changes` or API changes and an e2e runner exists; `always`; `off`):
    - Find the runner (Playwright/Cypress in `Frontend/`, or an `e2e` folder in `Backend/tests/`). Without a runner, record `skipped: no e2e runner` and list it as a follow-up.
    - Use the running local stack (`http://localhost:<FRONTEND_PORT>` from `.env`, default 4200; start it with `<runtime> compose up -d` from `containers.runtime` if it exists and is not running). If there is no stack, record `skipped: no stack`.

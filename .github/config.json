@@ -12,6 +12,7 @@
   },
   "workflow": {
     "tdd": "always",
+    "tddFirst": true,
     "e2e": "auto",
     "security": "auto",
     "reviewers": "auto",
