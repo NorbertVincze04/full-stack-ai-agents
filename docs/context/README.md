@@ -42,7 +42,7 @@ Each agent keeps its own file (`orchestrator.md`, `task-analyst.md`, `implemente
 3. `## Defects and lessons`: one row per defect found or fixed, decision taken, or lesson for next time (task, what, resolution). Skip routine success.
 4. `## Open items`: add what stays open, delete what this task resolved.
 5. Refresh the `Updated:` line (date and task ID).
-6. Keep the file under ~80 lines: when a table passes ~12 rows, merge the oldest rows into one `Earlier tasks` line and drop detail that a report link already holds. One line per entry; no code, no logs, no secrets or personal data, no copied report text.
+6. Keep the file under ~80 lines: when a table passes ~12 rows, merge the oldest rows into one `Earlier tasks` row (`node scripts/compact-agent-context.mjs --write docs/agents/<your file>`; agents without `execute` do it by hand) and drop detail that a report link already holds. One line per entry; no code, no logs, no secrets or personal data, no copied report text.
 7. Add the file to the commit list (`create-pr` allows `docs/agents/*.md`). Updates made after the commit (`Orchestrator` before `/create-pr` excepted, `Release Manager` recording the commit hash) stay in the working tree and ride along with the next task's commit.
 
 ## Template

@@ -26,7 +26,7 @@ For `/containerize` and `/ci-cd`: run the human gates (risk gate, see below), th
 - Commit and push need separate explicit human confirmations obtained in this conversation.
 
 ## Context file
-Read `docs/agents/orchestrator.md` first and update it before calling `/create-pr` (rules: `docs/context/README.md`, Agent context files). It is the only file you edit.
+Read `docs/agents/orchestrator.md` first and update it before calling `/create-pr` (rules: `docs/context/README.md`, Agent context files). Besides it you edit only `docs/runs/<task-id>/brief.md` and `docs/runs/<task-id>/metrics.md` (templates in `.github/skills/start-task/`): the brief is the compact task summary every later stage reads first; the metrics file gets one row per stage.
 
 ## Output Format
 Short stage-by-stage status table (stage, agent, verdict, report path), then the decision needed from the human, if any.

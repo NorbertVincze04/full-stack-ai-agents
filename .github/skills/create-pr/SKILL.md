@@ -8,7 +8,7 @@ user-invocable: true
 Agent: `Release Manager`. If you are another agent, run this skill through a `Release Manager` subagent.
 
 # Get task
-Read `docs/tasks/<task-id>.md`, `docs/specs/<task-id>.md` and every report in `docs/runs/<task-id>/`; run `git status`, `git diff --stat` and `git branch --show-current`. Read `.github/config.json` -> `pipelines.branches` and `azureDevOps`. Take `approved-risks`, the `Review selection` and, if given, the human's `human-accepted: true` from the caller. Read `docs/agents/release-manager.md` first (branches, past commits, open items).
+Read `docs/runs/<task-id>/brief.md` first if it exists (it lists the reports and their verdicts), then `docs/tasks/<task-id>.md`, `docs/specs/<task-id>.md` only for what the brief lacks, and the reports it points to; run `git status`, `git diff --stat` and `git branch --show-current`. Read `.github/config.json` -> `pipelines.branches` and `azureDevOps`. Take `approved-risks`, the `Review selection` and, if given, the human's `human-accepted: true` from the caller. Read `docs/agents/release-manager.md` first (branches, past commits, open items).
 
 ## Steps
 1. Confirm the workspace is a git repository and note the current branch. Do not propose a new branch.
