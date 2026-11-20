@@ -50,6 +50,9 @@ for (const dir of readdirSync(join(root, skillsDir), { withFileTypes: true })) {
   const owner = text.match(/^Agent: `([^`]+)`/m);
   if (!owner) errors.push(`${path}: missing "Agent:" line`);
   else if (!agentNames.has(owner[1])) errors.push(`${path}: unknown agent "${owner[1]}"`);
+  for (const m of text.matchAll(/\]\(\.\/([^)#]+)\)/g)) {
+    if (!existsSync(join(root, skillsDir, dir.name, m[1]))) errors.push(`${path}: broken link ./${m[1]}`);
+  }
 }
 
 // Agents and their context files

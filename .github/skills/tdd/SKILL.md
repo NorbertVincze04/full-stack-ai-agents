@@ -8,7 +8,7 @@ user-invocable: false
 Agent: `Tester`. Called by `start-task` (mode `red`) and by `test` (mode `green`); run it through a `Tester` subagent if you are another agent.
 
 # Get task
-Read `docs/specs/<task-id>.md` (acceptance criteria, API contract) and the `Tests` and `Conventions` sections of `docs/context/<area>.md`. Areas come from the argument or the spec `Area` (`frontend` and `backend` only). Mode: the argument; default `green`. Respect `.github/config.json` -> `workflow.tdd` (`always` or `on-demand`) and `workflow.tddFirst` (the Orchestrator calls `red` only when it is true). Read `docs/agents/tester.md` first (test history, known gaps).
+Read `docs/runs/<task-id>/brief.md` first if it exists (acceptance criteria, scope, risks, decisions); open `docs/specs/<task-id>.md` only for what it lacks, for example the API contract. Then the `Tests` and `Conventions` sections of `docs/context/<area>.md`. Areas come from the argument or the spec `Area` (`frontend` and `backend` only). Mode: the argument; default `green`. Respect `.github/config.json` -> `workflow.tdd` (`always` or `on-demand`) and `workflow.tddFirst` (the Orchestrator calls `red` only when it is true). Read `docs/agents/tester.md` first (test history, known gaps).
 - `red`: no implementation exists yet. Do not read implementation files beyond what is needed to compile (existing public surface, mocks).
 - `green`: also read `docs/runs/<task-id>/tdd-<area>.md` (the red baseline, if any) and `docs/runs/<task-id>/implement-<area>.md` (only the changed files and the contract).
 

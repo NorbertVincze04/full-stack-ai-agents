@@ -8,7 +8,7 @@ user-invocable: true
 Agent: `Tester`. If you are another agent, run this skill through a `Tester` subagent.
 
 # Get task
-Read `docs/specs/<task-id>.md` (acceptance criteria, `Scope flags`) and the `implement-*.md` reports; read `.github/config.json` -> `workflow` (`tdd`, `e2e`). Default mode is `all`. Read `docs/agents/tester.md` first (test history, known gaps, e2e status). e2e tests run against the local stack only.
+Read `docs/runs/<task-id>/brief.md` first if it exists (acceptance criteria, `Scope flags`, limits), else `docs/specs/<task-id>.md`; then the `implement-*.md` reports; read `.github/config.json` -> `workflow` (`tdd`, `e2e`). Default mode is `all`. Read `docs/agents/tester.md` first (test history, known gaps, e2e status). e2e tests run against the local stack only.
 
 ## Steps
 1. Run the `tdd` skill in mode `green` for the areas of the task (mode `tdd` or `all`); it writes the tests that were deferred at the red phase and checks the red baseline in `tdd-<area>.md`. If it fails, return the failing tests and stop: e2e is not run on red unit tests.

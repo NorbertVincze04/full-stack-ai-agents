@@ -100,7 +100,10 @@ The Orchestrator asks the human: spec questions (`/clarify-task spec`), approval
 
 Skill text guides the model; these parts do not depend on it:
 - `.github/hooks/guard.json` + `guard.cjs`: a `preToolUse` hook that denies shell commands the "Never" rules forbid (force-push, push of `main`/`master`, `--no-verify`, `git reset --hard`, branch deletion, `compose down -v`, prune/volume removal, Podman machine changes, `npm audit fix`, printing `.env`). It applies to every agent call, so if you really need one of them, run it yourself in a terminal. Agent hooks are a VS Code preview feature: check in `/hooks` that it is loaded.
-- `node scripts/check-agents.mjs`: validates skill frontmatter and sections, agent definitions, `docs/agents/*.md` (sections, size, date), referenced files, `.github/config.json` keys, and warns on `done` tasks whose spec says otherwise. It runs as the `agents` job in CI.
+- `node scripts/check-agents.mjs`: validates skill frontmatter, sections and `./` annex links, agent definitions, `docs/agents/*.md` (sections, size, date), referenced files, `.github/config.json` keys, and warns on `done` tasks whose spec says otherwise. It runs as the `agents` job in CI.
+- `node scripts/context-size.mjs [task-id]`: estimated tokens per skill, agent and context file and the fixed load of one call per agent. Run it before and after changing skills or context files.
+- `node scripts/compact-agent-context.mjs [--write]`: merges the oldest rows of `docs/agents/*.md` tables into an `Earlier tasks` row.
+- Per task: `docs/runs/<id>/brief.md` (compact summary every later stage reads instead of the whole spec) and `docs/runs/<id>/metrics.md` (one row per stage: verdict, rounds, what failed), both written by the Orchestrator; templates in `.github/skills/start-task/`.
 - Still the human's to configure (agents must not): branch protection on `main`, workflow permissions, required checks, bot bypass (`docs/context/pipelines.md`).
 
 ## Prerequisites

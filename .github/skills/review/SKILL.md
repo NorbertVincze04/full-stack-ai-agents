@@ -8,7 +8,7 @@ user-invocable: true
 Agent: `Reviewer`. If you are another agent, run this skill through a `Reviewer` subagent.
 
 # Get task
-Read `docs/specs/<task-id>.md` (acceptance criteria, `Scope flags`), the reports in `docs/runs/<task-id>/` (`implement-*.md`, `tdd-*.md`, `e2e.md`, `containerize.md`, `ci-cd.md`) and the `Conventions` section of the area context file. Read `docs/agents/reviewer.md` first (past findings, recurring issues) and do not re-report an item it lists as accepted or already tracked unless this change worsens it. Inspect only the files the reports list (`git diff --name-only`, `git status`). Without a task ID (on-demand audit), use the structure table of the context file instead of scanning blindly and write `docs/runs/review-<yyyymmdd>-<scope>.md`.
+Read `docs/runs/<task-id>/brief.md` first if it exists (acceptance criteria, `Scope flags`, approved risks; else `docs/specs/<task-id>.md`), the reports it lists in `docs/runs/<task-id>/` (`implement-*.md`, `tdd-*.md`, `e2e.md`, `containerize.md`, `ci-cd.md`) and the `Conventions` section of the area context file. Read `docs/agents/reviewer.md` first (past findings, recurring issues) and do not re-report an item it lists as accepted or already tracked unless this change worsens it. Inspect only the files the reports list (`git diff --name-only`, `git status`). Without a task ID (on-demand audit), use the structure table of the context file instead of scanning blindly and write `docs/runs/review-<yyyymmdd>-<scope>.md`.
 
 ## Steps
 1. Scopes: use the argument; for `all` or no argument pick from the `Scope flags` and files changed, and give a one-line reason for every scope run or skipped (`Review selection`):
