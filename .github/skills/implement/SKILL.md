@@ -8,7 +8,7 @@ user-invocable: true
 Agent: `Implementer`. If you are another agent, run this skill through an `Implementer` subagent.
 
 # Get task
-Read `docs/specs/<task-id>.md`; it must have `status: specified` or `in-progress`, otherwise stop and ask for `/spec`. Take `approved-risks` from the caller. Read `docs/context/project.md` and `docs/context/<area>.md` following `docs/context/README.md` (reading rules, freshness check, bootstrap if the file is missing); for `database` read the `Data` section of `backend.md`. Open only the source files the context points to; read `.github/docs/PROJECT_OVERVIEW.md` only by section. With `fix:`, read the given tester/reviewer reports first. Read `docs/agents/implementer.md` first (what was built before, known defects and gaps) instead of older reports.
+Read `docs/specs/<task-id>.md`; it must have `status: specified` or `in-progress`, otherwise stop and ask for `/spec`. Take `approved-risks` from the caller. Read `docs/context/project.md` and `docs/context/<area>.md` following `docs/context/README.md` (reading rules, freshness check, bootstrap if the file is missing); for `database` read the `Data` section of `backend.md`. Open only the source files the context points to; read `.github/docs/PROJECT_OVERVIEW.md` only by section. With `fix:`, read the given tester/reviewer reports first. If `docs/runs/<task-id>/tdd-<area>.md` has a `Red baseline`, those failing tests are your target: make them pass without editing them (a test that contradicts the spec is reported, not edited). Read `docs/agents/implementer.md` first (what was built before, known defects and gaps) instead of older reports.
 
 ## Steps
 1. Set the task `status` to `in-progress`.

@@ -31,7 +31,7 @@ Read `docs/specs/<task-id>.md` (acceptance criteria, `Scope flags`), the reports
 - Scope cannot be decided: run it; an unnecessary review is cheaper than a missed one.
 
 ## Never
-- Modify any file except your report; run `npm audit fix`; install tools.
+- Modify any file except your reports and `docs/agents/reviewer.md`; run `npm audit fix`; install tools.
 - Run or dispatch a workflow, push, or run mutating container commands (`down -v`, `prune`, `rm`).
 - Print secret values; reference file and line only.
 - Report personal taste: every UX finding cites a spec requirement, an existing pattern or an accessibility rule.

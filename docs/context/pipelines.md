@@ -6,20 +6,21 @@ GitHub Actions, `cdMode: merge-only` (`.github/config.json` -> `pipelines`). Del
 
 | File | Name | Purpose |
 | --- | --- | --- |
-| `.github/workflows/ci.yml` | `CI` | Build and test Backend and Frontend, build both container images (no push) |
+| `.github/workflows/ci.yml` | `CI` | Security check, build and test Backend and Frontend, check the agent setup, build both container images (no push) |
 | `.github/workflows/cd.yml` | `CD` | Merge the CI-tested `dev` commit into `main` (`--no-ff`) |
 
 ## CI (`ci.yml`)
 
 - Triggers: `push` to `dev`; `pull_request` into `dev` and `main`. Nothing else.
 - `permissions: contents: read`; concurrency per workflow and ref, `cancel-in-progress: true`.
-- Jobs (independent, no `continue-on-error`):
+- Jobs (no `continue-on-error`). Stage order inside each area job: security check, build, test; `containers` runs only after both area jobs:
 
 | Job | Steps |
 | --- | --- |
-| `backend` | in `Backend/`: `npm ci`, `npm run build`, `npm test` (Node 22.18, npm cache) |
-| `frontend` | in `Frontend/`: `npm ci`, `npm run build`, `npm run test:ci` (Node 22.18, npm cache) |
-| `containers` (matrix `Backend`, `Frontend`) | `docker build -f <Area>/Containerfile <Area>`, local tag only; no push, login, `--build-arg`, proxy |
+| `backend` | in `Backend/`: `npm ci`, `npm audit --omit=dev --audit-level=critical`, `npm run build`, `npm test` (Node 22.18, npm cache) |
+| `frontend` | in `Frontend/`: `npm ci`, `npm audit --omit=dev --audit-level=critical`, `npm run build`, `npm run test:ci` (Node 22.18, npm cache) |
+| `agents` | `node scripts/check-agents.mjs`: skills, agents, `docs/agents/*.md` and `.github/config.json` consistency (errors fail, warnings do not) |
+| `containers` (matrix `Backend`, `Frontend`; `needs: [backend, frontend]`) | `docker build -f <Area>/Containerfile <Area>`, local tag only; no push, login, `--build-arg`, proxy |
 
 - Only `actions/checkout@v4` (`persist-credentials: false`) and `actions/setup-node@v4`. No secrets.
 
@@ -65,7 +66,7 @@ A push to `dev` starts `CI`; `CD` starts only from the `workflow_run` of a succe
 
 | Step | Action | Expected observation |
 | --- | --- | --- |
-| 1 | Ensure `dev` is on `origin` (`git ls-remote origin dev`); if it is, open the existing `CI` run for the `dev` push in the Actions tab, otherwise push `dev` | `CI` run on `dev` with jobs `backend`, `frontend`, `containers (Backend)`, `containers (Frontend)`. No `CD` run while `cd.yml` is not on `main`. |
+| 1 | Ensure `dev` is on `origin` (`git ls-remote origin dev`); if it is, open the existing `CI` run for the `dev` push in the Actions tab, otherwise push `dev` | `CI` run on `dev` with jobs `backend`, `frontend`, `agents`, `containers (Backend)`, `containers (Frontend)`. No `CD` run while `cd.yml` is not on `main`. |
 | 2 | Merge the workflow files into `main` once (merge commit or fast-forward; squash is also fine if `.github/workflows/**` content is identical to `dev`) | `cd.yml` is on the default branch; no run starts (CI does not trigger on `main` pushes). |
 | 3 | Confirm default branch is `main` and the Actions settings above (permissions, bot bypass, no linear history) | Settings match the list above. |
 | 4 | Push a new commit to `dev` | `CI` run on `dev`; when green, a `CD` run with event `workflow_run`, jobs `verify` then `merge dev into main`; `main` gets a `--no-ff` merge commit `chore: merge dev into main (CI passed for <sha>)`. |

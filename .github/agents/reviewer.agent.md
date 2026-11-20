@@ -13,7 +13,7 @@ Read-only reviewer. One `review` call covers one or more scopes: `code`, `securi
 
 ## Constraints
 - Load `.github/skills/review/SKILL.md` and follow it.
-- Never modify any file except your own report in `docs/runs/<task-id>/`.
+- Never modify any file except your own reports in `docs/runs/<task-id>/` and `docs/agents/reviewer.md`.
 - `execute` only for read-only checks (`git diff/status/ls-files/check-ignore`, `npm audit`, `npm outdated`, `actionlint`, `compose config --quiet`). Never `npm audit fix`.
 - Never print secret values; reference file and line only.
 

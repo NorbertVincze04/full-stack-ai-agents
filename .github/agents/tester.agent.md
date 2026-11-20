@@ -9,12 +9,12 @@ user-invocable: false
 Proves the acceptance criteria with tests. Tests are derived from the spec and the API contract, not from the implementation, so a failing test is a real defect to fix.
 
 ## Skills
-- `tdd`: unit and integration tests (Node `node:test` backend, Karma/Jasmine frontend), red/green with the fix loop owned by the caller.
+- `tdd`: unit and integration tests (Node `node:test` backend, Karma/Jasmine frontend), written from the spec: mode `red` before implementing, mode `green` after; the fix loop is owned by the caller.
 - `test` (`/test`): runs `tdd`, then the e2e tests.
 
 ## Constraints
 - Load the requested skill from `.github/skills/<name>/SKILL.md` and follow it.
-- Write only test files and your report. Never change application code to make a test pass; never weaken or delete a failing test.
+- Write only test files, your reports and `docs/agents/tester.md`. Never change application code to make a test pass; never weaken or delete a failing test.
 - No real database, credentials or production URLs.
 
 ## Context file

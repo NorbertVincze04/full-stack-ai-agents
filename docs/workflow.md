@@ -29,8 +29,8 @@ flowchart TD
   T[get-task] --> S[spec]
   S -->|Ready: no| C[clarify-task spec] --> S
   S -->|Ready: yes| A{human approves spec and risks}
-  A --> I[implement: database, backend, frontend]
-  I --> TD[test: TDD] --> E[test: e2e]
+  A --> RD[tdd red: tests first, must fail] --> I[implement: database, backend, frontend]
+  I --> TD[test: TDD green] --> E[test: e2e]
   TD -->|fail| F[implement fix] --> TD
   E --> R[review: code, security, ux]
   R -->|changes-requested, retry < 2| F2[implement fix + test + review again] --> R
@@ -41,6 +41,7 @@ flowchart TD
 ```
 
 - The spec `Area` (`frontend`, `backend`, `containers`, `pipelines`) selects the stages; a `containers` or `pipelines` area runs workflow 2 or 3 as its implement stage.
+- Test-first (`workflow.tddFirst`): before implementing a `frontend` or `backend` area the Tester writes the tests from the acceptance criteria (`/tdd <id> <area> red`); they must fail for the right reason (`Red baseline` in `tdd-<area>.md`). The Implementer makes them pass without editing them; `/test` then runs mode `green`, writes the tests deferred at red (they needed code that did not exist) and the fix loop applies.
 - Test-fix loop: per failing test up to `maxTestFixLoops` (2) rounds (`implement fix` then `test rerun`); then human decision.
 - Review retry: up to `maxFixIterations` (2) retries of implement -> test -> review for scopes with `blocker`/`high` findings; then human discussion. `medium`/`low` findings go to the PR.
 - Reviewers are chosen from the spec `Scope flags` (`ui-changes`, `logic-changes`, `security-relevant`, `dependencies-changed`, `database-changes`, `scaffolding-only`); every run or skip is recorded under `Review coverage` in `pr.md`.
@@ -85,7 +86,7 @@ Task `status`: `new` -> `specified` -> `in-progress` -> `implemented` -> `done` 
 
 ## Configuration (`.github/config.json` -> `workflow`)
 
-`tdd`: `always` or `on-demand`. `e2e`: `auto`, `always` or `off`. `security`: `always`, `auto` or `on-demand`. `reviewers`: `auto` (from the scope flags) or `all`. `maxFixIterations`: review retries. `maxTestFixLoops`: fix rounds per failing test.
+`tdd`: `always` or `on-demand`. `tddFirst`: `true` runs the red phase before implementing. `e2e`: `auto`, `always` or `off`. `security`: `always`, `auto` or `on-demand`. `reviewers`: `auto` (from the scope flags) or `all`. `maxFixIterations`: review retries. `maxTestFixLoops`: fix rounds per failing test.
 
 ## Human gates and risk gate
 
@@ -94,6 +95,13 @@ The Orchestrator asks the human: spec questions (`/clarify-task spec`), approval
 ## Context files
 
 `docs/context/` (`project.md`, `backend.md`, `frontend.md`, `containers.md`, `pipelines.md`) is the compact, current map of the app. `implement`, `containerize` and `ci-cd` update them; every other skill reads them first. Protocol: `docs/context/README.md`.
+
+## Enforcement and checks
+
+Skill text guides the model; these parts do not depend on it:
+- `.github/hooks/guard.json` + `guard.cjs`: a `preToolUse` hook that denies shell commands the "Never" rules forbid (force-push, push of `main`/`master`, `--no-verify`, `git reset --hard`, branch deletion, `compose down -v`, prune/volume removal, Podman machine changes, `npm audit fix`, printing `.env`). It applies to every agent call, so if you really need one of them, run it yourself in a terminal. Agent hooks are a VS Code preview feature: check in `/hooks` that it is loaded.
+- `node scripts/check-agents.mjs`: validates skill frontmatter and sections, agent definitions, `docs/agents/*.md` (sections, size, date), referenced files, `.github/config.json` keys, and warns on `done` tasks whose spec says otherwise. It runs as the `agents` job in CI.
+- Still the human's to configure (agents must not): branch protection on `main`, workflow permissions, required checks, bot bypass (`docs/context/pipelines.md`).
 
 ## Prerequisites
 

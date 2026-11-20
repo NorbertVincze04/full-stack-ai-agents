@@ -8,11 +8,11 @@ user-invocable: true
 Agent: `Orchestrator` (the only agent that talks to the human). If you are a subagent, return `needs-human` with the questions instead of asking.
 
 # Get task
-Read `docs/specs/<task-id>.md` (`Open Questions`, `Risk gate`) and, for mode `decision`, the report paths of the failed stage that the caller passed (`docs/runs/<task-id>/`). Default mode: `spec` while the spec has `Ready: no`, otherwise `decision`. Read `docs/agents/orchestrator.md` first (past decisions, loop outcomes, open items).
+Read `docs/specs/<task-id>.md` (`Open Questions`, `Risk gate`) and, for mode `decision`, the report paths of the failed stage that the caller passed (`docs/runs/<task-id>/`). Default mode: `spec` (open questions and the approval gate) unless the caller passes `decision`. Read `docs/agents/orchestrator.md` first (past decisions, loop outcomes, open items).
 
 ## Steps
 **Mode spec**
-1. Take the numbered questions returned by `/spec` (with their suggested options).
+1. Take the numbered questions returned by `/spec` (with their suggested options). If none are open, go straight to step 5.
 2. Ask the human, at most 4 questions per call, with the options (mark the recommended one) and free text allowed. Ask only what is still open.
 3. Pass the answers to `Task Analyst` `/spec <task-id> answers: ...`.
 4. If `Ready: no` again, repeat. Maximum 3 rounds, then ask how to proceed (accept the listed assumptions, edit the spec manually, stop).

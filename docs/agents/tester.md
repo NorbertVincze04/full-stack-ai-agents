@@ -40,4 +40,5 @@ Backend tests: `node:test` in `Backend/tests/` (`npm test`). Frontend: Karma/Jas
 ## Notes for the new skills
 
 - `tdd` writes tests from the acceptance criteria and API contract, not from the implementation; it reports, the caller runs the fix loop.
+- `tdd` has modes: `red` (before implementing, `workflow.tddFirst`: tests must fail for the right reason, uncompilable ones are `deferred-to-green`) and `green` (after). The red phase has not run on a real task yet; the first run may show that UI specs need more detail in the spec (selectors, texts).
 - `test` runs `tdd` first, then e2e per `workflow.e2e` (`auto`); without a runner it records `skipped`.

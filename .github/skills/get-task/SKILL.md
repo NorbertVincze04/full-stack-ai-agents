@@ -34,4 +34,4 @@ Read `.github/config.json` -> `azureDevOps` (organization, project, `taskFilter`
 ## Never
 - Invent acceptance criteria, propose architecture, design UI or write code.
 - Modify the work item (read-only) or print/log/write the Personal Access Token.
-- Write anywhere except `docs/tasks/`.
+- Write anywhere except `docs/tasks/` and `docs/agents/task-analyst.md`.

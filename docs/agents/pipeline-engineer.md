@@ -13,6 +13,7 @@ Design and repository prerequisites: `docs/context/pipelines.md`. Settings: `.gi
 | --- | --- |
 | add CI and CD pipelines (commit `507168c` on `dev`) | `.github/workflows/ci.yml` (`CI`: push to `dev`, PRs into `dev` and `main`; jobs `backend`, `frontend`, `containers` matrix, Node 22.18, read-only permissions, concurrency, timeouts). `.github/workflows/cd.yml` (`CD`: `workflow_run` of CI plus dispatch; `verify` job, then a `merge` job that is the only one with `contents: write` and merges the CI-tested SHA `--no-ff` into `main`). Only `actions/checkout@v4` and `actions/setup-node@v4`. No deployment, publishing, tags or releases |
 | CI on dev push, then CD after CI success | No workflow change: inspection showed the files already satisfy the requirement. Corrected `docs/context/pipelines.md` (91 lines: enablement order, negative cases, `GITHUB_TOKEN` cannot push workflow-file changes, human settings) and the pipelines row in `project.md` |
+| agent setup hardening (no task ID, 2026-11-16) | `ci.yml`: `npm audit --omit=dev --audit-level=critical` before build in `backend` and `frontend` (both exit 0 locally), `containers` now `needs: [backend, frontend]`, new `agents` job running `node scripts/check-agents.mjs`. Not run on GitHub yet |
 
 ## Defects and lessons
 
@@ -28,5 +29,5 @@ Design and repository prerequisites: `docs/context/pipelines.md`. Settings: `.gi
 ## Open items
 
 - The workflows have never run: `dev` was not pushed to `origin`, and the repository settings (push `dev`, merge workflows into `main` once, workflow permissions, bot bypass) are the human's. AC5 of the CI-on-dev task is not verified.
-- `ci.yml` has no security check yet. `/ci-cd` will add the `npm audit --omit=dev --audit-level=critical` step (order security -> build -> test -> containers) on its next run.
+- The `ci.yml` security step blocks only on `critical`; today Backend has 1 high (body-parser) and Frontend 8 (4 high, 4 moderate), all tracked as follow-ups. Remember CD promotes automatically once CI is green.
 - First CI run validates the YAML for real; expect small fixes.
