@@ -27,6 +27,8 @@ Backend tests: `node:test` in `Backend/tests/` (`npm test`). Frontend: Karma/Jas
 | 650 desk numbering (red) | 308 run: 289 pass, 17 red (`desksRenumber.test.ts`: static checks of the 006+ migration, missing file) | not run | [tdd-backend.md](../runs/650/tdd-backend.md); first real `red` run |
 | visible password (red) | n/a | 288 run: 270 pass, 18 red (new `*.password-toggle.spec.ts` in login and register; toggle button missing) | [tdd-frontend.md](../runs/manual-visible-password/tdd-frontend.md) |
 | visible password (green) | n/a | 288/288 (18 red now pass); build pass | [tdd-frontend.md](../runs/manual-visible-password/tdd-frontend.md); e2e `skipped: no e2e runner` ([e2e.md](../runs/manual-visible-password/e2e.md)); no defects; Enter/Space and 320 px unasserted |
+| hero section split (green) | n/a | 295/295 (+2 breakpoint specs 767/768 px, red specs pass); build pass | [tdd-frontend.md](../runs/manual-div-for-hero-section/tdd-frontend.md); e2e `skipped: no e2e runner` ([e2e.md](../runs/manual-div-for-hero-section/e2e.md)); no defects |
+| hero section split (red) | n/a | 293 run: 291 pass, 2 red (`booking.component.hero-layout.spec.ts`: equal widths, row fill); 3 already-green guards | [tdd-frontend.md](../runs/manual-div-for-hero-section/tdd-frontend.md); 768 px media query not testable from a spec |
 
 ## Defects and lessons
 

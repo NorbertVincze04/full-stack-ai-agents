@@ -23,6 +23,7 @@ Stack: Angular 18 NgModule + RxJS (`Frontend/`), Express 5 + TypeScript ESM (`Ba
 | 649 select/deselect | frontend | Toggle on calendar days and desks (`dateDeselected`/`deskDeselected` outputs), no day selected on load, `No date selected` state with disabled `Book Now` and neutral desks, own desk (`yours`) selectable with `pressed` flag; no API change |
 | 650 desk numbering | backend, database, frontend | Migrations `006` (public and `"ico-env"`): guarded NULL-out of `booking_desk`, delete desks, insert A1..D4; no source change, not applied. Frontend: `block-left-edge`/`block-top-edge` spacing classes in `DeskPlanComponent` separate the 2 x 2 blocks (CSS only, labels only) |
 | manual-terms-services-page | frontend | Lazy `TermsModule` on `/terms` (h1 "Terms of Service", placeholder text) and a `Terms` header link after Help; reused header styles; 269 specs and build green |
+| manual-div-for-hero-section | frontend | CSS only in `booking.component.css`: `.layout-calendar`/`.layout-plan` 50/50 (`flex: 1 1 0`), stack via `@container` on `:host` below 768 px; 293 specs and build green |
 | manual-visible-password | frontend | Eye toggle (`button.password-toggle`, aria-label/aria-pressed) on login password and both register password fields, independent state; CSS in `auth-form.css`; 288 specs and build green |
 
 ## Defects and lessons
@@ -33,6 +34,8 @@ Stack: Angular 18 NgModule + RxJS (`Frontend/`), Express 5 + TypeScript ESM (`Ba
 | login and register pages | Header did not wrap on narrow screens (UX H1) | Header wraps on narrow screens |
 | login and register pages | Auth chunk loaded outside `/login` and `/register` (code review) | Matcher route loads `AuthModule` only on those paths |
 | ci-on-dev (docs) | False "dev pushed" claim and missing enablement order in `pipelines.md` (pipeline review, 1 high) | Corrected by the pipeline builder, see [pipeline-engineer.md](pipeline-engineer.md) |
+
+| manual-div-for-hero-section | Viewport `@media` kept specs red: Karma window < 768 px (TDD) | Container query on `:host` (lesson: layout specs set host width, so use `@container`, not `@media`) |
 
 ## Open items
 
