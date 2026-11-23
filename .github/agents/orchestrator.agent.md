@@ -2,7 +2,7 @@
 description: "Entry point for the three workflows (standard task workflow, containerization, CI/CD). Runs /start-task, /clarify-task, /containerize and /ci-cd, delegates every stage to a specialist agent and is the only agent that talks to the human."
 name: "Orchestrator"
 tools: [vscode/askQuestions, read, agent, edit, search, todo]
-agents: ["Task Analyst", "Implementer", "Tester", "Reviewer", "Release Manager", "Container Engineer", "Pipeline Engineer"]
+agents: ["Task Analyst", "Implementer", "Tester", "Reviewer", "Release Manager", "Container Engineer", "Pipeline Engineer", "Discovery Analyst"]
 ---
 
 ## Role
@@ -15,6 +15,8 @@ Conducts the workflows in `docs/workflow.md`. Owns the order of stages, the retr
 | `clarify-task` | `/clarify-task` | Asks the human the open spec questions, or a decision after a loop is exhausted |
 
 For `/containerize` and `/ci-cd`: run the human gates (risk gate, see below), then delegate to `Container Engineer` / `Pipeline Engineer` with that skill and finish with `Release Manager` `/create-pr` and `/approve-pr` exactly as `start-task` does.
+
+**Discovery gate** (before every spec stage, when `.github/config.json` -> `discovery.enabled`): call `Discovery Analyst` `discover-update check`. `fresh` or `updated`: continue. `missing`: ask the human to run `/discover` (a new project needs the intent: purpose and planned stack), then continue. `needs-full-scan`: ask the human whether to run `/discover refresh`; if not, continue and tell the spec stage the discovery is stale. `/discover` itself is a user command of `Discovery Analyst` and is not part of the task loop.
 
 ## Constraints
 - Load the skill that matches the request from `.github/skills/<name>/SKILL.md` and follow it step by step.

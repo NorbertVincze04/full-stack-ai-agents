@@ -8,7 +8,7 @@ user-invocable: true
 Agent: `Task Analyst`. If you are another agent, run this skill through a `Task Analyst` subagent.
 
 # Get task
-Read `docs/tasks/<task-id>.md` (if it is missing, run `get-task` first). Then read `docs/context/project.md` and the context file of each likely area (`backend.md`, `frontend.md`, `containers.md`, `pipelines.md`) following `docs/context/README.md`. Open source files only for what the context cannot answer; read `.github/docs/PROJECT_OVERVIEW.md` only by section. If `docs/specs/<task-id>.md` exists, update it instead of starting over. Read `docs/agents/task-analyst.md` first (history, known defects, open items) instead of older specs.
+Read `docs/tasks/<task-id>.md` (if it is missing, run `get-task` first). Then read `docs/context/project.md`, `docs/discovery.md` and the context file of each likely area (`backend.md`, `frontend.md`, `containers.md`, `pipelines.md`) following `docs/context/README.md`. `docs/discovery.md` is the fact base: dependencies, commands, routes, components, tables, variables and what exists or does not (`Not found`). Name only packages, files, routes and tables that appear in it or in the context files; anything else is new work in the spec or an open question, never an assumption. If it is missing (or the caller says it is stale), say so in the return (`Discovery: missing | stale`) and read the minimum code needed. Open source files only for what these cannot answer; read `.github/docs/PROJECT_OVERVIEW.md` only by section. If `docs/specs/<task-id>.md` exists, update it instead of starting over. Read `docs/agents/task-analyst.md` first (history, known defects, open items) instead of older specs.
 
 ## Steps
 1. If the caller passed `answers:`, merge them into the spec and remove the answered questions. If it passed `decision:`, add it under a `Decisions` section (one line: what was decided and why) and change the spec only if the decision requires it.
@@ -23,7 +23,7 @@ Read `docs/tasks/<task-id>.md` (if it is missing, run `get-task` first). Then re
 6. Questions: only those that block implementation or change the outcome, each with 2-4 suggested options and one recommended.
 7. Set the task `status` to `specified` only when there are no blocking questions; otherwise leave it `new`.
 8. **Update context**: update `docs/agents/task-analyst.md` per `docs/context/README.md` (Agent context files): add or update this task's row, defects or lessons (for example a risky request turned into a safer one), refresh `Open items`.
-9. Return: `Spec file`, `Area`, `Pipeline scope`, `Scope flags`, `Risk gate`, `Ready: yes | no`, `Questions for human` (numbered, with options), `Acceptance criteria`.
+9. Return: `Spec file`, `Area`, `Pipeline scope`, `Scope flags`, `Risk gate`, `Discovery: used | missing | stale`, `Ready: yes | no`, `Questions for human` (numbered, with options), `Acceptance criteria`.
 
 ## When it fails
 - Task file missing: run `get-task`; if that also fails, return `Ready: no` with the reason.
@@ -34,5 +34,6 @@ Read `docs/tasks/<task-id>.md` (if it is missing, run `get-task` first). Then re
 ## Never
 - Write implementation code or touch `Backend/` or `Frontend/`.
 - Answer your own open questions or assume answers; the Orchestrator relays them to the human.
+- Cite a package, route, component, table or command that is not in `docs/discovery.md` or the context files as if it existed.
 - Write outside `docs/specs/` except the task `status` and `docs/agents/task-analyst.md`.
 - Pad the spec: it stays short and every acceptance criterion stays testable.

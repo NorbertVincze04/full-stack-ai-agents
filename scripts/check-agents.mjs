@@ -101,6 +101,21 @@ try {
     if (!(k in (cfg.workflow ?? {}))) errors.push(`.github/config.json: workflow.${k} missing`);
   }
   if (!cfg.pipelines?.branches?.integration || !cfg.pipelines?.branches?.release) errors.push('.github/config.json: pipelines.branches incomplete');
+  if (cfg.discovery?.enabled) {
+    const file = cfg.discovery.file ?? 'docs/discovery.md';
+    if (!existsSync(join(root, 'scripts/discovery-scan.mjs'))) errors.push('discovery enabled but scripts/discovery-scan.mjs is missing');
+    if (!existsSync(join(root, file))) warnings.push(`${file} not created yet: run /discover`);
+    else {
+      const text = read(file);
+      if (!/^>\s*Scanned:.*Commit:\s*\S+/m.test(text)) errors.push(`${file}: header "> Scanned: ... | Commit: ..." missing`);
+      const template = read('.github/skills/discover/template.md');
+      const skeleton = template.match(/```markdown\n([\s\S]*?)\n```/)?.[1] ?? '';
+      const wanted = skeleton.split('\n').filter((l) => l.startsWith('## ')).map((l) => l.slice(3).trim());
+      const found = text.split('\n').filter((l) => l.startsWith('## ')).map((l) => l.slice(3).trim());
+      for (const h of wanted) if (!found.includes(h)) errors.push(`${file}: missing section "${h}"`);
+      if (wanted.join('|') !== found.filter((h) => wanted.includes(h)).join('|')) errors.push(`${file}: sections out of template order`);
+    }
+  }
 } catch (e) {
   errors.push(`.github/config.json: ${e.message}`);
 }

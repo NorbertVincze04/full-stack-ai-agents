@@ -35,7 +35,7 @@ for (const a of agents) {
   console.log(row(a.slug, a.file), '|', row(`docs/agents/${a.slug}.md`, `docs/agents/${a.slug}.md`).trim());
 }
 console.log('-- shared context (read by most calls)');
-for (const p of ['docs/context/project.md', 'docs/context/frontend.md', 'docs/context/backend.md', 'docs/context/containers.md', 'docs/context/pipelines.md']) console.log(row(p, p));
+for (const p of ['docs/context/project.md', 'docs/discovery.md', 'docs/context/frontend.md', 'docs/context/backend.md', 'docs/context/containers.md', 'docs/context/pipelines.md']) console.log(row(p, p));
 if (taskId) {
   for (const p of [`docs/runs/${taskId}/brief.md`, `docs/specs/${taskId}.md`]) console.log(row(p, p));
 }

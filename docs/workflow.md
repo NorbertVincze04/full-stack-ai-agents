@@ -1,6 +1,6 @@
 # Agent workflows
 
-Three workflows, started by slash commands (skills in `.github/skills/`), run by 8 agents (`.github/agents/`). `Orchestrator` is the entry point and the only agent that talks to the human.
+Three workflows, started by slash commands (skills in `.github/skills/`), run by 9 agents (`.github/agents/`). `Orchestrator` is the entry point and the only agent that talks to the human.
 
 ## Commands
 
@@ -17,8 +17,9 @@ Three workflows, started by slash commands (skills in `.github/skills/`), run by
 | `/approve-pr <id> [commit \| push]` | Release Manager | Commit on `dev`, then push it (no new branches) |
 | `/containerize [podman \| docker]` | Container Engineer | Containerization workflow |
 | `/ci-cd [ci \| cd \| both]` | Pipeline Engineer | CI/CD workflow |
+| `/discover [auto \| new \| existing] [refresh] [intent: ...]` | Discovery Analyst | Scan the repo once and write `docs/discovery.md` (user command; `refresh` rescans) |
 
-Each command can also be run on its own to resume or repeat one stage. `container-runtime` (Container Engineer) and `tdd` (Tester) are inner skills, not slash commands.
+Each command can also be run on its own to resume or repeat one stage. `container-runtime` (Container Engineer), `tdd` (Tester) and `discover-update` (Discovery Analyst) are inner skills, not slash commands.
 
 Every skill has the same layout: frontmatter (`name`, `description`, `argument-hint`, `user-invocable`), `# Get task`, `## Steps`, `## When it fails`, `## Never`.
 
@@ -74,6 +75,7 @@ Per-agent context (tasks, defects and lessons, open items): `docs/agents/<agent>
 | Release Manager | `create-pr`, `approve-pr` | four Task-to-PR agents, Handover |
 | Container Engineer | `containerize`, `container-runtime` | Container Builder |
 | Pipeline Engineer | `ci-cd` | CI and CD Pipeline Builders |
+| Discovery Analyst | `discover`, `discover-update` | new: fact base `docs/discovery.md` |
 
 ## Artifacts (all under `docs/`)
 
@@ -98,12 +100,23 @@ The Orchestrator asks the human: spec questions (`/clarify-task spec`), approval
 
 `docs/context/` (`project.md`, `backend.md`, `frontend.md`, `containers.md`, `pipelines.md`) is the compact, current map of the app. `implement`, `containerize` and `ci-cd` update them; every other skill reads them first. Protocol: `docs/context/README.md`.
 
+## Discovery (`docs/discovery.md`)
+
+A fact base of the whole repository so agents do not invent packages, routes, components or commands. Works for a **new** project (only `planned` items from the human's intent or docs) and an **existing** one (the repo is read once). Fixed template (`.github/skills/discover/template.md`): Summary, Repository layout, Languages and tooling, Dependencies, Commands, Implemented features, Interfaces, Data, Configuration, Tests, Build/CI/CD/containers, Conventions, Not found, Context files, Update log; every row has an evidence path.
+
+- `/discover` (user command): full scan with `node scripts/discovery-scan.mjs scan`, then one read of the code; seeds missing context files; refuses to run again unless `refresh` is given.
+- `discover-update` (inner skill): before every spec stage the Orchestrator calls `discover-update check`; `node scripts/discovery-scan.mjs stale` compares the header (`Commit`, `Dirty`) with git and names the sections to refresh; only those are rewritten. More than `discovery.maxChangedFilesBeforeRescan` changed files: the human decides on `/discover refresh`.
+- `spec` reads it first and cites only what it contains; settings in `.github/config.json` -> `discovery`.
+
+Use in another repository: copy `.github/` (agents, skills, hooks, config), `scripts/discovery-scan.mjs` and `docs/context/README.md`, then run `/discover`.
+
 ## Enforcement and checks
 
 Skill text guides the model; these parts do not depend on it:
 - `.github/hooks/guard.json` + `guard.cjs`: a `preToolUse` hook that denies shell commands the "Never" rules forbid (force-push, push of `main`/`master`, branch creation, `--no-verify`, `git reset --hard`, branch deletion, `compose down -v`, prune/volume removal, Podman machine changes, `npm audit fix`, printing `.env`). It applies to every agent call, so if you really need one of them, run it yourself in a terminal. Agent hooks are a VS Code preview feature: check in `/hooks` that it is loaded.
 - `node scripts/check-agents.mjs`: validates skill frontmatter, sections and `./` annex links, agent definitions, `docs/agents/*.md` (sections, size, date), referenced files, `.github/config.json` keys, and warns on `done` tasks whose spec says otherwise. Run it locally; it is not a CI job.
 - `node scripts/context-size.mjs [task-id]`: estimated tokens per skill, agent and context file and the fixed load of one call per agent. Run it before and after changing skills or context files.
+- `node scripts/discovery-scan.mjs scan | stale`: repository facts (tree, languages, manifests, dependencies, containers, CI, env variable names, migrations, tests) and the freshness verdict of `docs/discovery.md`; no interpretation, no secret values.
 - `node scripts/compact-agent-context.mjs [--write]`: merges the oldest rows of `docs/agents/*.md` tables into an `Earlier tasks` row.
 - Per task: `docs/runs/<id>/brief.md` (compact summary every later stage reads instead of the whole spec) and `docs/runs/<id>/metrics.md` (one row per stage: verdict, rounds, what failed), both written by the Orchestrator; templates in `.github/skills/start-task/`.
 - Still the human's to configure (agents must not): branch protection on `main`, workflow permissions, required checks, bot bypass (`docs/context/pipelines.md`).

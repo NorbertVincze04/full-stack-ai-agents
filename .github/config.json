@@ -48,5 +48,10 @@
   "pullRequests": {
     "platform": "github",
     "baseBranch": "dev"
+  },
+  "discovery": {
+    "enabled": true,
+    "file": "docs/discovery.md",
+    "maxChangedFilesBeforeRescan": 50
   }
 }

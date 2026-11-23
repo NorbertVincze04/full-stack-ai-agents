@@ -9,6 +9,7 @@ Agents keep a short, current description of the app in `docs/context/` so they d
 | `frontend.md` | Frontend map: commands, structure, routes, components, services, conventions, tests | `Implementer` (`implement frontend`) |
 | `containers.md` | Docker/Podman compose stack: services, files, env vars, Bosch proxy handling, conventions | `Container Engineer` (`containerize`) |
 | `pipelines.md` | CI/CD workflows: triggers, jobs, branch promotion, prerequisites, conventions | `Pipeline Engineer` (`ci-cd`) |
+| `../discovery.md` | Verified fact base of the whole repo (dependencies, languages, structure, implemented features, interfaces, data, tests, CI/containers, `Not found`); the context files above keep the per-area detail | `Discovery Analyst` (`discover` once, `discover-update` by section) |
 
 `.github/docs/PROJECT_OVERVIEW.md` is the **target design**. The context files describe the **actual current state** and win on any conflict.
 
@@ -21,7 +22,8 @@ Agents keep a short, current description of the app in `docs/context/` so they d
    - changed files = `git diff --name-only <ref> -- <Area>/` plus `git status --short <Area>/`
    - If nothing changed, trust the file. If files changed outside the workflow, read only those files and fix the affected sections before using them.
    - If the file has no commit yet, use `git status --short <Area>/` the same way.
-4. If a context file is missing, the area's skill (`implement`, `containerize`, `ci-cd`) creates it by analysing the area once (bootstrap); other skills report it as missing and continue with the minimum reading needed.
+4. If a context file is missing, the area's skill (`implement`, `containerize`, `ci-cd`) creates it by analysing the area once (bootstrap); other skills report it as missing and continue with the minimum reading needed. When `docs/discovery.md` exists, the bootstrap starts from it instead of re-reading the area. `discover` seeds missing context files itself and never edits existing ones.
+5. `docs/discovery.md` is read by `spec` (facts only come from it and the context files). Other agents may look up a section of it instead of scanning folders. It is scanned once (`/discover`) and refreshed by section (`discover-update`, run by the Orchestrator before the spec stage); the header `Scanned: ... | Commit: ... | Dirty: ...` is what `node scripts/discovery-scan.mjs stale` compares with git.
 
 ## Update rules (implement, containerize, ci-cd)
 
