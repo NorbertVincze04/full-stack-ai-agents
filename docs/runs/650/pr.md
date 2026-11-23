@@ -10,7 +10,7 @@
 - [x] AC2: 4 blocks of 2x2, labels only (`desk-numbering.spec.ts`)
 - [x] AC3: select, book, withdraw, availability for every desk, e.g. C3 (`desk-numbering.spec.ts`, `bookings.api.test.ts`)
 - [x] AC4: pre-change bookings listed without desk label, block no desk (`desk-numbering.spec.ts`)
-- [ ] AC5: no booking deleted, idempotent: **Not verified** (static review and `desksRenumber.test.ts` only; the human verifies after `pg_dump`)
+- [x] AC5: no booking deleted, idempotent: **Verified** (human applied 006 after `pg_dump`, ran it twice, identical result, bookings kept)
 - [x] AC6: specs adapted and pass; tests cover 16 desks, labels, 2x2 blocks, booking without desk
 
 ## Test results

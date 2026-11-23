@@ -38,5 +38,5 @@ Turns a work item into `docs/tasks/<id>.md` and `docs/specs/<id>.md`. Azure DevO
 
 - `decision:` input used twice (649, D4 and D9); the task `status` stays `implemented` until the human accepts AC10 after the manual browser check.
 - Task 649: nothing to implement; only the human's manual AC10 check and acceptance are open (`docs/runs/649/e2e.md` still describes the runner as a follow-up; the Tester or Release Manager records the result).
-- Task 650: answers merged; ready for implementation (human applies the migration after `pg_dump`).
+- Task 650: answers merged; ready for implementation (human applies the migration after `pg_dump`). Azure DevOps `System.State` set to `Done` on 2026-11-23 (human confirmed; only the state changed).
 - The `list` mode depends on the `ado` MCP server (PAT prompt) being started.
