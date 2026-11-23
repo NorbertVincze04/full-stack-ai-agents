@@ -15,7 +15,7 @@ The agent-setup validation (`node scripts/check-agents.mjs`) is not a CI job: ru
 
 ## CI (`ci-backend.yml`, `ci-frontend.yml`)
 
-- Triggers: `push` to `dev`; `pull_request` into `dev` and `main`. Nothing else, no `paths` filters (CD needs a run of both workflows per commit).
+- Triggers: `push` to `dev`; `pull_request` into `dev` and `main`, both with `paths` filters: Backend runs only for `Backend/**` (or its own workflow file), Frontend only for `Frontend/**` (or its own workflow file). A change in one area does not start the other area's CI. Because a filtered workflow may not run, do not make these checks required on PRs (a required check that never runs stays pending); `CI - PR Check` has no filter and can be required.
 - `permissions: contents: read`; concurrency per workflow and ref, `cancel-in-progress: true`.
 - Jobs (no `continue-on-error`). The test job runs security check, build, test; the image job runs only after it:
 
@@ -41,7 +41,7 @@ The agent-setup validation (`node scripts/check-agents.mjs`) is not a CI job: ru
 
 | Job | Permissions | What it does |
 | --- | --- | --- |
-| `verify` | `contents: read`, `actions: read` | Resolves the SHA: `workflow_run.head_sha`, or for a manual run the current head of `dev` (dispatch must be from `dev`). Checks it is a 40-char SHA, then confirms via the Actions API that both CI workflows have a successful `push` run for it and outputs `ready`. The run triggered by the slower workflow promotes, the other skips; a manual run fails if not ready. |
+| `verify` | `contents: read`, `actions: read` | Resolves the SHA: `workflow_run.head_sha`, or for a manual run the current head of `dev` (dispatch must be from `dev`). Checks it is a 40-char SHA, then confirms via the Actions API that both CI workflows are green for it and outputs `ready`: a successful `push` run for the SHA, or, if the workflow was skipped by its path filter, a successful latest completed `dev` run whose commit is an ancestor with no change in that area since. A skipped area with a red or missing baseline blocks promotion. The run triggered by the workflow that finishes last promotes, the other skips; a manual run fails if not ready. A push touching neither area (docs only) starts no CI and no CD; it is promoted with the next code push or by a manual dispatch. |
 | `merge` (`needs: verify`, only if `ready`) | `contents: write` (only job) | Checks out `main` (full history), fetches `dev`, requires the SHA to be an ancestor of `origin/dev`, no-op if `main` already contains it, otherwise `git merge --no-ff <sha>`, then `git push origin HEAD:refs/heads/main`. |
 
 - Merge commit message: `chore: merge dev into main (CI passed for <short-sha>)`; identity `github-actions[bot]`.
@@ -66,7 +66,7 @@ Agents change none of these.
 2. `workflow_run` runs only from the default branch: merge the change that adds the `ci-*.yml` and `cd.yml` files into `main` by hand once (until then CD cannot trigger automatically). Confirm `main` is the default branch. The `.github/workflows/**` files on `main` must be identical to `dev` (see "Workflow-file changes"). The old `ci.yml` was removed: delete it on `main` too.
 3. Settings > Actions > General: Actions enabled; workflow permissions set to "Read and write" or otherwise not blocking the explicit `contents: write` of the `merge` job.
 4. If `main` has branch protection or a ruleset (required PR, required checks, linear history): add `github-actions[bot]` (GitHub Actions app) to the bypass list, or CD's push is rejected. Merge commits must be allowed; "linear history" is incompatible with `--no-ff`. CD never works around protection; alternatively provide your own token secret (needs a spec change).
-5. Optional: make `Backend - test and build`, `Frontend - test and build` and `PR - title, branches and files` required checks on PRs into `dev` and `main`, but not on the direct CD push to `main`.
+5. Optional: make `PR - title, branches and files` a required check on PRs into `dev` and `main`. Do not require the Backend/Frontend CI jobs (path-filtered), and never on the direct CD push to `main`.
 6. Pushes made with `GITHUB_TOKEN` start no other workflows (acceptable: CI does not run on `main` pushes).
 7. Pull requests: agents push a `task/<task-id>` branch and open the PR into `dev` with `gh` (install it and run `gh auth login`); without `gh` they give a compare link. Merging that PR into `dev` is what triggers CI and then CD.
 

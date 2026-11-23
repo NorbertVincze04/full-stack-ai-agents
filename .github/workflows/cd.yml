@@ -54,12 +54,35 @@ jobs:
             echo "::error::Resolved value is not a commit SHA."
             exit 1
           fi
-          # Both CI workflows must have succeeded on this exact commit.
+          # Each area workflow must be green for this commit. An area whose CI was skipped by its
+          # path filter counts as green only if its latest completed dev run succeeded and the area
+          # has not changed since that run's commit.
           ready=true
-          for wf in ci-backend.yml ci-frontend.yml; do
-            count=$(gh api "repos/$REPO/actions/workflows/$wf/runs?head_sha=$sha&branch=dev&event=push&status=success" --jq .total_count)
-            if [ "$count" -lt 1 ]; then
-              echo "::notice::No successful $wf run for $sha yet."
+          for entry in ci-backend.yml:Backend ci-frontend.yml:Frontend; do
+            wf="${entry%%:*}"
+            dir="${entry##*:}"
+            runs="repos/$REPO/actions/workflows/$wf/runs"
+            ok=$(gh api "$runs?head_sha=$sha&branch=dev&event=push&status=success" --jq .total_count)
+            if [ "$ok" -ge 1 ]; then
+              continue
+            fi
+            any=$(gh api "$runs?head_sha=$sha&branch=dev&event=push" --jq .total_count)
+            if [ "$any" -ge 1 ]; then
+              echo "::notice::$wf has not succeeded for $sha (running or failed)."
+              ready=false
+              continue
+            fi
+            base=$(gh api "$runs?branch=dev&event=push&status=completed&per_page=1" --jq '.workflow_runs[0] | select(.conclusion == "success") | .head_sha // empty')
+            if [ -z "$base" ]; then
+              echo "::notice::$wf was skipped for $sha and its latest completed dev run is missing or not green."
+              ready=false
+              continue
+            fi
+            diff=$(gh api "repos/$REPO/compare/$base...$sha" --jq "[.status, ([.files[].filename | select(startswith(\"$dir/\") or . == \".github/workflows/$wf\")] | length)] | @tsv")
+            status=$(printf '%s' "$diff" | cut -f1)
+            changed=$(printf '%s' "$diff" | cut -f2)
+            if { [ "$status" != "ahead" ] && [ "$status" != "identical" ]; } || [ "$changed" -ne 0 ]; then
+              echo "::notice::$wf has no run for $sha but $dir changed since the last green run ($base)."
               ready=false
             fi
           done
