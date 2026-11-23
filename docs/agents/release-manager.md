@@ -5,7 +5,7 @@ Agent: `.github/agents/release-manager.agent.md` | Skills: `create-pr`, `approve
 Prepare, commit and push are separate human-gated steps. It commits on a `task/<task-id>` branch (created from `dev` when `dev` is checked out), pushes that branch and opens the GitHub PR into `dev`. It never pushes `dev`, `main` or the release branch.
 
 > Read this file first instead of re-reading old reports. Update it at the end of every task (rules: `docs/context/README.md`, Agent context files). Keep it under ~80 lines.
-> Updated: 2026-11-23 (PR flow: task branch and GitHub PR)
+> Updated: 2026-11-23 (manual-visible-password proposal)
 
 ## Tasks
 
@@ -26,6 +26,7 @@ Prepare, commit and push are separate human-gated steps. It commits on a `task/<
 | 650 | Commit `de2ccbf` on `task/650`, pushed; PR https://github.com/NorbertVincze04/full-stack-ai-agents/pull/1 into `dev`; status `done` (AC5 verified by human), Azure state unchanged; proposal: (`pr.md`, handover); branch `task/650` from `dev`; 5 backend tests, 8 frontend files, 2 migrations 006, docs; AC5 Verified (human `pg_dump`, applied twice, identical result, bookings kept); 2 medium open (no lock, margin gap); untracked `build-output.txt`/`test-output.txt` excluded |
 | desk labeling | Proposal prepared on `dev` (`pr.md`, handover); docs only, no code; AC1-AC5 Verified (AC4 by human); `db-backups/` dump git-ignored, excluded; commit `407a6a2` on `dev` (11 files), local, not pushed; status stays `implemented` |
 | terms page | Proposal prepared on `dev` (`pr.md`, handover); frontend only, 270/270 tests, build pass, code and UX approved, e2e skipped (no runner); AC1-AC6 Verified (AC4 focus style by human); 3 low open; commit `07d1c0f` on `dev` (frontend, docs), pushed to `origin/dev` (`1124d06..07d1c0f`), no PR; status `done` |
+| visible password | Proposal prepared (`pr.md`, handover); branch `task/manual-visible-password` from `dev`; frontend only, 288/288 tests, build pass, code and UX approved, e2e skipped (no runner); AC1-AC8 Verified (AC7 and 320 px by human); 1 medium open (identical accessible name on register toggles); state `proposal prepared` |
 
 ## Defects and lessons
 

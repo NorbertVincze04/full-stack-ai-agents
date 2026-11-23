@@ -37,14 +37,31 @@
 
   <div class="field">
     <label for="register-password">Password</label>
-    <input
-      id="register-password"
-      type="password"
-      formControlName="password"
-      autocomplete="new-password"
-      [attr.aria-invalid]="errorFor('password') !== null"
-      [attr.aria-describedby]="errorFor('password') ? 'register-password-error' : null"
-    />
+    <div class="password-wrap">
+      <input
+        id="register-password"
+        [type]="showPassword ? 'text' : 'password'"
+        formControlName="password"
+        autocomplete="new-password"
+        [attr.aria-invalid]="errorFor('password') !== null"
+        [attr.aria-describedby]="errorFor('password') ? 'register-password-error' : null"
+      />
+      <button
+        type="button"
+        class="password-toggle"
+        [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+        [attr.aria-pressed]="showPassword"
+        (click)="showPassword = !showPassword"
+      >
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+          <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
+          <circle cx="12" cy="12" r="3" />
+          @if (showPassword) {
+            <path d="M3 3l18 18" />
+          }
+        </svg>
+      </button>
+    </div>
     @if (errorFor('password'); as msg) {
       <p class="field-error" id="register-password-error">{{ msg }}</p>
     }
@@ -52,14 +69,31 @@
 
   <div class="field">
     <label for="register-confirm-password">Confirm password</label>
-    <input
-      id="register-confirm-password"
-      type="password"
-      formControlName="confirmPassword"
-      autocomplete="new-password"
-      [attr.aria-invalid]="errorFor('confirmPassword') !== null"
-      [attr.aria-describedby]="errorFor('confirmPassword') ? 'register-confirm-password-error' : null"
-    />
+    <div class="password-wrap">
+      <input
+        id="register-confirm-password"
+        [type]="showConfirmPassword ? 'text' : 'password'"
+        formControlName="confirmPassword"
+        autocomplete="new-password"
+        [attr.aria-invalid]="errorFor('confirmPassword') !== null"
+        [attr.aria-describedby]="errorFor('confirmPassword') ? 'register-confirm-password-error' : null"
+      />
+      <button
+        type="button"
+        class="password-toggle"
+        [attr.aria-label]="showConfirmPassword ? 'Hide password' : 'Show password'"
+        [attr.aria-pressed]="showConfirmPassword"
+        (click)="showConfirmPassword = !showConfirmPassword"
+      >
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+          <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
+          <circle cx="12" cy="12" r="3" />
+          @if (showConfirmPassword) {
+            <path d="M3 3l18 18" />
+          }
+        </svg>
+      </button>
+    </div>
     @if (errorFor('confirmPassword'); as msg) {
       <p class="field-error" id="register-confirm-password-error">{{ msg }}</p>
     }

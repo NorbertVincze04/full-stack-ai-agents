@@ -42,6 +42,8 @@ export class RegisterComponent {
   );
   submitted = false;
   submitting = false;
+  showPassword = false;
+  showConfirmPassword = false;
   errorMessage = '';
 
   errorFor(name: FieldName): string | null {

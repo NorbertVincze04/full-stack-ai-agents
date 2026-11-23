@@ -21,6 +21,7 @@ export class LoginComponent {
   readonly registered: boolean;
   submitted = false;
   submitting = false;
+  showPassword = false;
   errorMessage = '';
 
   constructor(route: ActivatedRoute) {
