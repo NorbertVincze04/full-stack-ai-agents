@@ -5,7 +5,7 @@ Agent: `.github/agents/reviewer.agent.md` | Skill: `review` (+ `checklists.md`) 
 Scopes: `code`, `security`, `ux`, `containers`, `pipelines`. Dependency advisories: npm `critical` blocks, everything lower is a follow-up.
 
 > Read this file first instead of re-reading old reports. Update it at the end of every task (rules: `docs/context/README.md`, Agent context files). Keep it under ~80 lines.
-> Updated: 2026-11-23 (manual-div-for-hero-section)
+> Updated: 2026-11-23 (manual-shadow-borders)
 
 ## Tasks
 
@@ -27,6 +27,7 @@ Scopes: `code`, `security`, `ux`, `containers`, `pipelines`. Dependency advisori
 | manual-terms-services-page | frontend code, UX (security skipped by flags) | Both approved. Code: 2 low (no component spec, no route `title`). UX: 1 low (no active-link cue in header) |
 | manual-visible-password | frontend code, UX (security skipped by request) | Both approved. Code: 3 low (triplicated toggle markup, inline booleans, empty e2e). UX: 1 medium (identical accessible name on both register toggles), 2 low (label plus `aria-pressed` double state, 320 px unverified) |
 | manual-div-for-hero-section | frontend UX (code, security skipped by flags) | Approved. 4 low (no comment on container-query choice, calendar `max-width` leaves gap in 50% div, 12 px desk text at 768 px unverified, no top-bar 320 px check). Container query is baseline since 2023 and fine |
+| manual-shadow-borders | frontend UX, code (security skipped by flags) | Both approved. UX: 2 medium (top bar likely covers the header shadow, containers have no vertical padding so focus rings touch the border), 3 low. Code: 4 low (footer shadow literal, 4px radii on desks/days, nav hover guard, stray `$f` file) |
 
 ## Defects and lessons
 
@@ -38,6 +39,7 @@ Scopes: `code`, `security`, `ux`, `containers`, `pipelines`. Dependency advisori
 - Layout spacing done with margins on grid items instead of grid tracks/gaps (650).
 - Static routes (`info`, `terms`) lack a `title`; header links lack an active-route cue.
 - Icon buttons repeated per field share one accessible name (visible-password toggles); AC wording dictates it.
+- Shadows of an earlier sibling are painted over by later opaque siblings (header vs top bar); containers with `padding: 0 1rem` need vertical padding once bordered (shadow-borders).
 - Colour-only state cues and missing hints for disabled/neutral states in the booking UI.
 
 ## Open items

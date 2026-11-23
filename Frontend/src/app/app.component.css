@@ -17,6 +17,7 @@ header {
   padding: 1rem;
   background-color: #1f2937;
   color: #ffffff;
+  box-shadow: var(--shadow-md);
 }
 
 header h1 {
@@ -63,7 +64,7 @@ header button {
   min-height: 44px;
   padding: 0.5rem 1rem;
   border: 2px solid #ffffff;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   background-color: #ffffff;
   color: #1f2937;
   font: inherit;
@@ -96,4 +97,5 @@ footer {
   overflow-wrap: anywhere;
   background-color: #1f2937;
   color: #ffffff;
+  box-shadow: 0 -4px 12px rgba(0,0,0,.12);
 }

@@ -25,6 +25,7 @@ Stack: Angular 18 NgModule + RxJS (`Frontend/`), Express 5 + TypeScript ESM (`Ba
 | manual-terms-services-page | frontend | Lazy `TermsModule` on `/terms` (h1 "Terms of Service", placeholder text) and a `Terms` header link after Help; reused header styles; 269 specs and build green |
 | manual-div-for-hero-section | frontend | CSS only in `booking.component.css`: `.layout-calendar`/`.layout-plan` 50/50 (`flex: 1 1 0`), stack via `@container` on `:host` below 768 px; 293 specs and build green |
 | manual-visible-password | frontend | Eye toggle (`button.password-toggle`, aria-label/aria-pressed) on login password and both register password fields, independent state; CSS in `auth-form.css`; 288 specs and build green |
+| manual-shadow-borders | frontend | CSS only: tokens on `:root` in `styles.css` (border, radii, shadows); booking top bar, calendar, desk plan bordered with shadow-sm; header shadow-md, footer upward shadow; buttons 6px radius, hover shadow-md, disabled none; build and tests green |
 
 ## Defects and lessons
 
