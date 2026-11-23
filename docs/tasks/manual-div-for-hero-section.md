@@ -4,7 +4,7 @@ source: manual
 url:
 title: div for hero section
 tags: []
-status: specified
+status: done
 ---
 
 ## Description
