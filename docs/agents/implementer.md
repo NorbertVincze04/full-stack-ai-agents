@@ -23,6 +23,7 @@ Stack: Angular 18 NgModule + RxJS (`Frontend/`), Express 5 + TypeScript ESM (`Ba
 | 649 select/deselect | frontend | Toggle on calendar days and desks (`dateDeselected`/`deskDeselected` outputs), no day selected on load, `No date selected` state with disabled `Book Now` and neutral desks, own desk (`yours`) selectable with `pressed` flag; no API change |
 | 650 desk numbering | backend, database, frontend | Migrations `006` (public and `"ico-env"`): guarded NULL-out of `booking_desk`, delete desks, insert A1..D4; no source change, not applied. Frontend: `block-left-edge`/`block-top-edge` spacing classes in `DeskPlanComponent` separate the 2 x 2 blocks (CSS only, labels only) |
 | manual-terms-services-page | frontend | Lazy `TermsModule` on `/terms` (h1 "Terms of Service", placeholder text) and a `Terms` header link after Help; reused header styles; 269 specs and build green |
+| manual-visible-password | frontend | Eye toggle (`button.password-toggle`, aria-label/aria-pressed) on login password and both register password fields, independent state; CSS in `auth-form.css`; 288 specs and build green |
 
 ## Defects and lessons
 

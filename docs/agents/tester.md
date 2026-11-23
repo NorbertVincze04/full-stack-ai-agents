@@ -25,6 +25,8 @@ Backend tests: `node:test` in `Backend/tests/` (`npm test`). Frontend: Karma/Jas
 | 650 desk numbering (green) | 308: 306 pass, 2 skipped; fixtures adapted to A1-D4 / 16 desks | 263/263 (+2: `data-block`, spacing classes); fixtures adapted | [tdd-green.md](../runs/650/tdd-green.md); e2e `skipped: no e2e runner` ([e2e.md](../runs/650/e2e.md)); no defects |
 | 650 desk numbering (red) | see `tdd-backend.md` | 261/261, 14 new in `desk-numbering.spec.ts`, all already-green (UI is data-driven); block separation deferred-to-green | [tdd-frontend.md](../runs/650/tdd-frontend.md) |
 | 650 desk numbering (red) | 308 run: 289 pass, 17 red (`desksRenumber.test.ts`: static checks of the 006+ migration, missing file) | not run | [tdd-backend.md](../runs/650/tdd-backend.md); first real `red` run |
+| visible password (red) | n/a | 288 run: 270 pass, 18 red (new `*.password-toggle.spec.ts` in login and register; toggle button missing) | [tdd-frontend.md](../runs/manual-visible-password/tdd-frontend.md) |
+| visible password (green) | n/a | 288/288 (18 red now pass); build pass | [tdd-frontend.md](../runs/manual-visible-password/tdd-frontend.md); e2e `skipped: no e2e runner` ([e2e.md](../runs/manual-visible-password/e2e.md)); no defects; Enter/Space and 320 px unasserted |
 
 ## Defects and lessons
 

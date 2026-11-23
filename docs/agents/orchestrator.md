@@ -25,6 +25,7 @@ Runs the three workflows, owns the retry loops and every human gate. History bel
 | 649 select/deselect | feature | Azure | frontend | tests 247/247, review code+ux approved (0 blocker/high, 1 medium); PR proposal pending ([reports](../runs/649/)) |
 | 650 desk numbering | feature | Azure | frontend, backend, database | tests backend 306/308 (2 skipped), frontend 263/263; review code+ux approved (0 blocker/high, 2 medium); PR proposal pending ([reports](../runs/650/)) |
 | manual-terms-services-page | feature | manual | frontend | tests 270/270, review code+ux approved (0 blocker/high/medium, 3 low); AC4 human-verified; e2e skipped (no runner); PR proposal pending ([reports](../runs/manual-terms-services-page/)) |
+| manual-visible-password | feature | manual | frontend | tests 288/288, review code+ux approved (0 blocker/high, 1 medium, 5 low); AC7 and 320 px human-verified; e2e skipped (no runner); PR proposal pending ([reports](../runs/manual-visible-password/)) |
 | manual-desk-labeling | defect (006 not applied locally) | manual | containers | local volume recreated, 16 desks A1-D4, AC4 human-verified ([report](../runs/manual-desk-labeling/containerize.md)); no code change |
 
 ## Defects and lessons
@@ -41,6 +42,7 @@ Runs the three workflows, owns the retry loops and every human gate. History bel
 | 650 | D1 delete and recreate all desks (human chose knowingly over the safer relabel; existing bookings lose their desk); R1/R2 approved as described (human applies migration 006 after pg_dump); D2 2x2 blocks, D3 labels only; Azure tag missing, ignored; e2e skipped (no runner) |
 | manual-desk-labeling | Labels D01-D12 came from a db-data volume older than migration 006; R1/R2 approved (pg_dump first, `compose down -v`), agent applied locally; Cloud Foundry stays human-applied |
 | manual-terms-services-page | D1 link in app header next to Help; D2 route /terms, label "Terms"; D3 h1 "Terms of Service"; D4 placeholder text marked not legal; no risks; no fix loops |
+| manual-visible-password | D1 eye on login Password and both register fields, independent toggles; no risks; no fix loops; medium (identical accessible name on two register toggles) carried to PR |
 | header, info, 602 | Acceptance check passed (`human-accepted`); 602 needed fix iteration 1 first |
 
 ## Loops

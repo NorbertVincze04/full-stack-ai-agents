@@ -26,14 +26,31 @@
 
   <div class="field">
     <label for="login-password">Password</label>
-    <input
-      id="login-password"
-      type="password"
-      formControlName="password"
-      autocomplete="current-password"
-      [attr.aria-invalid]="showError('password')"
-      [attr.aria-describedby]="showError('password') ? 'login-password-error' : null"
-    />
+    <div class="password-wrap">
+      <input
+        id="login-password"
+        [type]="showPassword ? 'text' : 'password'"
+        formControlName="password"
+        autocomplete="current-password"
+        [attr.aria-invalid]="showError('password')"
+        [attr.aria-describedby]="showError('password') ? 'login-password-error' : null"
+      />
+      <button
+        type="button"
+        class="password-toggle"
+        [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+        [attr.aria-pressed]="showPassword"
+        (click)="showPassword = !showPassword"
+      >
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+          <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
+          <circle cx="12" cy="12" r="3" />
+          @if (showPassword) {
+            <path d="M3 3l18 18" />
+          }
+        </svg>
+      </button>
+    </div>
     @if (showError('password')) {
       <p class="field-error" id="login-password-error">Password is required</p>
     }
