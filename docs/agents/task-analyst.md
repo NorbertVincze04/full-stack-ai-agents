@@ -5,7 +5,7 @@ Agent: `.github/agents/task-analyst.agent.md` | Skills: `get-task`, `spec` | Rep
 Turns a work item into `docs/tasks/<id>.md` and `docs/specs/<id>.md`. Azure DevOps project `WebTools`, tag filter `deskbookingPrj` (`.github/config.json`).
 
 > Read this file first instead of re-reading old reports. Update it at the end of every task (rules: `docs/context/README.md`, Agent context files). Keep it under ~80 lines.
-> Updated: 2026-11-23 (manual div-for-hero-section task ingested)
+> Updated: 2026-11-23 (manual shadow-borders task ingested)
 
 ## Tasks
 
@@ -27,6 +27,7 @@ Turns a work item into `docs/tasks/<id>.md` and `docs/specs/<id>.md`. Azure DevO
 | terms-services page | manual | feature | Frontend-only static page + header link (like info/Help); no AC or content given; answers Q1-Q4 merged (header next to Help, `/terms`, label "Terms", h1 "Terms of Service", placeholder text); status `specified`, 6 ACs, no risks |
 | visible password | manual | feature | Specified 2026-11-23, status `specified`: frontend-only eye toggle (inline SVG, no dependency), 8 ACs, no risks; assumptions A1-A3 (hidden on load, per-field, accessible); Q1 answered a (both register fields, independent toggles, D1) |
 | div for hero section | manual | feature | Specified 2026-11-23, status `specified`, no questions: frontend CSS-only 50/50 split of `.booking-layout` (calendar left, desks right, stack below 768px), wrapper divs already exist; 5 ACs, no risks; assumptions A1-A4 (no "hero" element exists) |
+| shadow and borders | manual | feature | Specified 2026-11-23, status `specified`: frontend CSS-only tokens (border, radius, shadow); answers Q1-Q6 merged, narrowed to the booking page plus shared header/footer (auth, info, terms out of scope); 9 ACs, no risks |
 | desk labeling | manual | defect/verification | Same as 650 (A1-D4). Human saw D01..D12: 006 not applied to the running DB (init SQL runs only on an empty `db-data` volume; Cloud Foundry is human-applied). Specified, area containers, no code change, ACs 1-5, risks R1-R3; open: which DB, who applies |
 
 ## Defects and lessons
@@ -48,4 +49,5 @@ Turns a work item into `docs/tasks/<id>.md` and `docs/specs/<id>.md`. Azure DevO
 - manual-terms-services-page: answers merged, ready for the frontend implementer.
 - manual-visible-password: answers merged (Q1 = a), ready for the frontend implementer.
 - manual-div-for-hero-section: specified, ready for the frontend implementer.
+- manual-shadow-borders: answers merged (Q1 vs Q2 conflict resolved as booking page only), ready for the frontend implementer; 9 ACs, no risks.
 - The `list` mode depends on the `ado` MCP server (PAT prompt) being started.

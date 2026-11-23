@@ -3,6 +3,9 @@
   width: 100%;
   padding: 0 1rem;
   color: #1f2937;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
 }
 
 .plan-title {

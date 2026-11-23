@@ -9,6 +9,9 @@
   padding: 0.75rem 1rem;
   background-color: #e5e7eb;
   color: #1f2937;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
 }
 
 .top-bar-row {
@@ -30,14 +33,20 @@
   min-height: 44px;
   padding: 0.5rem 1rem;
   border: 2px solid #1f2937;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
   background-color: #1f2937;
   color: #ffffff;
   font: inherit;
   cursor: pointer;
 }
 
+.book-button:hover:not(:disabled) {
+  box-shadow: var(--shadow-md);
+}
+
 .book-button:disabled {
+  box-shadow: none;
   opacity: 0.6;
   cursor: not-allowed;
 }

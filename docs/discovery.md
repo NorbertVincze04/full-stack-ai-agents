@@ -1,6 +1,6 @@
 # Discovery: Desk Booking (agentic-desk-booking-app)
 
-> Scanned: 2026-11-23 | Commit: c26b063220d68083e570ad0205f1410f31a5abe7 | Dirty: clean | Mode: existing | Scan: full
+> Scanned: 2026-11-23 | Commit: 6dcf74cacedb2bcc72d6dce8ae974f6ec8af6318 | Dirty: 777ebf584d | Mode: existing | Scan: update
 > Source of truth for facts (packages, routes, components, tables, commands, variables). Written by `Discovery Analyst`; read by `/spec`. Context files in `docs/context/` keep the per-area detail.
 
 ## Summary
@@ -25,6 +25,7 @@
 | .github/agents, skills, docs, hooks, config.json | tooling | agent architecture | 37 |
 | scripts | tooling | agent helper scripts (`.mjs`) | 5 |
 | docs | docs | workflow docs, context, agents, tasks, specs, runs, handover | 182 |
+| live-ui | tooling | static live dashboard of agent workflow (`index.html`, `app.js`, `styles.css`, `state.json`) | 4 |
 | certs | config | proxy CA cert instructions (`*.crt` gitignored) | 1 |
 | db-backups | data | local SQL dumps (gitignored) | 2 |
 
@@ -104,6 +105,8 @@ Lock files: Backend/package-lock.json, Frontend/package-lock.json.
 | Password visibility toggle on login and register | Frontend | implemented | Frontend/src/app/features/auth/login/login.component.ts (`showPassword`), login.password-toggle.spec.ts |
 | Container stack (db, backend, frontend) | Containers | implemented | compose.yaml |
 | CI per area, PR check, CD merge dev into main | Pipelines | implemented (run results not verified) | .github/workflows/*.yml |
+| Booking page hero layout (styles in booking.component.css, browser-measured spec) | Frontend | implemented | Frontend/src/app/features/booking/booking.component.css, booking.component.hero-layout.spec.ts |
+| Live UI dashboard of agents and skills (static, reads `state.json`) | Tooling | implemented | live-ui/app.js, live-ui/index.html |
 | Admin management of bookings | Backend, Frontend | planned (user `type` column and `admin` value exist, no admin endpoint or UI) | .github/docs/PROJECT_OVERVIEW.md, Backend/migrations/001_create_users.sql |
 
 ## Interfaces
@@ -157,7 +160,7 @@ Variable names only; `.env` was not opened.
 | Area | Framework | Location | Count | Command |
 | --- | --- | --- | --- | --- |
 | Backend | `node:test` (native TS) | Backend/tests | 16 files (app, auth, authenticate, bookingDates, bookingRepository, bookingService, bookings.api, deskRepository, desks.api, desksMigrations, desksRenumber, health.extra, health.schema, login.acceptance, register, server) | `npm test` |
-| Frontend | Jasmine + Karma (ChromeHeadless in CI) | Frontend/src/**/*.spec.ts, helper `app/testing/auth-test-utils.ts` | 20 spec files | `npm run test:ci` |
+| Frontend | Jasmine + Karma (ChromeHeadless in CI) | Frontend/src/**/*.spec.ts, helper `app/testing/auth-test-utils.ts` | 21 spec files (incl. booking.component.hero-layout.spec.ts) | `npm run test:ci` |
 
 Per-test-case counts were not collected. Evidence: scan (`tests.files`), Backend/package.json, Frontend/package.json.
 
@@ -205,3 +208,4 @@ Per-test-case counts were not collected. Evidence: scan (`tests.files`), Backend
 | Date | Commit | Mode | Sections touched |
 | --- | --- | --- | --- |
 | 2026-11-23 | c26b063 | existing, full scan | all |
+| 2026-11-23 | 6dcf74c | update | Implemented features, Tests, Repository layout (Interfaces: no change, live-ui has no API) |

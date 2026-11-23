@@ -5,7 +5,7 @@ Agent: `.github/agents/release-manager.agent.md` | Skills: `create-pr`, `approve
 Prepare, commit and push are separate human-gated steps. It commits on a `task/<task-id>` branch (created from `dev` when `dev` is checked out), pushes that branch and opens the GitHub PR into `dev`. It never pushes `dev`, `main` or the release branch.
 
 > Read this file first instead of re-reading old reports. Update it at the end of every task (rules: `docs/context/README.md`, Agent context files). Keep it under ~80 lines.
-> Updated: 2026-11-23 (manual-div-for-hero-section proposal)
+> Updated: 2026-11-23 (manual-shadow-borders proposal)
 
 ## Tasks
 
@@ -28,6 +28,7 @@ Prepare, commit and push are separate human-gated steps. It commits on a `task/<
 | terms page | Proposal prepared on `dev` (`pr.md`, handover); frontend only, 270/270 tests, build pass, code and UX approved, e2e skipped (no runner); AC1-AC6 Verified (AC4 focus style by human); 3 low open; commit `07d1c0f` on `dev` (frontend, docs), pushed to `origin/dev` (`1124d06..07d1c0f`), no PR; status `done` |
 | visible password | Proposal prepared (`pr.md`, handover); branch `task/manual-visible-password` from `dev`; frontend only, 288/288 tests, build pass, code and UX approved, e2e skipped (no runner); AC1-AC8 Verified (AC7 and 320 px by human); 1 medium open (identical accessible name on register toggles); commit `c3a30c2` on `task/manual-visible-password`, pushed; PR https://github.com/NorbertVincze04/full-stack-ai-agents/pull/2 into `dev` (merged, `3cb3983`); status `done`; branch deleted |
 | div for hero section | Proposal prepared (`pr.md`, handover); branch `task/manual-div-for-hero-section` from `dev` (`dev` checked out); frontend CSS only plus 1 spec, 295/295, build pass, ux approved, code/security skipped, e2e skipped (no runner); AC1-AC5 Verified (AC1, AC3 by human in a browser); 4 low open; commit `8008389` on `task/manual-div-for-hero-section`, pushed; PR https://github.com/NorbertVincze04/full-stack-ai-agents/pull/3 into `dev`; status `done` |
+| shadow borders | Proposal prepared (`pr.md`, handover); branch `task/manual-shadow-borders` from `dev` (`dev` checked out); frontend CSS only plus 1 spec, 310/310, build pass, code and ux approved, e2e skipped (no runner); AC1-AC9 Verified except AC3 Partially; AC4-AC6, AC8, AC9 by human; 2 medium (header shadow hidden, container padding), 4 low open; excluded stray `$f`, `Frontend/build-output.txt`, `test-output.txt`, `live-ui/state.json`; state `proposal prepared` |
 
 ## Defects and lessons
 
