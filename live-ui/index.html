@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agent Live</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <span class="logo" aria-hidden="true"></span>
+      <div>
+        <h1>Agent Live</h1>
+        <p id="taskLine" class="muted">No task yet</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <span id="conn" class="pill pill-off" role="status">Not connected</span>
+      <button id="btnConnect" type="button" class="btn" hidden>Select state.json</button>
+      <button id="btnDemo" type="button" class="btn btn-ghost">Demo</button>
+    </div>
+  </header>
+
+  <nav id="tabs" class="tabs" role="tablist" aria-label="Workflow"></nav>
+
+  <main class="layout">
+    <section class="left">
+      <article id="now" class="now" aria-live="polite"></article>
+
+      <div class="progress" aria-hidden="true"><span id="bar"></span></div>
+      <p id="progressText" class="muted small"></p>
+
+      <ol id="pipeline" class="pipeline"></ol>
+    </section>
+
+    <aside class="chat" aria-label="Chat activity">
+      <h2>Chat</h2>
+      <div id="feed" class="feed"></div>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
