@@ -1,8 +1,8 @@
-name: CD
+name: CD - Merge dev into main
 
 on:
   workflow_run:
-    workflows: [CI]
+    workflows: ["CI - Backend Test/Build", "CI - Frontend Test/Build"]
     types: [completed]
     branches: [dev]
   workflow_dispatch:
@@ -29,6 +29,7 @@ jobs:
       actions: read
     outputs:
       sha: ${{ steps.resolve.outputs.sha }}
+      ready: ${{ steps.resolve.outputs.ready }}
     steps:
       - name: Resolve and validate the commit to promote
         id: resolve
@@ -46,11 +47,6 @@ jobs:
               exit 1
             fi
             sha=$(gh api "repos/$REPO/git/ref/heads/dev" --jq .object.sha)
-            count=$(gh api "repos/$REPO/actions/workflows/ci.yml/runs?head_sha=$sha&branch=dev&event=push&status=success" --jq .total_count)
-            if [ "$count" -lt 1 ]; then
-              echo "::error::No successful CI run found for the dev head ($sha). Not promoting."
-              exit 1
-            fi
           else
             sha="$RUN_SHA"
           fi
@@ -58,14 +54,29 @@ jobs:
             echo "::error::Resolved value is not a commit SHA."
             exit 1
           fi
+          # Both CI workflows must have succeeded on this exact commit.
+          ready=true
+          for wf in ci-backend.yml ci-frontend.yml; do
+            count=$(gh api "repos/$REPO/actions/workflows/$wf/runs?head_sha=$sha&branch=dev&event=push&status=success" --jq .total_count)
+            if [ "$count" -lt 1 ]; then
+              echo "::notice::No successful $wf run for $sha yet."
+              ready=false
+            fi
+          done
+          if [ "$ready" = false ] && [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            echo "::error::CI has not succeeded for the dev head ($sha). Not promoting."
+            exit 1
+          fi
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
-          echo "Commit to promote: $sha"
+          echo "ready=$ready" >> "$GITHUB_OUTPUT"
+          echo "Commit to promote: $sha (ready=$ready)"
 
   merge:
     name: merge dev into main
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: verify
+    if: needs.verify.outputs.ready == 'true'
     permissions:
       contents: write
     steps:

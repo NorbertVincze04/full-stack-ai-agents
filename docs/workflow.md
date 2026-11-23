@@ -14,7 +14,7 @@ Three workflows, started by slash commands (skills in `.github/skills/`), run by
 | `/test <id> [tdd \| e2e \| all]` | Tester | TDD suite, then e2e (`tdd` is the inner skill) |
 | `/review <id> [scope]` | Reviewer | Code, security, UX, containers, pipelines |
 | `/create-pr <id>` | Release Manager | Prepare PR description, handover and commit proposal (no git changes) |
-| `/approve-pr <id> [commit \| push]` | Release Manager | Commit, then push and open the PR (Azure DevOps or GitHub) |
+| `/approve-pr <id> [commit \| push]` | Release Manager | Commit on a `task/<id>` branch, then push it and open the GitHub PR into `dev` |
 | `/containerize [podman \| docker]` | Container Engineer | Containerization workflow |
 | `/ci-cd [ci \| cd \| both]` | Pipeline Engineer | CI/CD workflow |
 
@@ -54,9 +54,11 @@ flowchart TD
 
 ## 3. CI/CD workflow (`/ci-cd`)
 
-`get-task (manual) -> spec (area pipelines) -> ci-cd (write ci.yml + cd.yml) -> security review of the workflows -> local validation -> create-pr -> approve-pr`
+`get-task (manual) -> spec (area pipelines) -> ci-cd (write ci-*.yml + cd.yml) -> security review of the workflows -> local validation -> create-pr -> approve-pr`
 
-Generated CI (on push to `dev` and PRs): security check (`npm audit --omit=dev --audit-level=critical`) -> `npm run build` -> tests -> container build check (`push: false`). Generated CD: after CI succeeds on `dev`, merge the tested commit into `main` (`--no-ff`); nothing is deployed (`pipelines.cdMode: merge-only`). Design: `docs/context/pipelines.md`; settings: `.github/config.json` -> `pipelines`.
+Generated CI is split per area (`CI - Backend Test/Build`, `CI - Frontend Test/Build`; on push to `dev` and PRs): security check (`npm audit --omit=dev --audit-level=critical`) -> `npm run build` -> tests -> container build check (`push: false`); plus `CI - PR Check` on pull requests (branches, `<task-id>: <title>` title, description, forbidden files). Generated CD (`CD - Merge dev into main`): after both area workflows succeed on `dev`, merge the tested commit into `main` (`--no-ff`); nothing is deployed (`pipelines.cdMode: merge-only`). Design: `docs/context/pipelines.md`; settings: `.github/config.json` -> `pipelines`.
+
+Pull requests: `approve-pr` commits on a `task/<task-id>` branch (created from `dev` when `dev` is checked out), pushes it and runs `gh pr create --base dev`, so the PR shows in the GitHub Pull requests tab. Settings: `.github/config.json` -> `pullRequests`. Needs the GitHub CLI (`gh auth login`); without it a compare link is given.
 
 ## Agents and skills
 
@@ -99,8 +101,8 @@ The Orchestrator asks the human: spec questions (`/clarify-task spec`), approval
 ## Enforcement and checks
 
 Skill text guides the model; these parts do not depend on it:
-- `.github/hooks/guard.json` + `guard.cjs`: a `preToolUse` hook that denies shell commands the "Never" rules forbid (force-push, push of `main`/`master`, `--no-verify`, `git reset --hard`, branch deletion, `compose down -v`, prune/volume removal, Podman machine changes, `npm audit fix`, printing `.env`). It applies to every agent call, so if you really need one of them, run it yourself in a terminal. Agent hooks are a VS Code preview feature: check in `/hooks` that it is loaded.
-- `node scripts/check-agents.mjs`: validates skill frontmatter, sections and `./` annex links, agent definitions, `docs/agents/*.md` (sections, size, date), referenced files, `.github/config.json` keys, and warns on `done` tasks whose spec says otherwise. It runs as the `agents` job in CI.
+- `.github/hooks/guard.json` + `guard.cjs`: a `preToolUse` hook that denies shell commands the "Never" rules forbid (force-push, push of `main`/`master`/`dev`, `--no-verify`, `git reset --hard`, branch deletion, `compose down -v`, prune/volume removal, Podman machine changes, `npm audit fix`, printing `.env`). It applies to every agent call, so if you really need one of them, run it yourself in a terminal. Agent hooks are a VS Code preview feature: check in `/hooks` that it is loaded.
+- `node scripts/check-agents.mjs`: validates skill frontmatter, sections and `./` annex links, agent definitions, `docs/agents/*.md` (sections, size, date), referenced files, `.github/config.json` keys, and warns on `done` tasks whose spec says otherwise. Run it locally; it is not a CI job.
 - `node scripts/context-size.mjs [task-id]`: estimated tokens per skill, agent and context file and the fixed load of one call per agent. Run it before and after changing skills or context files.
 - `node scripts/compact-agent-context.mjs [--write]`: merges the oldest rows of `docs/agents/*.md` tables into an `Earlier tasks` row.
 - Per task: `docs/runs/<id>/brief.md` (compact summary every later stage reads instead of the whole spec) and `docs/runs/<id>/metrics.md` (one row per stage: verdict, rounds, what failed), both written by the Orchestrator; templates in `.github/skills/start-task/`.

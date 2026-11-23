@@ -27,7 +27,7 @@ Take the argument: Azure task ID, `list`, or manual text. Run `Task Analyst` `/g
 - Spec still `Ready: no` after 3 clarification rounds: ask the human how to proceed; do not implement.
 - An implementer, tester or reviewer returns `blocked`: show the reason and ask the human before continuing.
 - Retry limits reached (tests or review): `/clarify-task <id> decision`; apply the decision, then continue from the stage concerned.
-- Not a git repository or no `gh`/`az` CLI: the PR stage reports it and the proposal stays in `docs/runs/<id>/pr.md`.
+- Not a git repository or no `gh` CLI: the PR stage reports it and the proposal stays in `docs/runs/<id>/pr.md`.
 - A subagent needs another area: stop, ask the human to approve widening the area, update the spec, then continue.
 
 ## Never

@@ -36,9 +36,18 @@
     "enabled": true,
     "platform": "github-actions",
     "workflowDir": ".github/workflows",
-    "ciWorkflow": { "file": "ci.yml", "name": "CI" },
-    "cdWorkflow": { "file": "cd.yml", "name": "CD" },
+    "ciWorkflows": [
+      { "file": "ci-backend.yml", "name": "CI - Backend Test/Build", "gatesCd": true },
+      { "file": "ci-frontend.yml", "name": "CI - Frontend Test/Build", "gatesCd": true },
+      { "file": "ci-pr-check.yml", "name": "CI - PR Check", "gatesCd": false }
+    ],
+    "cdWorkflow": { "file": "cd.yml", "name": "CD - Merge dev into main" },
     "branches": { "integration": "dev", "release": "main" },
     "cdMode": "merge-only"
+  },
+  "pullRequests": {
+    "platform": "github",
+    "baseBranch": "dev",
+    "branchPrefix": "task/"
   }
 }

@@ -2,10 +2,10 @@
 
 Agent: `.github/agents/release-manager.agent.md` | Skills: `create-pr`, `approve-pr` | Replaces: Frontend, Backend, Container and Pipeline Task-to-PR agents, and Handover.
 
-Prepare, commit and push are separate human-gated steps. It never creates or switches branches and never pushes `main` or the release branch.
+Prepare, commit and push are separate human-gated steps. It commits on a `task/<task-id>` branch (created from `dev` when `dev` is checked out), pushes that branch and opens the GitHub PR into `dev`. It never pushes `dev`, `main` or the release branch.
 
 > Read this file first instead of re-reading old reports. Update it at the end of every task (rules: `docs/context/README.md`, Agent context files). Keep it under ~80 lines.
-> Updated: 2026-11-16 (task 649 AC10 acceptance recorded)
+> Updated: 2026-11-23 (PR flow: task branch and GitHub PR)
 
 ## Tasks
 
@@ -36,6 +36,7 @@ Prepare, commit and push are separate human-gated steps. It never creates or swi
 ## Open items
 
 - Many branches are local only; a stacked PR chain (602 -> header, backend login -> containers) needs pushes in order.
+- Earlier tasks were committed straight on `dev` and never produced a GitHub PR (`no PR: dev`). Since 2026-11-23 `approve-pr` uses a `task/<id>` branch and `gh pr create --base dev`; `gh` is not installed on this machine yet (without it the agent gives a compare link).
 - `create-pr` now writes the handover before the commit, so it is part of the commit (previously uncommitted).
 - `approve-pr` sets `done` only after a successful push; a local-only commit leaves `implemented`.
 - 649: current branch is `dev` (integration branch, tracks `origin/dev`); a commit there is pushed by the human decision only.
