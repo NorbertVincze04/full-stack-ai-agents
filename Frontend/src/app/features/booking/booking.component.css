@@ -1,3 +1,8 @@
+:host {
+  display: block;
+  container-type: inline-size;
+}
+
 .top-bar {
   box-sizing: border-box;
   width: 100%;
@@ -54,9 +59,8 @@
 
 .booking-layout {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: flex-start;
-  justify-content: center;
   gap: 0 1.5rem;
   margin: 0;
 }
@@ -65,16 +69,24 @@
 .layout-plan {
   box-sizing: border-box;
   min-width: 0;
-}
-
-.layout-calendar {
-  flex: 0 1 24rem;
+  flex: 1 1 0;
 }
 
 .layout-plan {
-  flex: 1 1 22rem;
-  max-width: 36rem;
   padding: 1rem 0;
+}
+
+@container (max-width: 767.98px) {
+  .booking-layout {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .layout-calendar,
+  .layout-plan {
+    flex: 0 0 auto;
+    width: 100%;
+  }
 }
 
 app-calendar,

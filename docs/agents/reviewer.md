@@ -5,7 +5,7 @@ Agent: `.github/agents/reviewer.agent.md` | Skill: `review` (+ `checklists.md`) 
 Scopes: `code`, `security`, `ux`, `containers`, `pipelines`. Dependency advisories: npm `critical` blocks, everything lower is a follow-up.
 
 > Read this file first instead of re-reading old reports. Update it at the end of every task (rules: `docs/context/README.md`, Agent context files). Keep it under ~80 lines.
-> Updated: 2026-11-23 (manual-visible-password)
+> Updated: 2026-11-23 (manual-div-for-hero-section)
 
 ## Tasks
 
@@ -26,6 +26,7 @@ Scopes: `code`, `security`, `ux`, `containers`, `pipelines`. Dependency advisori
 | 650 desk numbering | code (incl. destructive migrations 006), UX (security skipped by flags) | Both approved. Code: 1 medium (no lock/operator note for migration run), 4 low. UX: 1 medium (block gap via margins shrinks col 3 / row 3 desks), 2 low |
 | manual-terms-services-page | frontend code, UX (security skipped by flags) | Both approved. Code: 2 low (no component spec, no route `title`). UX: 1 low (no active-link cue in header) |
 | manual-visible-password | frontend code, UX (security skipped by request) | Both approved. Code: 3 low (triplicated toggle markup, inline booleans, empty e2e). UX: 1 medium (identical accessible name on both register toggles), 2 low (label plus `aria-pressed` double state, 320 px unverified) |
+| manual-div-for-hero-section | frontend UX (code, security skipped by flags) | Approved. 4 low (no comment on container-query choice, calendar `max-width` leaves gap in 50% div, 12 px desk text at 768 px unverified, no top-bar 320 px check). Container query is baseline since 2023 and fine |
 
 ## Defects and lessons
 

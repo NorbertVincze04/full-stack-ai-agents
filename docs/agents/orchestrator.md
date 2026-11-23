@@ -26,6 +26,7 @@ Runs the three workflows, owns the retry loops and every human gate. History bel
 | 650 desk numbering | feature | Azure | frontend, backend, database | tests backend 306/308 (2 skipped), frontend 263/263; review code+ux approved (0 blocker/high, 2 medium); PR proposal pending ([reports](../runs/650/)) |
 | manual-terms-services-page | feature | manual | frontend | tests 270/270, review code+ux approved (0 blocker/high/medium, 3 low); AC4 human-verified; e2e skipped (no runner); PR proposal pending ([reports](../runs/manual-terms-services-page/)) |
 | manual-visible-password | feature | manual | frontend | tests 288/288, review code+ux approved (0 blocker/high, 1 medium, 5 low); AC7 and 320 px human-verified; e2e skipped (no runner); PR proposal pending ([reports](../runs/manual-visible-password/)) |
+| manual-div-for-hero-section | feature | manual | frontend | tests 295/295, review ux approved (0 blocker/high/medium, 4 low); AC1/AC3 human-verified; e2e skipped (no runner); PR proposal pending ([reports](../runs/manual-div-for-hero-section/)) |
 | manual-desk-labeling | defect (006 not applied locally) | manual | containers | local volume recreated, 16 desks A1-D4, AC4 human-verified ([report](../runs/manual-desk-labeling/containerize.md)); no code change |
 
 ## Defects and lessons
@@ -43,6 +44,7 @@ Runs the three workflows, owns the retry loops and every human gate. History bel
 | manual-desk-labeling | Labels D01-D12 came from a db-data volume older than migration 006; R1/R2 approved (pg_dump first, `compose down -v`), agent applied locally; Cloud Foundry stays human-applied |
 | manual-terms-services-page | D1 link in app header next to Help; D2 route /terms, label "Terms"; D3 h1 "Terms of Service"; D4 placeholder text marked not legal; no risks; no fix loops |
 | manual-visible-password | D1 eye on login Password and both register fields, independent toggles; no risks; no fix loops; medium (identical accessible name on two register toggles) carried to PR |
+| manual-div-for-hero-section | Hero = `.booking-layout`, 50/50, stack below 768px (container query on host, not viewport media query); no risks; no fix loops; first attempt discarded by the human and task reworded ("placeholder" removed) |
 | header, info, 602 | Acceptance check passed (`human-accepted`); 602 needed fix iteration 1 first |
 
 ## Loops
