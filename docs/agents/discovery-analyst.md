@@ -12,6 +12,7 @@ Builds `docs/discovery.md` (the verified fact base read by `/spec`) with one ful
 | Date | Mode | Commit | Result |
 | --- | --- | --- | --- |
 | 2026-11-23 | existing, full | c26b063 | `docs/discovery.md` created (~190 lines): 382 files, 36 dependencies, 14 feature rows (13 implemented, 1 planned), 13 interfaces; `stale` = fresh; no context files seeded (all 5 present) |
+| 2026-11-23 | update | 6dcf74c | 6 changed files: hero-layout spec (21 specs), booking css, new `live-ui/`; 3 sections refreshed, 2 feature rows + 1 layout row added |
 
 ## Defects and lessons
 

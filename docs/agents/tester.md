@@ -5,7 +5,7 @@ Agent: `.github/agents/tester.agent.md` | Skills: `tdd`, `test` | Replaces: Fron
 Backend tests: `node:test` in `Backend/tests/` (`npm test`). Frontend: Karma/Jasmine (`npm run test:ci`). There is no e2e runner in the repository.
 
 > Read this file first instead of re-reading old reports. Update it at the end of every task (rules: `docs/context/README.md`, Agent context files). Keep it under ~80 lines.
-> Updated: 2026-11-23 (terms page)
+> Updated: 2026-11-23 (shadow and borders)
 
 ## Tasks
 
@@ -28,6 +28,7 @@ Backend tests: `node:test` in `Backend/tests/` (`npm test`). Frontend: Karma/Jas
 | visible password (red) | n/a | 288 run: 270 pass, 18 red (new `*.password-toggle.spec.ts` in login and register; toggle button missing) | [tdd-frontend.md](../runs/manual-visible-password/tdd-frontend.md) |
 | visible password (green) | n/a | 288/288 (18 red now pass); build pass | [tdd-frontend.md](../runs/manual-visible-password/tdd-frontend.md); e2e `skipped: no e2e runner` ([e2e.md](../runs/manual-visible-password/e2e.md)); no defects; Enter/Space and 320 px unasserted |
 | hero section split (green) | n/a | 295/295 (+2 breakpoint specs 767/768 px, red specs pass); build pass | [tdd-frontend.md](../runs/manual-div-for-hero-section/tdd-frontend.md); e2e `skipped: no e2e runner` ([e2e.md](../runs/manual-div-for-hero-section/e2e.md)); no defects |
+| shadow and borders (green) | n/a | 310/310 (12 red specs now pass); build pass | [tdd-frontend.md](../runs/manual-shadow-borders/tdd-frontend.md); e2e `skipped: no e2e runner` ([e2e.md](../runs/manual-shadow-borders/e2e.md)); no defects; hover, focus ring, contrast unasserted |
 | hero section split (red) | n/a | 293 run: 291 pass, 2 red (`booking.component.hero-layout.spec.ts`: equal widths, row fill); 3 already-green guards | [tdd-frontend.md](../runs/manual-div-for-hero-section/tdd-frontend.md); 768 px media query not testable from a spec |
 
 ## Defects and lessons
