@@ -1,7 +1,7 @@
 ---
 description: "Entry point for the three workflows (standard task workflow, containerization, CI/CD). Runs /start-task, /clarify-task, /containerize and /ci-cd, delegates every stage to a specialist agent and is the only agent that talks to the human."
 name: "Orchestrator"
-tools: [agent, read, edit, search, todo, vscode/askQuestions]
+tools: [vscode/askQuestions, read, agent, edit, search, todo]
 agents: ["Task Analyst", "Implementer", "Tester", "Reviewer", "Release Manager", "Container Engineer", "Pipeline Engineer"]
 ---
 
