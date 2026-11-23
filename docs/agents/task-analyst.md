@@ -5,7 +5,7 @@ Agent: `.github/agents/task-analyst.agent.md` | Skills: `get-task`, `spec` | Rep
 Turns a work item into `docs/tasks/<id>.md` and `docs/specs/<id>.md`. Azure DevOps project `WebTools`, tag filter `deskbookingPrj` (`.github/config.json`).
 
 > Read this file first instead of re-reading old reports. Update it at the end of every task (rules: `docs/context/README.md`, Agent context files). Keep it under ~80 lines.
-> Updated: 2026-11-23 (task 650 ingested)
+> Updated: 2026-11-23 (manual terms-services page specified)
 
 ## Tasks
 
@@ -24,6 +24,7 @@ Turns a work item into `docs/tasks/<id>.md` and `docs/specs/<id>.md`. Azure DevO
 | CI on dev push, then CD after CI success | manual | pipelines | Inspection-only task; risks R1 (auto-merge on first green CI), R2 (repository settings) |
 | 649 | Azure | feature | Frontend-only toggle select/deselect for calendar days and desks; 11 ACs after answers (no day on load, disabled `Book Now` without a day, own day/desk toggle = selection only); risks R1-R3 (all low); decisions D1-D3; spec `docs/specs/649.md`. An e2e runner follow-up (D4-D8, ACs 12-20, R4, R5, R8) was withdrawn by human decision D9: no runner, no dependency, flags back to no dependency/security change, area `frontend` with no new work; AC10 is verified manually by the human (steps in the spec), then the task may be set to `done` |
 | 650 | Azure | feature | Specified 2026-11-23, status `specified`, no open questions: 16 desks A1-D4 as 4 blocks of 2 x 2, labels only; area frontend + backend; human chose Q1c (delete and recreate desks; `booking_desk` set to NULL first because the FK blocks the delete); risks R1, R2 (destructive migration, safer alternative kept), decisions D1-D4, assumptions A1-A4 (incl. Q2c vs Q3a: blocks without headings); tag ignored |
+| terms-services page | manual | feature | Frontend-only static page + header link (like info/Help); no AC or content given; answers Q1-Q4 merged (header next to Help, `/terms`, label "Terms", h1 "Terms of Service", placeholder text); status `specified`, 6 ACs, no risks |
 | desk labeling | manual | defect/verification | Same as 650 (A1-D4). Human saw D01..D12: 006 not applied to the running DB (init SQL runs only on an empty `db-data` volume; Cloud Foundry is human-applied). Specified, area containers, no code change, ACs 1-5, risks R1-R3; open: which DB, who applies |
 
 ## Defects and lessons
@@ -32,6 +33,7 @@ Turns a work item into `docs/tasks/<id>.md` and `docs/specs/<id>.md`. Azure DevO
 - Task 649: one-line AC ignored the consequence of deselecting the day (page always had a date selected); turned into question Q1 instead of assuming. "Toggle" on an own booking is ambiguous with withdraw; the spec fixes it as selection-only (D3).
 - Task 649: existing specs assume a preselected first day; the no-preselection answer requires adapting them (AC11).
 - Task 649 follow-up: a runner request hides three risky choices (dependency, browser download behind the proxy, CI). The human finally chose the safer alternative (no runner, manual AC10 check, D9); an option choice (D5) was never a risk approval.
+- Terms-services task: "heading" is ambiguous (app header vs `<h1>`); assumed header as A1 and asked, no content for the terms was given.
 - Task 648: acceptance criterion only covered the happy path; the spec added the weekend, past-date, anonymous and withdraw cases.
 - Backend login task: the literal request (drop `users`, CORS from any origin) was a risk-gate item and was approved only in a safer form.
 
@@ -41,4 +43,5 @@ Turns a work item into `docs/tasks/<id>.md` and `docs/specs/<id>.md`. Azure DevO
 - Task 649: nothing to implement; only the human's manual AC10 check and acceptance are open (`docs/runs/649/e2e.md` still describes the runner as a follow-up; the Tester or Release Manager records the result).
 - Task 650: answers merged; ready for implementation (human applies the migration after `pg_dump`). Azure DevOps `System.State` set to `Done` on 2026-11-23 (human confirmed; only the state changed).
 - manual-desk-labeling: answers merged, ready; local container only, Container Engineer dumps then `compose down -v` (R1, R2 approved); lesson: a migration in `db/migrations` does not reach an existing `db-data` volume.
+- manual-terms-services-page: answers merged, ready for the frontend implementer.
 - The `list` mode depends on the `ado` MCP server (PAT prompt) being started.

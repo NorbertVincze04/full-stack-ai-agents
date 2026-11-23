@@ -5,7 +5,7 @@ Agent: `.github/agents/reviewer.agent.md` | Skill: `review` (+ `checklists.md`) 
 Scopes: `code`, `security`, `ux`, `containers`, `pipelines`. Dependency advisories: npm `critical` blocks, everything lower is a follow-up.
 
 > Read this file first instead of re-reading old reports. Update it at the end of every task (rules: `docs/context/README.md`, Agent context files). Keep it under ~80 lines.
-> Updated: 2026-11-16 (task 649)
+> Updated: 2026-11-23 (manual-terms-services-page)
 
 ## Tasks
 
@@ -24,6 +24,7 @@ Scopes: `code`, `security`, `ux`, `containers`, `pipelines`. Dependency advisori
 | CI on dev, CD after CI | pipelines (twice) | Round 1: 1 high, 2 medium, 2 low, all fixed; re-review approved with 0 findings |
 | 649 select/deselect | frontend code, UX (security skipped by scope flags) | Both approved. Code: 4 low (duplicate `selectedDesk` reset, `select`/`deselect` duplication, stale docs, no e2e runner). UX: 1 medium (no plan hint for signed-in user without a day), 2 low (picked own desk colour-only, no live region on `No date selected`) |
 | 650 desk numbering | code (incl. destructive migrations 006), UX (security skipped by flags) | Both approved. Code: 1 medium (no lock/operator note for migration run), 4 low. UX: 1 medium (block gap via margins shrinks col 3 / row 3 desks), 2 low |
+| manual-terms-services-page | frontend code, UX (security skipped by flags) | Both approved. Code: 2 low (no component spec, no route `title`). UX: 1 low (no active-link cue in header) |
 
 ## Defects and lessons
 
@@ -33,6 +34,7 @@ Scopes: `code`, `security`, `ux`, `containers`, `pipelines`. Dependency advisori
 - Frontend race conditions around in-flight booking requests.
 - Stale test counts in `docs/context/*.md` after a task (again in 649: 145 vs 247, "specs pending").
 - Layout spacing done with margins on grid items instead of grid tracks/gaps (650).
+- Static routes (`info`, `terms`) lack a `title`; header links lack an active-route cue.
 - Colour-only state cues and missing hints for disabled/neutral states in the booking UI.
 
 ## Open items

@@ -9,6 +9,7 @@ function authMatcher(segments: UrlSegment[]): UrlMatchResult | null {
 const routes: Routes = [
   { path: '', pathMatch: 'full', loadChildren: () => import('./features/booking/booking.module').then(m => m.BookingModule) },
   { path: 'info', loadChildren: () => import('./features/info/info.module').then(m => m.InfoModule) },
+  { path: 'terms', loadChildren: () => import('./features/terms/terms.module').then(m => m.TermsModule) },
   { matcher: authMatcher, loadChildren: () => import('./features/auth/auth.module').then(m => m.AuthModule) }
 ];
 

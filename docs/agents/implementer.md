@@ -22,6 +22,7 @@ Stack: Angular 18 NgModule + RxJS (`Frontend/`), Express 5 + TypeScript ESM (`Ba
 | create a mockup office for booking | frontend, backend, database | `DeskPlanComponent` (12 desks, 4 x 3), `GET /api/desks`, `GET /api/desks/availability`, `desk` required on `POST /api/bookings`; local migration `005_ico_env_desks.sql` (applied to the local container after a `pg_dump` backup) and Cloud Foundry `004_create_desks_and_booking_desk.sql` (human applies) |
 | 649 select/deselect | frontend | Toggle on calendar days and desks (`dateDeselected`/`deskDeselected` outputs), no day selected on load, `No date selected` state with disabled `Book Now` and neutral desks, own desk (`yours`) selectable with `pressed` flag; no API change |
 | 650 desk numbering | backend, database, frontend | Migrations `006` (public and `"ico-env"`): guarded NULL-out of `booking_desk`, delete desks, insert A1..D4; no source change, not applied. Frontend: `block-left-edge`/`block-top-edge` spacing classes in `DeskPlanComponent` separate the 2 x 2 blocks (CSS only, labels only) |
+| manual-terms-services-page | frontend | Lazy `TermsModule` on `/terms` (h1 "Terms of Service", placeholder text) and a `Terms` header link after Help; reused header styles; 269 specs and build green |
 
 ## Defects and lessons
 

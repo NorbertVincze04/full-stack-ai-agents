@@ -2,6 +2,7 @@
   <h1><a routerLink="/">{{ title }}</a></h1>
   <div class="header-actions">
     <a routerLink="/info">Help</a>
+    <a routerLink="/terms">Terms</a>
     @if (user$ | async; as user) {
       <span class="user-name" [title]="user.fullName">{{ user.fullName }}</span>
       <button type="button" class="logout-button" aria-label="Log out" (click)="logout()">
