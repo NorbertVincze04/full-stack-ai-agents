@@ -68,7 +68,7 @@ Agents change none of these.
 4. If `main` has branch protection or a ruleset (required PR, required checks, linear history): add `github-actions[bot]` (GitHub Actions app) to the bypass list, or CD's push is rejected. Merge commits must be allowed; "linear history" is incompatible with `--no-ff`. CD never works around protection; alternatively provide your own token secret (needs a spec change).
 5. Optional: make `PR - title, branches and files` a required check on PRs into `dev` and `main`. Do not require the Backend/Frontend CI jobs (path-filtered), and never on the direct CD push to `main`.
 6. Pushes made with `GITHUB_TOKEN` start no other workflows (acceptable: CI does not run on `main` pushes).
-7. Pull requests: agents push a `task/<task-id>` branch and open the PR into `dev` with `gh` (install it and run `gh auth login`); without `gh` they give a compare link. Merging that PR into `dev` is what triggers CI and then CD.
+7. Agents work on `dev` only and push it after human confirmation; that push triggers CI and then CD. `CI - PR Check` applies only to PRs the human opens.
 
 ## Enablement and verification (human, in this order)
 

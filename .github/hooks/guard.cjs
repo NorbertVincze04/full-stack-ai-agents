@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const rules = [
   [/\bgit\s+push\b[^\n;|&]*(--force\b|--force-with-lease|\s-f\b)/, 'force-push is forbidden'],
   [/\bgit\s+push\b[^\n;|&]*[\s:](main|master)(\s|$)/, 'pushing main/master is forbidden'],
-  [/\bgit\s+push\b[^\n;|&]*[\s:]dev(\s|$)/, 'pushing dev directly is forbidden: push a task branch and open a PR'],
+  [/\bgit\s+(switch\s+-[cC]\b|checkout\s+-[bB]\b|branch\s+(?!-)\S)/, 'creating branches is forbidden: agents work on dev only'],
   [/--no-verify\b/, 'bypassing git hooks (--no-verify) is forbidden'],
   [/\bgit\s+reset\s+--hard\b/, 'git reset --hard discards work'],
   [/\bgit\s+branch\s+-[dD]\b|\bgit\s+push\b[^\n;|&]*--delete\b/, 'deleting branches is forbidden'],

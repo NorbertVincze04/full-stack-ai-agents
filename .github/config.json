@@ -47,7 +47,6 @@
   },
   "pullRequests": {
     "platform": "github",
-    "baseBranch": "dev",
-    "branchPrefix": "task/"
+    "baseBranch": "dev"
   }
 }
