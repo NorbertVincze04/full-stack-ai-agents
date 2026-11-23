@@ -21,14 +21,15 @@ Take the argument: Azure task ID, `list`, or manual text. Run `Task Analyst` `/g
 8. **Manual checks**: list the acceptance criteria that no test or review verified (manual checks such as applying a migration or a backup restore). Ask the human, per criterion, to run it and confirm: verified (with the evidence), failed (back to step 4 with the feedback), or skip (stays `Not verified`). Pass the confirmed ones to `/create-pr` as `manual-verified`.
 9. **PR**: first update `docs/agents/orchestrator.md` per `docs/context/README.md` (Agent context files): this task's row, decisions and loop outcomes, `Open items` (the specialist agents have already updated their own files). Then `Release Manager` `/create-pr <id>`. Show the human the proposal (branch, commit message, files, open findings, how to verify) and ask: commit as proposed, edit message/files, changes needed (free text -> back to step 4 with the feedback, maximum 3 rounds), stop.
 10. **Commit**: after the confirmation call `Release Manager` `/approve-pr <id> commit` with `human-confirmed: true`, the exact message and file list.
-11. **Push**: ask separately whether to push `dev` (push, keep local). Only if confirmed call `/approve-pr <id> push` with `push: true`.
-12. Fill the `Totals` line of `metrics.md`, then finish with a short summary: task, area, outcome per stage, commits, PR URL, unresolved findings, report paths.
+11. **Push + PR**: ask separately whether to push the task branch and open the PR into `dev` (push, keep local). Only if confirmed call `/approve-pr <id> push` with `push: true`. Tell the human to merge the PR; CI then runs on `dev` and CD merges `dev` into `main` and deletes the merged task branch on GitHub.
+12. **Cleanup**: when the human reports the PR merged and CD finished, call `/approve-pr <id> cleanup` (deletes the local task branch, switches back to `dev`, checks the remote branch is gone).
+13. Fill the `Totals` line of `metrics.md`, then finish with a short summary: task, area, outcome per stage, commits, PR URL, unresolved findings, report paths.
 
 ## When it fails
 - Spec still `Ready: no` after 3 clarification rounds: ask the human how to proceed; do not implement.
 - An implementer, tester or reviewer returns `blocked`: show the reason and ask the human before continuing.
 - Retry limits reached (tests or review): `/clarify-task <id> decision`; apply the decision, then continue from the stage concerned.
-- Not a git repository or `dev` not checked out: the PR stage reports it and the proposal stays in `docs/runs/<id>/pr.md`.
+- Not a git repository or `dev` (or `task/<id>`) not checked out: the PR stage reports it and the proposal stays in `docs/runs/<id>/pr.md`.
 - A subagent needs another area: stop, ask the human to approve widening the area, update the spec, then continue.
 
 ## Never
@@ -36,5 +37,5 @@ Take the argument: Azure task ID, `list`, or manual text. Run `Task Analyst` `/g
 - Skip the spec, implement while a blocking question or unapproved risk is open, or approve a risk for the human.
 - Run the reviewers while tests fail, or loop more than the configured limits.
 - Commit or push without the human's explicit confirmation in this conversation, or combine the commit and push confirmations.
-- Let any agent create or switch branches; all work happens on `dev`.
+- Let any agent create, push, switch to or delete a branch other than the task's `task/<id>` branch (created by `approve-pr` from `dev`); implementation work happens on `dev` before the commit stage.
 - Call agents of areas that are not in the spec `Area`.

@@ -4,10 +4,10 @@ const fs = require('node:fs');
 const rules = [
   [/\bgit\s+push\b[^\n;|&]*(--force\b|--force-with-lease|\s-f\b)/, 'force-push is forbidden'],
   [/\bgit\s+push\b[^\n;|&]*[\s:](main|master)(\s|$)/, 'pushing main/master is forbidden'],
-  [/\bgit\s+(switch\s+-[cC]\b|checkout\s+-[bB]\b|branch\s+(?!-)\S)/, 'creating branches is forbidden: agents work on dev only'],
+  [/\bgit\s+(switch\s+-[cC]\s+(?!task\/)|checkout\s+-[bB]\s+(?!task\/)|branch\s+(?!-|task\/)\S)/, 'only task/<id> branches may be created'],
   [/--no-verify\b/, 'bypassing git hooks (--no-verify) is forbidden'],
   [/\bgit\s+reset\s+--hard\b/, 'git reset --hard discards work'],
-  [/\bgit\s+branch\s+-[dD]\b|\bgit\s+push\b[^\n;|&]*--delete\b/, 'deleting branches is forbidden'],
+  [/\bgit\s+branch\s+-[dD]\s+(?!task\/)|\bgit\s+push\b[^\n;|&]*--delete\s+(?!task\/|\S+\s+task\/)/, 'only task/<id> branches may be deleted'],
   [/\b(podman|docker)(\s+|-)compose\s+down\b[^\n;|&]*(\s-v\b|--volumes)/, 'compose down -v deletes the database volume'],
   [/\b(podman|docker)\s+(system\s+(prune|reset)|volume\s+(rm|prune))\b/, 'prune/volume removal needs human approval'],
   [/\bpodman\s+machine\s+(rm|reset|init)\b/, 'machine changes need human approval'],

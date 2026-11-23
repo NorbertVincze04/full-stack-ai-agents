@@ -11,7 +11,7 @@ Agent: `Release Manager`. If you are another agent, run this skill through a `Re
 Read `docs/runs/<task-id>/brief.md` first if it exists (it lists the reports and their verdicts), then `docs/tasks/<task-id>.md`, `docs/specs/<task-id>.md` only for what the brief lacks, and the reports it points to; run `git status`, `git diff --stat` and `git branch --show-current`. Read `.github/config.json` -> `pipelines.branches`, `pullRequests` and `azureDevOps`. Take `approved-risks`, the `Review selection` and, if given, the human's `human-accepted: true` from the caller. Read `docs/agents/release-manager.md` first (branches, past commits, open items).
 
 ## Steps
-1. Confirm the workspace is a git repository and note the current branch. The commit lands on the integration branch (`pullRequests.baseBranch`, `dev`); if another branch is checked out, report it and stop. Never propose a new branch.
+1. Confirm the workspace is a git repository and note the current branch. The commit lands on a new branch `task/<task-id>` created from the integration branch (`pullRequests.baseBranch`, `dev`) by `approve-pr`; `dev` or `task/<task-id>` must be checked out, otherwise report it and stop. The PR goes from `task/<task-id>` into `dev`.
 2. Verify each acceptance criterion with evidence (test result, build output, reviewer report, or the human's manual confirmation passed by the caller as `manual-verified`). Unverified criteria stay `Not verified`; do not upgrade them.
 3. Build the exact file list from the reports and `git status`. Allowed: `Backend/`, `Frontend/`, `compose.yaml`, `.env.example`, container files (`Containerfile`, `.containerignore`, `.dockerignore`, `nginx.conf`, `certs/README.md`), `.github/workflows/`, `docs/context/*`, `docs/tasks/<id>.md`, `docs/specs/<id>.md`, `docs/runs/<id>/`, `docs/handover/<id>.md`, `docs/agents/*.md` (the agents' context files). Anything else is reported, not proposed.
 4. Write `docs/runs/<task-id>/pr.md` (it becomes the GitHub PR description; the title is `<task-id>: <title>`): title, summary per area, acceptance criteria checklist, test results (tdd/e2e), `Review coverage` (each scope run or skipped and why), `Approved risks` and the human's decisions, migration to apply, how to start and verify, repository settings the human must configure (pipelines), open findings.
@@ -26,7 +26,7 @@ Read `docs/runs/<task-id>/brief.md` first if it exists (it lists the reports and
 - A `blocker` finding still open, or no tests run for a logic change: list it prominently in the proposal; the human decides.
 
 ## Never
-- Stage, commit, push or run any git command that writes; create, switch or delete branches.
+- Stage, commit, push or run any git command that writes; create, switch or delete branches (that is `approve-pr`).
 - Modify source code, tests or other agents' reports.
 - Mark an acceptance criterion verified without evidence.
 - Include `.env`, certificates, backups or anything containing secrets.

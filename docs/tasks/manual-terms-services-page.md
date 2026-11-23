@@ -4,7 +4,7 @@ source: manual
 url:
 title: terms-services page
 tags: []
-status: specified
+status: done
 ---
 
 ## Description

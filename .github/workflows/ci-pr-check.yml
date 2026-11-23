@@ -36,7 +36,7 @@ jobs:
             echo "::error::PRs into main must come from dev (got $HEAD_REF)."
             fail=1
           fi
-          if [ "$BASE_REF" = "dev" ] && { [ "$HEAD_REF" = "main" ] || [ "$HEAD_REF" = "dev" ]; }; then
+          if [ "$BASE_REF" = "dev" ] && ! printf '%s' "$HEAD_REF" | grep -Eq '^task/[A-Za-z0-9._-]+$'; then
             echo "::error::PRs into dev must come from a task branch (got $HEAD_REF)."
             fail=1
           fi

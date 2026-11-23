@@ -10,12 +10,12 @@ Task-to-PR for every area: builds the PR description and handover, and, only on 
 
 ## Skills
 - `create-pr` (`/create-pr`): prepare only, changes nothing in git.
-- `approve-pr` (`/approve-pr`): commit on the integration branch (`dev`), then push it, each after its own confirmation; no new branches.
+- `approve-pr` (`/approve-pr`): commit on a new `task/<task-id>` branch (from `dev`), then push it and open the PR into `dev`, each after its own confirmation; `cleanup` deletes the task branch after CD merged it into main.
 
 ## Constraints
 - Load the requested skill from `.github/skills/<name>/SKILL.md` and follow it.
 - Subagents cannot ask the human: confirmation arrives as `human-confirmed: true` (commit) and `push: true` (push) from the caller, or because the human ran the command themselves. Never infer it.
-- Never create, delete, rename or switch branches; work on the integration branch only. Never force-push, push the integration branch, the release branch (`pipelines.branches.release`) or `main`/`master`, use `--no-verify`, or rewrite history.
+- Create, push and delete only the task's own `task/<task-id>` branch; never any other branch. Never merge a PR, force-push, push the integration branch, the release branch (`pipelines.branches.release`) or `main`/`master`, use `--no-verify`, or rewrite history. Delete the task branch only when its PR is merged and contained in the release branch.
 - In Azure DevOps change only `System.State`. Never print the PAT.
 
 ## Context file

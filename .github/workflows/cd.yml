@@ -131,3 +131,39 @@ jobs:
             exit 1
           fi
           git push origin HEAD:refs/heads/main
+
+  cleanup:
+    name: delete merged task branches
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [verify, merge]
+    if: needs.merge.result == 'success'
+    permissions:
+      contents: write
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Delete task branches whose PR is merged and now in main
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          gh api "repos/$REPO/pulls?state=closed&base=dev&per_page=100" \
+            --jq '.[] | select(.merged_at != null and .head.repo.full_name == "'"$REPO"'" and (.head.ref | startswith("task/"))) | [.head.ref, .merge_commit_sha] | @tsv' |
+          while IFS=$'\t' read -r ref sha; do
+            if ! printf '%s' "$ref" | grep -Eq '^task/[A-Za-z0-9._-]+$'; then
+              continue
+            fi
+            if ! git merge-base --is-ancestor "$sha" origin/main 2>/dev/null; then
+              echo "::notice::$ref is merged into dev but not yet in main. Keeping it."
+              continue
+            fi
+            if gh api -X DELETE "repos/$REPO/git/refs/heads/$ref" >/dev/null 2>&1; then
+              echo "Deleted $ref"
+            fi
+          done
