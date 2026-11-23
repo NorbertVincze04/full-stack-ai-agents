@@ -22,7 +22,7 @@ describe('BookingComponent', () => {
   const url = `${environment.apiUrl}/bookings`;
   const desksUrl = `${environment.apiUrl}/desks`;
   const token = makeToken(3600);
-  const deskIds = Array.from({ length: 12 }, (_, i) => `D${String(i + 1).padStart(2, '0')}`);
+  const deskIds = Array.from({ length: 16 }, (_, i) => `${'ABCD'[Math.floor(i / 4)]}${(i % 4) + 1}`);
   const layout = deskIds.map((id, i) => ({ id, label: id, row: Math.floor(i / 4) + 1, col: (i % 4) + 1 }));
 
   // Fixed "today": Friday 6 Nov 2026 -> window 6, 9, 10, 11 Nov. The page starts without a day (spec 649), so setup clicks `day` (null = leave unselected).
@@ -164,18 +164,18 @@ describe('BookingComponent', () => {
 
   describe('logged in (FR4, FR5, FR6, FR8)', () => {
     it('should load booked dates on load and show Withdraw booking for a booked selected date (FR8)', () => {
-      setup({ loggedIn: true, mine: [{ date: '2026-11-06', desk: 'D01' }] });
+      setup({ loggedIn: true, mine: [{ date: '2026-11-06', desk: 'A1' }] });
       expect(button().textContent?.trim()).toBe('Withdraw booking');
     });
 
     it('should show Book Now when the selected date is not booked', () => {
-      setup({ loggedIn: true, mine: [{ date: '2026-11-09', desk: 'D02' }] });
+      setup({ loggedIn: true, mine: [{ date: '2026-11-09', desk: 'A2' }] });
       expect(button().textContent?.trim()).toBe('Book Now');
     });
 
     it('should make the label follow the selected date (FR4)', () => {
       const mine = [
-        { date: '2026-11-09', desk: 'D02' },
+        { date: '2026-11-09', desk: 'A2' },
         { date: '2026-11-11', desk: null }
       ];
       setup({ loggedIn: true, mine });
@@ -195,13 +195,13 @@ describe('BookingComponent', () => {
 
     it('should POST { date, desk } with Bearer token on Book Now and switch to Withdraw booking (FR5)', () => {
       setup({ loggedIn: true });
-      pickDesk('D03');
+      pickDesk('A3');
       click();
       const req = http.expectOne(url);
       expect(req.request.method).toBe('POST');
-      expect(req.request.body).toEqual({ date: '2026-11-06', desk: 'D03' });
+      expect(req.request.body).toEqual({ date: '2026-11-06', desk: 'A3' });
       expect(req.request.headers.get('Authorization')).toBe(`Bearer ${token}`);
-      req.flush({ success: true, payload: { booking: { date: '2026-11-06', desk: 'D03' } } }, { status: 201, statusText: 'Created' });
+      req.flush({ success: true, payload: { booking: { date: '2026-11-06', desk: 'A3' } } }, { status: 201, statusText: 'Created' });
       fixture.detectChanges();
       expect(button().textContent?.trim()).toBe('Withdraw booking');
       expect(message()).toBe('');
@@ -209,17 +209,17 @@ describe('BookingComponent', () => {
 
     it('should allow bookings for several dates (FR5)', () => {
       setup({ loggedIn: true });
-      pickDesk('D03');
+      pickDesk('A3');
       click();
       http.expectOne(url).flush({ success: true }, { status: 201, statusText: 'Created' });
       day(9).click();
       fixture.detectChanges();
       flushAvailability();
       expect(button().textContent?.trim()).toBe('Book Now');
-      pickDesk('D03');
+      pickDesk('A3');
       click();
       const req = http.expectOne(url);
-      expect(req.request.body).toEqual({ date: '2026-11-09', desk: 'D03' });
+      expect(req.request.body).toEqual({ date: '2026-11-09', desk: 'A3' });
       req.flush({ success: true }, { status: 201, statusText: 'Created' });
       fixture.detectChanges();
       expect(button().textContent?.trim()).toBe('Withdraw booking');
@@ -229,8 +229,8 @@ describe('BookingComponent', () => {
 
     it('should DELETE /bookings/<date> on Withdraw booking and return to Book Now (FR6)', () => {
       const mine = [
-        { date: '2026-11-06', desk: 'D01' },
-        { date: '2026-11-09', desk: 'D02' }
+        { date: '2026-11-06', desk: 'A1' },
+        { date: '2026-11-09', desk: 'A2' }
       ];
       setup({ loggedIn: true, mine });
       click();
@@ -248,7 +248,7 @@ describe('BookingComponent', () => {
 
     it('should disable the button while a request is in flight and re-enable afterwards', () => {
       setup({ loggedIn: true });
-      pickDesk('D03');
+      pickDesk('A3');
       click();
       expect(button().disabled).toBeTrue();
       button().click();
@@ -260,7 +260,7 @@ describe('BookingComponent', () => {
 
     it('should show an error on 409, refresh availability and keep the state unchanged', () => {
       setup({ loggedIn: true });
-      pickDesk('D03');
+      pickDesk('A3');
       click();
       http.expectOne(url).flush({ success: false }, { status: 409, statusText: 'Conflict' });
       flushAvailability();
@@ -271,7 +271,7 @@ describe('BookingComponent', () => {
 
     it('should show a generic error on 500 when booking', () => {
       setup({ loggedIn: true });
-      pickDesk('D03');
+      pickDesk('A3');
       click();
       http.expectOne(url).flush({ success: false }, { status: 500, statusText: 'Server Error' });
       fixture.detectChanges();
@@ -279,7 +279,7 @@ describe('BookingComponent', () => {
     });
 
     it('should show a generic error and keep Withdraw booking on a 500 withdraw', () => {
-      setup({ loggedIn: true, mine: [{ date: '2026-11-06', desk: 'D01' }] });
+      setup({ loggedIn: true, mine: [{ date: '2026-11-06', desk: 'A1' }] });
       click();
       http.expectOne(`${url}/2026-11-06`).flush({ success: false }, { status: 500, statusText: 'Server Error' });
       fixture.detectChanges();
@@ -288,7 +288,7 @@ describe('BookingComponent', () => {
     });
 
     it('should drop the date locally when withdraw returns 404', () => {
-      setup({ loggedIn: true, mine: [{ date: '2026-11-06', desk: 'D01' }] });
+      setup({ loggedIn: true, mine: [{ date: '2026-11-06', desk: 'A1' }] });
       click();
       http.expectOne(`${url}/2026-11-06`).flush({ success: false }, { status: 404, statusText: 'Not Found' });
       fixture.detectChanges();
@@ -318,7 +318,7 @@ describe('BookingComponent', () => {
     it('should log out and show "You must log in first" when booking returns 401', () => {
       setup({ loggedIn: true });
       const auth = TestBed.inject(AuthService);
-      pickDesk('D03');
+      pickDesk('A3');
       click();
       http.expectOne(url).flush({ success: false }, { status: 401, statusText: 'Unauthorized' });
       fixture.detectChanges();
@@ -328,7 +328,7 @@ describe('BookingComponent', () => {
     });
 
     it('should log out and show the message when withdraw returns 401', () => {
-      setup({ loggedIn: true, mine: [{ date: '2026-11-06', desk: 'D01' }] });
+      setup({ loggedIn: true, mine: [{ date: '2026-11-06', desk: 'A1' }] });
       const auth = TestBed.inject(AuthService);
       click();
       http.expectOne(`${url}/2026-11-06`).flush({ success: false }, { status: 401, statusText: 'Unauthorized' });
@@ -355,7 +355,7 @@ describe('BookingComponent', () => {
     });
 
     it('should clear booked state after logout so the button shows Book Now', () => {
-      setup({ loggedIn: true, mine: [{ date: '2026-11-06', desk: 'D01' }] });
+      setup({ loggedIn: true, mine: [{ date: '2026-11-06', desk: 'A1' }] });
       expect(button().textContent?.trim()).toBe('Withdraw booking');
       TestBed.inject(AuthService).logout();
       fixture.detectChanges();

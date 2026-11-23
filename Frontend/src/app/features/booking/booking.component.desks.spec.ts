@@ -24,7 +24,7 @@ describe('BookingComponent desk plan', () => {
   const bookingsUrl = `${environment.apiUrl}/bookings`;
   const desksUrl = `${environment.apiUrl}/desks`;
   const token = makeToken(3600);
-  const ids = Array.from({ length: 12 }, (_, i) => `D${String(i + 1).padStart(2, '0')}`);
+  const ids = Array.from({ length: 16 }, (_, i) => `${'ABCD'[Math.floor(i / 4)]}${(i % 4) + 1}`);
   const layout = ids.map((id, i) => ({ id, label: id, row: Math.floor(i / 4) + 1, col: (i % 4) + 1 }));
   const free = (overrides: Record<string, string> = {}): DeskAvailability[] =>
     ids.map(id => (overrides[id] ? { id, booked: true, bookedBy: overrides[id] } : { id, booked: false }));
@@ -98,11 +98,11 @@ describe('BookingComponent desk plan', () => {
   });
 
   describe('AC1: layout on the page', () => {
-    it('should render the calendar and exactly 12 desks loaded from GET /desks', () => {
+    it('should render the calendar and exactly 16 desks loaded from GET /desks', () => {
       setup({ loggedIn: false });
       expect(root.querySelector('app-calendar')).not.toBeNull();
       expect(root.querySelector('app-desk-plan')).not.toBeNull();
-      expect(desks().length).toBe(12);
+      expect(desks().length).toBe(16);
     });
 
     it('should show the plan to signed-out users without state and without an availability request', () => {
@@ -184,21 +184,21 @@ describe('BookingComponent desk plan', () => {
       const req = http.expectOne(r => r.url === `${desksUrl}/availability`);
       expect(req.request.params.get('date')).toBe('2026-11-06');
       expect(req.request.headers.get('Authorization')).toBe(`Bearer ${token}`);
-      req.flush({ success: true, payload: { desks: free({ D04: 'Ana' }) } });
+      req.flush({ success: true, payload: { desks: free({ A4: 'Ana' }) } });
       fixture.detectChanges();
-      expect(desk('D04').getAttribute('aria-label')).toBe('Desk D04, booked by Ana');
-      expect(desk('D04').querySelector('.desk-by')?.textContent?.trim()).toBe('Ana');
-      expect(desk('D03').getAttribute('aria-label')).toBe('Desk D03, available');
+      expect(desk('A4').getAttribute('aria-label')).toBe('Desk A4, booked by Ana');
+      expect(desk('A4').querySelector('.desk-by')?.textContent?.trim()).toBe('Ana');
+      expect(desk('A3').getAttribute('aria-label')).toBe('Desk A3, available');
     });
 
     it('should reload availability when the date changes and show the new state', () => {
-      setup({ loggedIn: true, booked: { D04: 'Ana' } });
+      setup({ loggedIn: true, booked: { A4: 'Ana' } });
       day(9).click();
       fixture.detectChanges();
-      const date = flushAvailability({ D07: 'Ben' });
+      const date = flushAvailability({ B3: 'Ben' });
       expect(date).toBe('2026-11-09');
-      expect(desk('D04').getAttribute('aria-label')).toBe('Desk D04, available');
-      expect(desk('D07').getAttribute('aria-label')).toBe('Desk D07, booked by Ben');
+      expect(desk('A4').getAttribute('aria-label')).toBe('Desk A4, available');
+      expect(desk('B3').getAttribute('aria-label')).toBe('Desk B3, booked by Ben');
     });
 
     it('should ignore a stale availability response when the date changed meanwhile', () => {
@@ -211,14 +211,14 @@ describe('BookingComponent desk plan', () => {
       const dates = reqs.map(r => r.request.params.get('date'));
       const current = reqs.find(r => r.request.params.get('date') === '2026-11-10');
       expect(dates).toContain('2026-11-10');
-      current!.flush({ success: true, payload: { desks: free({ D02: 'Current' }) } });
+      current!.flush({ success: true, payload: { desks: free({ A2: 'Current' }) } });
       fixture.detectChanges();
       for (const stale of reqs.filter(r => r !== current && !r.cancelled)) {
-        stale.flush({ success: true, payload: { desks: free({ D09: 'Stale' }) } });
+        stale.flush({ success: true, payload: { desks: free({ C1: 'Stale' }) } });
       }
       fixture.detectChanges();
-      expect(desk('D02').getAttribute('aria-label')).toBe('Desk D02, booked by Current');
-      expect(desk('D09').getAttribute('aria-label')).toBe('Desk D09, available');
+      expect(desk('A2').getAttribute('aria-label')).toBe('Desk A2, booked by Current');
+      expect(desk('C1').getAttribute('aria-label')).toBe('Desk C1, available');
     });
 
     it('should show a generic message when availability fails with 500', () => {
@@ -242,7 +242,7 @@ describe('BookingComponent desk plan', () => {
     });
 
     it('should drop the desk states after logout', () => {
-      setup({ loggedIn: true, booked: { D04: 'Ana' } });
+      setup({ loggedIn: true, booked: { A4: 'Ana' } });
       TestBed.inject(AuthService).logout();
       fixture.detectChanges();
       for (const b of desks()) {
@@ -256,18 +256,18 @@ describe('BookingComponent desk plan', () => {
   describe('AC4: booking a selected desk', () => {
     it('should highlight a free desk when selected', () => {
       setup({ loggedIn: true });
-      pick('D03');
-      expect(desk('D03').getAttribute('aria-pressed')).toBe('true');
-      expect(desk('D03').getAttribute('aria-label')).toBe('Desk D03, selected');
-      expect(desk('D02').getAttribute('aria-pressed')).toBe('false');
+      pick('A3');
+      expect(desk('A3').getAttribute('aria-pressed')).toBe('true');
+      expect(desk('A3').getAttribute('aria-label')).toBe('Desk A3, selected');
+      expect(desk('A2').getAttribute('aria-pressed')).toBe('false');
     });
 
     it('should move the selection when another free desk is picked', () => {
       setup({ loggedIn: true });
-      pick('D03');
-      pick('D08');
-      expect(desk('D03').getAttribute('aria-pressed')).toBe('false');
-      expect(desk('D08').getAttribute('aria-pressed')).toBe('true');
+      pick('A3');
+      pick('B4');
+      expect(desk('A3').getAttribute('aria-pressed')).toBe('false');
+      expect(desk('B4').getAttribute('aria-pressed')).toBe('true');
     });
 
     it('should send no request and ask for a desk when Book Now is pressed without a selection', () => {
@@ -280,23 +280,23 @@ describe('BookingComponent desk plan', () => {
 
     it('should POST { date, desk }, show the desk as yours (still selectable, spec 649 R3) and switch to Withdraw booking', () => {
       setup({ loggedIn: true });
-      pick('D03');
+      pick('A3');
       clickBook();
       const req = http.expectOne(bookingsUrl);
       expect(req.request.method).toBe('POST');
-      expect(req.request.body).toEqual({ date: '2026-11-06', desk: 'D03' });
+      expect(req.request.body).toEqual({ date: '2026-11-06', desk: 'A3' });
       expect(req.request.headers.get('Authorization')).toBe(`Bearer ${token}`);
-      req.flush({ success: true, payload: { booking: { date: '2026-11-06', desk: 'D03' } } }, { status: 201, statusText: 'Created' });
+      req.flush({ success: true, payload: { booking: { date: '2026-11-06', desk: 'A3' } } }, { status: 201, statusText: 'Created' });
       fixture.detectChanges();
-      expect(desk('D03').getAttribute('aria-label')).toBe('Desk D03, yours');
-      expect(desk('D03').disabled).toBeFalse();
-      expect(desk('D03').getAttribute('aria-pressed')).toBe('false');
+      expect(desk('A3').getAttribute('aria-label')).toBe('Desk A3, yours');
+      expect(desk('A3').disabled).toBeFalse();
+      expect(desk('A3').getAttribute('aria-pressed')).toBe('false');
       expect(bookButton().textContent?.trim()).toBe('Withdraw booking');
     });
 
     it('should send the user id nowhere in the booking request body', () => {
       setup({ loggedIn: true });
-      pick('D03');
+      pick('A3');
       clickBook();
       const req = http.expectOne(bookingsUrl);
       expect(Object.keys(req.request.body as object).sort()).toEqual(['date', 'desk']);
@@ -305,7 +305,7 @@ describe('BookingComponent desk plan', () => {
 
     it('should reset the desk selection when the date changes', () => {
       setup({ loggedIn: true });
-      pick('D03');
+      pick('A3');
       day(9).click();
       fixture.detectChanges();
       flushAvailability();
@@ -316,14 +316,14 @@ describe('BookingComponent desk plan', () => {
     });
 
     it('should show my desk as yours from my bookings and free it again after withdrawing', () => {
-      setup({ loggedIn: true, mine: [{ date: '2026-11-06', desk: 'D05' }], booked: { D05: TEST_USER.fullName } });
-      expect(desk('D05').getAttribute('aria-label')).toBe('Desk D05, yours');
+      setup({ loggedIn: true, mine: [{ date: '2026-11-06', desk: 'B1' }], booked: { B1: TEST_USER.fullName } });
+      expect(desk('B1').getAttribute('aria-label')).toBe('Desk B1, yours');
       expect(bookButton().textContent?.trim()).toBe('Withdraw booking');
       clickBook();
       http.expectOne(`${bookingsUrl}/2026-11-06`).flush({ success: true });
       fixture.detectChanges();
-      expect(desk('D05').getAttribute('aria-label')).toBe('Desk D05, available');
-      expect(desk('D05').disabled).toBeFalse();
+      expect(desk('B1').getAttribute('aria-label')).toBe('Desk B1, available');
+      expect(desk('B1').disabled).toBeFalse();
       expect(bookButton().textContent?.trim()).toBe('Book Now');
     });
 
@@ -345,9 +345,9 @@ describe('BookingComponent desk plan', () => {
 
   describe('AC5: booked desks and conflicts', () => {
     it('should not select a booked desk', () => {
-      setup({ loggedIn: true, booked: { D04: 'Ana' } });
-      pick('D04');
-      expect(desk('D04').getAttribute('aria-label')).toBe('Desk D04, booked by Ana');
+      setup({ loggedIn: true, booked: { A4: 'Ana' } });
+      pick('A4');
+      expect(desk('A4').getAttribute('aria-label')).toBe('Desk A4, booked by Ana');
       clickBook();
       http.expectNone(bookingsUrl);
       expect(message()).toBe(SELECT_DESK_MESSAGE);
@@ -355,21 +355,21 @@ describe('BookingComponent desk plan', () => {
 
     it('should show an error and refresh availability on 409', () => {
       setup({ loggedIn: true });
-      pick('D03');
+      pick('A3');
       clickBook();
       http.expectOne(bookingsUrl).flush({ success: false, message: 'Desk already booked' }, { status: 409, statusText: 'Conflict' });
       fixture.detectChanges();
       expect(message()).toBe(BOOKING_CONFLICT_MESSAGE);
-      const date = flushAvailability({ D03: 'Ben' });
+      const date = flushAvailability({ A3: 'Ben' });
       expect(date).toBe('2026-11-06');
-      expect(desk('D03').getAttribute('aria-label')).toBe('Desk D03, booked by Ben');
-      expect(desk('D03').disabled).toBeTrue();
+      expect(desk('A3').getAttribute('aria-label')).toBe('Desk A3, booked by Ben');
+      expect(desk('A3').disabled).toBeTrue();
       expect(bookButton().textContent?.trim()).toBe('Book Now');
     });
 
     it('should keep the plan unchanged and show a generic message on a 500 when booking', () => {
       setup({ loggedIn: true });
-      pick('D03');
+      pick('A3');
       clickBook();
       http.expectOne(bookingsUrl).flush({ success: false }, { status: 500, statusText: 'Server Error' });
       fixture.detectChanges();

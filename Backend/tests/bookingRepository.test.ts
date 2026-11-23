@@ -19,19 +19,19 @@ function fakeDb(rows: Array<Record<string, unknown>> = []) {
 
 describe("bookingRepository", () => {
   it("create inserts the desk and the user's database name with the booking", async () => {
-    const { db, calls } = fakeDb([{ date: "2026-11-09", desk: "D03" }]);
-    const result = await createBookingRepository(db).create(USER, "2026-11-09", "D03");
-    assert.deepEqual(result, { date: "2026-11-09", desk: "D03" });
+    const { db, calls } = fakeDb([{ date: "2026-11-09", desk: "A3" }]);
+    const result = await createBookingRepository(db).create(USER, "2026-11-09", "A3");
+    assert.deepEqual(result, { date: "2026-11-09", desk: "A3" });
     assert.match(calls[0].text, /^INSERT INTO public\.bookings \(user_id, booking_date, booking_desk, user_name\)/);
     assert.match(calls[0].text, /SELECT full_name FROM public\.users WHERE id = \$1/);
-    assert.deepEqual(calls[0].values, [USER, "2026-11-09", "D03"]);
+    assert.deepEqual(calls[0].values, [USER, "2026-11-09", "A3"]);
     assert.doesNotMatch(calls[0].text, /email/i);
   });
 
   it("create passes the desk as a bind parameter, never inside the SQL text (AC7)", async () => {
-    const { db, calls } = fakeDb([{ date: "2026-11-09", desk: "D03" }]);
-    await createBookingRepository(db).create(USER, "2026-11-09", "D03");
-    assert.doesNotMatch(calls[0].text, /D03/);
+    const { db, calls } = fakeDb([{ date: "2026-11-09", desk: "A3" }]);
+    await createBookingRepository(db).create(USER, "2026-11-09", "A3");
+    assert.doesNotMatch(calls[0].text, /A3/);
   });
 
   it("delete filters on date AND user_id and reports hit/miss (FR11)", async () => {
@@ -45,11 +45,11 @@ describe("bookingRepository", () => {
   });
 
   it("listByUser filters by user and start date, ascending", async () => {
-    const { db, calls } = fakeDb([{ date: "2026-11-06", desk: "D01" }, { date: "2026-11-09", desk: "D02" }]);
+    const { db, calls } = fakeDb([{ date: "2026-11-06", desk: "A1" }, { date: "2026-11-09", desk: "A2" }]);
     const result = await createBookingRepository(db).listByUser(USER, "2026-11-06");
     assert.deepEqual(result, [
-      { date: "2026-11-06", desk: "D01" },
-      { date: "2026-11-09", desk: "D02" },
+      { date: "2026-11-06", desk: "A1" },
+      { date: "2026-11-09", desk: "A2" },
     ]);
     assert.match(calls[0].text, /WHERE user_id = \$1 AND booking_date >= \$2 ORDER BY booking_date/);
     assert.deepEqual(calls[0].values, [USER, "2026-11-06"]);
@@ -65,14 +65,14 @@ describe("bookingRepository", () => {
   });
 
   it("listByUser exposes only date and desk", async () => {
-    const { db } = fakeDb([{ date: "2026-11-06", desk: "D01", user_id: USER, email: "a@b.c" }]);
+    const { db } = fakeDb([{ date: "2026-11-06", desk: "A1", user_id: USER, email: "a@b.c" }]);
     const [item] = await createBookingRepository(db).listByUser(USER, "2026-11-06");
     assert.deepEqual(Object.keys(item).sort(), ["date", "desk"]);
   });
 
   it("uses the quoted schema table for non-public schemas", async () => {
-    const { db, calls } = fakeDb([{ date: "2026-11-09", desk: "D01" }]);
-    await createBookingRepository(db, "ico-env").create(USER, "2026-11-09", "D01");
+    const { db, calls } = fakeDb([{ date: "2026-11-09", desk: "A1" }]);
+    await createBookingRepository(db, "ico-env").create(USER, "2026-11-09", "A1");
     assert.match(calls[0].text, /INSERT INTO "ico-env"\.bookings /);
     assert.match(calls[0].text, /SELECT full_name FROM "ico-env"\.users WHERE id = \$1/);
   });

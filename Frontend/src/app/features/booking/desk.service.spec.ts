@@ -33,7 +33,7 @@ describe('DeskService', () => {
     const req = http.expectOne(url);
     expect(req.request.method).toBe('GET');
     expect(req.request.headers.has('Authorization')).toBeFalse();
-    const desks = [{ id: 'D01', label: 'D01', row: 1, col: 1 }];
+    const desks = [{ id: 'A1', label: 'A1', row: 1, col: 1 }];
     req.flush({ success: true, payload: { desks } });
     expect(result).toEqual(desks);
     http.verify();
@@ -56,7 +56,7 @@ describe('DeskService', () => {
     expect(req.request.method).toBe('GET');
     expect(req.request.params.get('date')).toBe('2026-11-09');
     expect(req.request.headers.get('Authorization')).toBe(`Bearer ${token}`);
-    const desks = [{ id: 'D01', booked: true, bookedBy: 'Ana' }, { id: 'D02', booked: false }];
+    const desks = [{ id: 'A1', booked: true, bookedBy: 'Ana' }, { id: 'A2', booked: false }];
     req.flush({ success: true, payload: { desks } });
     expect(result).toEqual(desks);
     http.verify();

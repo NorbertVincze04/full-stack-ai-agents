@@ -8,6 +8,9 @@
       <button
         type="button"
         class="desk"
+        [class.block-left-edge]="cell.col === 3"
+        [class.block-top-edge]="cell.row === 3"
+        [attr.data-block]="cell.id.charAt(0)"
         [class.available]="cell.state === 'available'"
         [class.booked]="cell.state === 'booked'"
         [class.selected]="cell.state === 'selected'"

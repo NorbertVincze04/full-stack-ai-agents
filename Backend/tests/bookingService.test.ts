@@ -28,7 +28,7 @@ function fakeRepo(overrides: Partial<BookingRepository> = {}) {
     async listByUser(userId, from) {
       calls.push({ op: "list", args: [userId, from] });
       return [
-        { date: "2026-11-06", desk: "D01" },
+        { date: "2026-11-06", desk: "A1" },
         { date: "2026-11-09", desk: null },
       ];
     },
@@ -41,15 +41,15 @@ describe("bookingService.book", () => {
   it("stores a bookable date and desk for the user", async () => {
     const { repo, calls } = fakeRepo();
     const svc = createBookingService(repo, () => NOW);
-    assert.deepEqual(await svc.book(USER, "2026-11-09", "D03"), { date: "2026-11-09", desk: "D03" });
-    assert.deepEqual(calls, [{ op: "create", args: [USER, "2026-11-09", "D03"] }]);
+    assert.deepEqual(await svc.book(USER, "2026-11-09", "A3"), { date: "2026-11-09", desk: "A3" });
+    assert.deepEqual(calls, [{ op: "create", args: [USER, "2026-11-09", "A3"] }]);
   });
 
   it("accepts today and the last day of the window", async () => {
     const { repo } = fakeRepo();
     const svc = createBookingService(repo, () => NOW);
-    await svc.book(USER, "2026-11-06", "D01");
-    await svc.book(USER, "2026-11-11", "D01");
+    await svc.book(USER, "2026-11-06", "A1");
+    await svc.book(USER, "2026-11-11", "A1");
   });
 
   for (const [label, date] of [
@@ -62,7 +62,7 @@ describe("bookingService.book", () => {
     it(`rejects ${label} without touching the repository`, async () => {
       const { repo, calls } = fakeRepo();
       const svc = createBookingService(repo, () => NOW);
-      await assert.rejects(svc.book(USER, date, "D01"), InvalidBookingDateError);
+      await assert.rejects(svc.book(USER, date, "A1"), InvalidBookingDateError);
       assert.equal(calls.length, 0);
     });
   }
@@ -70,9 +70,9 @@ describe("bookingService.book", () => {
   it("uses the injected clock (weekend start moves the window)", async () => {
     const { repo } = fakeRepo();
     const svc = createBookingService(repo, () => new Date(2026, 10, 7, 9, 0)); // Saturday
-    await assert.rejects(svc.book(USER, "2026-11-06", "D01"), InvalidBookingDateError);
-    await svc.book(USER, "2026-11-09", "D01");
-    await svc.book(USER, "2026-11-12", "D01");
+    await assert.rejects(svc.book(USER, "2026-11-06", "A1"), InvalidBookingDateError);
+    await svc.book(USER, "2026-11-09", "A1");
+    await svc.book(USER, "2026-11-12", "A1");
   });
 
   it("maps pg 23505 without a desk constraint to BookingAlreadyExistsError (FR12)", async () => {
@@ -82,7 +82,7 @@ describe("bookingService.book", () => {
       },
     });
     await assert.rejects(
-      createBookingService(repo, () => NOW).book(USER, "2026-11-09", "D01"),
+      createBookingService(repo, () => NOW).book(USER, "2026-11-09", "A1"),
       BookingAlreadyExistsError,
     );
   });
@@ -94,7 +94,7 @@ describe("bookingService.book", () => {
       },
     });
     await assert.rejects(
-      createBookingService(repo, () => NOW).book(USER, "2026-11-09", "D01"),
+      createBookingService(repo, () => NOW).book(USER, "2026-11-09", "A1"),
       BookingAlreadyExistsError,
     );
   });
@@ -106,7 +106,7 @@ describe("bookingService.book", () => {
       },
     });
     await assert.rejects(
-      createBookingService(repo, () => NOW).book(USER, "2026-11-09", "D01"),
+      createBookingService(repo, () => NOW).book(USER, "2026-11-09", "A1"),
       DeskAlreadyBookedError,
     );
   });
@@ -118,7 +118,7 @@ describe("bookingService.book", () => {
       },
     });
     await assert.rejects(
-      createBookingService(repo, () => NOW).book(USER, "2026-11-09", "D01"),
+      createBookingService(repo, () => NOW).book(USER, "2026-11-09", "A1"),
       UnknownUserError,
     );
   });
@@ -130,7 +130,7 @@ describe("bookingService.book", () => {
       },
     });
     await assert.rejects(
-      createBookingService(repo, () => NOW).book(USER, "2026-11-09", "D99"),
+      createBookingService(repo, () => NOW).book(USER, "2026-11-09", "Z9"),
       UnknownDeskError,
     );
   });
@@ -143,7 +143,7 @@ describe("bookingService.book", () => {
       },
     });
     await assert.rejects(
-      createBookingService(repo, () => NOW).book(USER, "2026-11-09", "D01"),
+      createBookingService(repo, () => NOW).book(USER, "2026-11-09", "A1"),
       (err) => err === boom,
     );
   });
@@ -170,7 +170,7 @@ describe("bookingService.listMine", () => {
     const { repo, calls } = fakeRepo();
     const result = await createBookingService(repo, () => NOW).listMine(USER);
     assert.deepEqual(result, [
-      { date: "2026-11-06", desk: "D01" },
+      { date: "2026-11-06", desk: "A1" },
       { date: "2026-11-09", desk: null },
     ]);
     assert.deepEqual(calls, [{ op: "list", args: [USER, "2026-11-06"] }]);

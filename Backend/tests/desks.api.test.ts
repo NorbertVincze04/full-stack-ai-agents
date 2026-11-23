@@ -10,9 +10,9 @@ const SECRET = "desks-api-test-secret";
 const ALICE = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const NOW = new Date(2026, 10, 6, 12, 0); // Friday 2026-11-06; window 06, 09, 10, 11
 
-const DESKS: Desk[] = Array.from({ length: 12 }, (_, i) => ({
-  id: `D${String(i + 1).padStart(2, "0")}`,
-  label: `D${String(i + 1).padStart(2, "0")}`,
+const DESKS: Desk[] = Array.from({ length: 16 }, (_, i) => ({
+  id: `${'ABCD'[Math.floor(i / 4)]}${(i % 4) + 1}`,
+  label: `${'ABCD'[Math.floor(i / 4)]}${(i % 4) + 1}`,
   row: Math.floor(i / 4) + 1,
   col: (i % 4) + 1,
 }));
@@ -67,17 +67,19 @@ async function get(path: string, opts: { token?: string; header?: string } = {})
 }
 
 describe("GET /api/desks (public layout)", () => {
-  it("200 without a token returns the 12 desks (AC6)", async () => {
+  it("200 without a token returns the 16 desks (AC1)", async () => {
     const r = await get("");
     assert.equal(r.status, 200);
     assert.equal(r.json.success, true);
     const desks = (r.json.payload as { desks: Desk[] }).desks;
-    assert.equal(desks.length, 12);
+    assert.equal(desks.length, 16);
     assert.deepEqual(desks.map((d) => d.id), DESKS.map((d) => d.id));
+    assert.deepEqual(desks.map((d) => d.id).slice(0, 4), ["A1", "A2", "A3", "A4"]);
+    assert.equal(desks[15].id, "D4");
   });
 
   it("returns only id, label, row, col per desk, no booking or user data (AC6)", async () => {
-    booked = { D01: "Ana Example" };
+    booked = { A1: "Ana Example" };
     const r = await get("");
     for (const desk of (r.json.payload as { desks: object[] }).desks) {
       assert.deepEqual(Object.keys(desk).sort(), ["col", "id", "label", "row"]);
@@ -85,11 +87,11 @@ describe("GET /api/desks (public layout)", () => {
     assert.doesNotMatch(JSON.stringify(r.json), /Ana Example|booked|email|user/i);
   });
 
-  it("is a 4 x 3 grid: rows 1-3, columns 1-4 (AC1)", async () => {
+  it("is a 4 x 4 grid: rows 1-4, columns 1-4 (AC1)", async () => {
     const desks = ((await get("")).json.payload as { desks: Desk[] }).desks;
-    assert.deepEqual([...new Set(desks.map((d) => d.row))].sort(), [1, 2, 3]);
+    assert.deepEqual([...new Set(desks.map((d) => d.row))].sort(), [1, 2, 3, 4]);
     assert.deepEqual([...new Set(desks.map((d) => d.col))].sort(), [1, 2, 3, 4]);
-    assert.equal(new Set(desks.map((d) => `${d.row}/${d.col}`)).size, 12);
+    assert.equal(new Set(desks.map((d) => `${d.row}/${d.col}`)).size, 16);
   });
 
   it("ignores an invalid token (public endpoint)", async () => {
@@ -98,20 +100,20 @@ describe("GET /api/desks (public layout)", () => {
 });
 
 describe("GET /api/desks/availability", () => {
-  it("200 returns all 12 desks with booked and bookedBy for booked ones (AC6)", async () => {
-    booked = { D02: "Ana Example", D07: "Ben Example" };
+  it("200 returns all 16 desks with booked and bookedBy for booked ones (AC6)", async () => {
+    booked = { A2: "Ana Example", B3: "Ben Example" };
     const r = await get("/availability?date=2026-11-09", { token: token(ALICE) });
     assert.equal(r.status, 200);
     const desks = (r.json.payload as { desks: DeskAvailability[] }).desks;
-    assert.equal(desks.length, 12);
-    assert.deepEqual(desks.find((d) => d.id === "D02"), { id: "D02", booked: true, bookedBy: "Ana Example" });
-    assert.deepEqual(desks.find((d) => d.id === "D07"), { id: "D07", booked: true, bookedBy: "Ben Example" });
-    assert.deepEqual(desks.find((d) => d.id === "D01"), { id: "D01", booked: false });
+    assert.equal(desks.length, 16);
+    assert.deepEqual(desks.find((d) => d.id === "A2"), { id: "A2", booked: true, bookedBy: "Ana Example" });
+    assert.deepEqual(desks.find((d) => d.id === "B3"), { id: "B3", booked: true, bookedBy: "Ben Example" });
+    assert.deepEqual(desks.find((d) => d.id === "A1"), { id: "A1", booked: false });
     assert.deepEqual(availabilityCalls, ["2026-11-09"]);
   });
 
   it("exposes no user id or e-mail, only id, booked and bookedBy (AC6)", async () => {
-    booked = { D02: "Ana Example" };
+    booked = { A2: "Ana Example" };
     const r = await get("/availability?date=2026-11-09", { token: token(ALICE) });
     for (const desk of (r.json.payload as { desks: object[] }).desks) {
       for (const key of Object.keys(desk)) assert.ok(["id", "booked", "bookedBy"].includes(key), key);

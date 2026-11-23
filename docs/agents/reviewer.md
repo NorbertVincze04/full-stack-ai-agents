@@ -23,6 +23,7 @@ Scopes: `code`, `security`, `ux`, `containers`, `pipelines`. Dependency advisori
 | add CI and CD pipelines | pipelines | 0 blocker, 0 high, 4 medium (M1 concurrency drops a pending promotion, M2 `GITHUB_TOKEN` cannot push workflow changes, M3 bot bypass plus dispatch, M4 Chrome `--no-sandbox`), 6 low |
 | CI on dev, CD after CI | pipelines (twice) | Round 1: 1 high, 2 medium, 2 low, all fixed; re-review approved with 0 findings |
 | 649 select/deselect | frontend code, UX (security skipped by scope flags) | Both approved. Code: 4 low (duplicate `selectedDesk` reset, `select`/`deselect` duplication, stale docs, no e2e runner). UX: 1 medium (no plan hint for signed-in user without a day), 2 low (picked own desk colour-only, no live region on `No date selected`) |
+| 650 desk numbering | code (incl. destructive migrations 006), UX (security skipped by flags) | Both approved. Code: 1 medium (no lock/operator note for migration run), 4 low. UX: 1 medium (block gap via margins shrinks col 3 / row 3 desks), 2 low |
 
 ## Defects and lessons
 
@@ -31,12 +32,15 @@ Scopes: `code`, `security`, `ux`, `containers`, `pipelines`. Dependency advisori
 - No CSP or security headers in `Frontend/nginx.conf`.
 - Frontend race conditions around in-flight booking requests.
 - Stale test counts in `docs/context/*.md` after a task (again in 649: 145 vs 247, "specs pending").
+- Layout spacing done with margins on grid items instead of grid tracks/gaps (650).
 - Colour-only state cues and missing hints for disabled/neutral states in the booking UI.
 
 ## Open items
 
 - 649: the `review` skill ran (code + ux); scope selection from the flags worked. No e2e runner exists (decision for the human, see `docs/runs/649/e2e.md`).
 - 649 follow-ups: plan hint when signed in without a day (UX medium); refresh the counts and "pending" wording in `frontend.md` and `project.md`.
+
+- 650 follow-ups: block gap through grid tracks; migration 006 run with backend stopped and idempotency verified by the human; stale counts.
 
 ## Notes for the new skill
 

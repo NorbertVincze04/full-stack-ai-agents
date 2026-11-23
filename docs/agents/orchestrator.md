@@ -23,6 +23,7 @@ Runs the three workflows, owns the retry loops and every human gate. History bel
 | add CI and CD pipelines | pipelines | manual | pipelines | `done` ([handover](../handover/manual-add-ci-and-cd-pipelines-with-github-actions.md)) |
 | CI on dev push, then CD after CI success | pipelines (verification, docs) | manual | pipelines | `implemented`, AC5 needs a real Actions run ([handover](../handover/manual-ci-on-dev-push-then-cd-after-ci-success.md)) |
 | 649 select/deselect | feature | Azure | frontend | tests 247/247, review code+ux approved (0 blocker/high, 1 medium); PR proposal pending ([reports](../runs/649/)) |
+| 650 desk numbering | feature | Azure | frontend, backend, database | tests backend 306/308 (2 skipped), frontend 263/263; review code+ux approved (0 blocker/high, 2 medium); PR proposal pending ([reports](../runs/650/)) |
 
 ## Defects and lessons
 
@@ -35,12 +36,14 @@ Runs the three workflows, owns the retry loops and every human gate. History bel
 | containerize | Approved environment fixes (compose provider, proxy path); D8 build-only host networking; D9 classic builder only; reran after a host `ng serve` held port 4200 |
 | pipelines | R1 (first green CI auto-merges into `main`) and R2 (human changes repository settings) approved as documentation only; commit skipped for the CI-on-dev task |
 | 649 | Q1 no-date state (desks neutral, Book Now disabled), Q2 no day on load, Q3 own day and own desk toggle selection only (no request); R1-R3 approved as described; e2e skipped (no runner), journeys listed in `e2e.md`; Azure tag missing, not changed |
+| 650 | D1 delete and recreate all desks (human chose knowingly over the safer relabel; existing bookings lose their desk); R1/R2 approved as described (human applies migration 006 after pg_dump); D2 2x2 blocks, D3 labels only; Azure tag missing, ignored; e2e skipped (no runner) |
 | header, info, 602 | Acceptance check passed (`human-accepted`); 602 needed fix iteration 1 first |
 
 ## Loops
 
 - Review-fix loop: 602 (1 iteration), login and register pages (1 re-review round), CI-on-dev pipelines (1 round).
 - 649: no test-fix or review-fix loop needed (specs were adapted by the Tester in the first test round).
+- 650: no test-fix or review-fix loop needed; tdd red was red only in the backend (frontend already rendered the new ids).
 - Test-fix loop: not needed in any handover. Containerization ran test rounds 0-7 (see [container-engineer.md](container-engineer.md)).
 - Rules fixed 2026-11-16: the approval gate now always runs once (before, it was skipped when the spec was `Ready: yes` at first); agents may edit their own `docs/agents` file; red tests run before implementing (`workflow.tddFirst`).\n- Added 2026-11-20: `brief.md` (compact task summary read first by later stages) and `metrics.md` (one row per stage) under `docs/runs/<id>/`; neither has been used on a real task yet, so the token saving is an estimate (spec 649 is ~85 lines, a brief ~30).
 - No handover records a task that exhausted `maxFixIterations`; `/clarify-task decision` is new and has not been used yet.

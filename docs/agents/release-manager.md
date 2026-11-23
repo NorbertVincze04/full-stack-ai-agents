@@ -23,6 +23,7 @@ Prepare, commit and push are separate human-gated steps. It commits on a `task/<
 | add CI and CD pipelines | Commit `507168c` on `dev` (10 files); push declined: `dev` is the integration branch, not on `origin`, `gh` not installed; manual push command given |
 | CI on dev, CD after CI | Commit skipped by the human; docs changes uncommitted |
 | 649 | Commit `b6cecb0` on `dev` (29 files, frontend only, 247/247 tests, code and UX approved, e2e skipped); pushed to `origin/dev` (`057cabe..b6cecb0`), no PR (`dev`, CI/CD promotes); AC10 accepted manually by the human 2026-11-16, all ACs Verified, no blocker/high open: task file `done`; docs commit `06bf2ed` pushed to `origin/dev` (`b6cecb0..06bf2ed`); Azure `System.State` set to `Done` (rev 2) |
+| 650 | Proposal prepared (`pr.md`, handover); branch `task/650` from `dev` (current `dev`); 5 backend tests, 8 frontend files, 2 migrations 006, docs; AC5 Not verified (human `pg_dump` and apply, R1/R2); 2 medium open (no lock, margin gap); untracked `build-output.txt`/`test-output.txt` excluded |
 
 ## Defects and lessons
 
@@ -32,6 +33,8 @@ Prepare, commit and push are separate human-gated steps. It commits on a `task/<
 - Pipelines commit could not be pushed, so CI/CD never ran remotely.
 - Work items 602, 648 and 649 lack the `deskbookingPrj` tag.
 - 649: `docs/context/frontend.md` (lines 55, 58) and `project.md` (line 10) still had stale counts and "pending" wording at PR time; owned by other agents, so reported, not edited.
+
+- 650: `Backend/build-output.txt`, `test-output.txt` and the Frontend equivalents are untracked and not git-ignored; not committed.
 
 ## Open items
 

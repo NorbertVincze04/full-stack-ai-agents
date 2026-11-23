@@ -26,7 +26,7 @@ interface Store extends BookingRepository {
   error?: unknown;
 }
 
-const DESK_IDS = Array.from({ length: 12 }, (_, i) => `D${String(i + 1).padStart(2, "0")}`);
+const DESK_IDS = Array.from({ length: 16 }, (_, i) => `${'ABCD'[Math.floor(i / 4)]}${(i % 4) + 1}`);
 
 // Behaves like the database: FK on user and desk, unique (date, user), partial unique (date, desk).
 function makeStore(): Store {
@@ -126,31 +126,31 @@ async function call(method: string, path: string, opts: { token?: string; header
 
 describe("POST /api/bookings", () => {
   it("201 stores the date and desk for the token's user (AC4, AC7, FR10)", async () => {
-    const r = await call("POST", "", { token: token(ALICE), body: { date: "2026-11-09", desk: "D03" } });
+    const r = await call("POST", "", { token: token(ALICE), body: { date: "2026-11-09", desk: "A3" } });
     assert.equal(r.status, 201);
-    assert.deepEqual(r.json, { success: true, payload: { booking: { date: "2026-11-09", desk: "D03" } } });
-    assert.deepEqual(store.rows, [{ userId: ALICE, date: "2026-11-09", desk: "D03" }]);
+    assert.deepEqual(r.json, { success: true, payload: { booking: { date: "2026-11-09", desk: "A3" } } });
+    assert.deepEqual(store.rows, [{ userId: ALICE, date: "2026-11-09", desk: "A3" }]);
   });
 
   it("ignores a user id supplied in the body (AC7, FR10)", async () => {
     const r = await call("POST", "", {
       token: token(ALICE),
-      body: { date: "2026-11-09", desk: "D01", userId: BOB, user_id: BOB, id: BOB, email: "bob@example.com" },
+      body: { date: "2026-11-09", desk: "A1", userId: BOB, user_id: BOB, id: BOB, email: "bob@example.com" },
     });
     assert.equal(r.status, 201);
-    assert.deepEqual(store.rows, [{ userId: ALICE, date: "2026-11-09", desk: "D01" }]);
+    assert.deepEqual(store.rows, [{ userId: ALICE, date: "2026-11-09", desk: "A1" }]);
   });
 
   it("allows one user to hold several dates (AC7)", async () => {
     for (const date of ["2026-11-06", "2026-11-10", "2026-11-11"]) {
-      assert.equal((await call("POST", "", { token: token(ALICE), body: { date, desk: "D01" } })).status, 201);
+      assert.equal((await call("POST", "", { token: token(ALICE), body: { date, desk: "A1" } })).status, 201);
     }
     assert.equal(store.rows.length, 3);
   });
 
   it("201 for today and for the last day of the window (FR2)", async () => {
-    assert.equal((await call("POST", "", { token: token(ALICE), body: { date: "2026-11-06", desk: "D01" } })).status, 201);
-    assert.equal((await call("POST", "", { token: token(ALICE), body: { date: "2026-11-11", desk: "D01" } })).status, 201);
+    assert.equal((await call("POST", "", { token: token(ALICE), body: { date: "2026-11-06", desk: "A1" } })).status, 201);
+    assert.equal((await call("POST", "", { token: token(ALICE), body: { date: "2026-11-11", desk: "A1" } })).status, 201);
   });
 
   for (const [label, body] of [
@@ -158,10 +158,10 @@ describe("POST /api/bookings", () => {
     ["null desk", { date: "2026-11-09", desk: null }],
     ["numeric desk", { date: "2026-11-09", desk: 3 }],
     ["empty desk", { date: "2026-11-09", desk: "" }],
-    ["object desk", { date: "2026-11-09", desk: { id: "D01" } }],
-    ["unknown desk", { date: "2026-11-09", desk: "D99" }],
-    ["unknown desk id D00", { date: "2026-11-09", desk: "D00" }],
-    ["desk with SQL characters", { date: "2026-11-09", desk: "D01'; DROP TABLE desks;--" }],
+    ["object desk", { date: "2026-11-09", desk: { id: "A1" } }],
+    ["unknown desk", { date: "2026-11-09", desk: "Z9" }],
+    ["unknown desk id A0", { date: "2026-11-09", desk: "A0" }],
+    ["desk with SQL characters", { date: "2026-11-09", desk: "A1'; DROP TABLE desks;--" }],
     ["overlong desk", { date: "2026-11-09", desk: "D".repeat(500) }],
   ] as const) {
     it(`400 on the desk field for ${label} (AC7)`, async () => {
@@ -175,35 +175,35 @@ describe("POST /api/bookings", () => {
   }
 
   it("409 Desk already booked when another user holds the desk on that date (AC5, AC7)", async () => {
-    await call("POST", "", { token: token(ALICE), body: { date: "2026-11-09", desk: "D05" } });
-    const r = await call("POST", "", { token: token(BOB), body: { date: "2026-11-09", desk: "D05" } });
+    await call("POST", "", { token: token(ALICE), body: { date: "2026-11-09", desk: "B1" } });
+    const r = await call("POST", "", { token: token(BOB), body: { date: "2026-11-09", desk: "B1" } });
     assert.equal(r.status, 409);
     assert.deepEqual(r.json, { success: false, message: "Desk already booked" });
     assert.equal(store.rows.length, 1);
   });
 
   it("201 for the same desk on a different date (AC7)", async () => {
-    await call("POST", "", { token: token(ALICE), body: { date: "2026-11-09", desk: "D05" } });
-    const r = await call("POST", "", { token: token(BOB), body: { date: "2026-11-10", desk: "D05" } });
+    await call("POST", "", { token: token(ALICE), body: { date: "2026-11-09", desk: "B1" } });
+    const r = await call("POST", "", { token: token(BOB), body: { date: "2026-11-10", desk: "B1" } });
     assert.equal(r.status, 201);
   });
 
   it("201 for two different desks on the same date (AC7)", async () => {
-    await call("POST", "", { token: token(ALICE), body: { date: "2026-11-09", desk: "D05" } });
-    const r = await call("POST", "", { token: token(BOB), body: { date: "2026-11-09", desk: "D06" } });
+    await call("POST", "", { token: token(ALICE), body: { date: "2026-11-09", desk: "B1" } });
+    const r = await call("POST", "", { token: token(BOB), body: { date: "2026-11-09", desk: "B2" } });
     assert.equal(r.status, 201);
   });
 
   it("the desk is free again after withdrawing (AC7)", async () => {
-    await call("POST", "", { token: token(ALICE), body: { date: "2026-11-09", desk: "D05" } });
+    await call("POST", "", { token: token(ALICE), body: { date: "2026-11-09", desk: "B1" } });
     await call("DELETE", "/2026-11-09", { token: token(ALICE) });
-    const r = await call("POST", "", { token: token(BOB), body: { date: "2026-11-09", desk: "D05" } });
+    const r = await call("POST", "", { token: token(BOB), body: { date: "2026-11-09", desk: "B1" } });
     assert.equal(r.status, 201);
   });
 
   it("a legacy booking without desk occupies no desk (AC7)", async () => {
     store.rows.push({ userId: BOB, date: "2026-11-09", desk: null });
-    const r = await call("POST", "", { token: token(ALICE), body: { date: "2026-11-09", desk: "D01" } });
+    const r = await call("POST", "", { token: token(ALICE), body: { date: "2026-11-09", desk: "A1" } });
     assert.equal(r.status, 201);
   });
 
@@ -220,7 +220,7 @@ describe("POST /api/bookings", () => {
     ["a date after the window", "2026-11-12"],
   ] as const) {
     it(`400 for ${label} (FR9)`, async () => {
-      const r = await call("POST", "", { token: token(ALICE), body: { date, desk: "D01" } });
+      const r = await call("POST", "", { token: token(ALICE), body: { date, desk: "A1" } });
       assert.equal(r.status, 400);
       assert.equal(r.json.success, false);
       assert.equal(r.json.message, "Validation failed");
@@ -230,12 +230,12 @@ describe("POST /api/bookings", () => {
   }
 
   for (const [label, body] of [
-    ["missing date", { desk: "D01" }],
-    ["null date", { date: null, desk: "D01" }],
-    ["numeric date", { date: 20261109, desk: "D01" }],
-    ["wrong format", { date: "09-11-2026", desk: "D01" }],
-    ["impossible date", { date: "2026-02-30", desk: "D01" }],
-    ["date with time", { date: "2026-11-09T10:00:00Z", desk: "D01" }],
+    ["missing date", { desk: "A1" }],
+    ["null date", { date: null, desk: "A1" }],
+    ["numeric date", { date: 20261109, desk: "A1" }],
+    ["wrong format", { date: "09-11-2026", desk: "A1" }],
+    ["impossible date", { date: "2026-02-30", desk: "A1" }],
+    ["date with time", { date: "2026-11-09T10:00:00Z", desk: "A1" }],
   ] as const) {
     it(`400 for ${label}`, async () => {
       const r = await call("POST", "", { token: token(ALICE), body });
@@ -251,21 +251,21 @@ describe("POST /api/bookings", () => {
   });
 
   it("409 when the same user books the same date twice on another desk (FR12)", async () => {
-    await call("POST", "", { token: token(ALICE), body: { date: "2026-11-09", desk: "D01" } });
-    const r = await call("POST", "", { token: token(ALICE), body: { date: "2026-11-09", desk: "D02" } });
+    await call("POST", "", { token: token(ALICE), body: { date: "2026-11-09", desk: "A1" } });
+    const r = await call("POST", "", { token: token(ALICE), body: { date: "2026-11-09", desk: "A2" } });
     assert.equal(r.status, 409);
     assert.deepEqual(r.json, { success: false, message: "Booking already exists" });
     assert.equal(store.rows.length, 1);
   });
 
   it("201 for two different users on the same date and different desks (FR12, AC6)", async () => {
-    assert.equal((await call("POST", "", { token: token(ALICE), body: { date: "2026-11-09", desk: "D01" } })).status, 201);
-    assert.equal((await call("POST", "", { token: token(BOB), body: { date: "2026-11-09", desk: "D02" } })).status, 201);
+    assert.equal((await call("POST", "", { token: token(ALICE), body: { date: "2026-11-09", desk: "A1" } })).status, 201);
+    assert.equal((await call("POST", "", { token: token(BOB), body: { date: "2026-11-09", desk: "A2" } })).status, 201);
     assert.equal(store.rows.length, 2);
   });
 
   it("401 and nothing stored when the user no longer exists (FR14)", async () => {
-    const r = await call("POST", "", { token: token(GHOST), body: { date: "2026-11-09", desk: "D01" } });
+    const r = await call("POST", "", { token: token(GHOST), body: { date: "2026-11-09", desk: "A1" } });
     assert.equal(r.status, 401);
     assert.deepEqual(r.json, { success: false, message: "Authentication required" });
     assert.equal(store.rows.length, 0);
@@ -273,7 +273,7 @@ describe("POST /api/bookings", () => {
 
   it("500 with a generic message on unexpected repository errors", async () => {
     store.error = Object.assign(new Error("relation does not exist: secret-detail"), { code: "42P01" });
-    const r = await call("POST", "", { token: token(ALICE), body: { date: "2026-11-09", desk: "D01" } });
+    const r = await call("POST", "", { token: token(ALICE), body: { date: "2026-11-09", desk: "A1" } });
     assert.equal(r.status, 500);
     assert.deepEqual(r.json, { success: false, message: "Internal server error" });
   });
@@ -282,16 +282,16 @@ describe("POST /api/bookings", () => {
 describe("DELETE /api/bookings/:date", () => {
   it("200 removes only the caller's booking for that date (AC5, FR11)", async () => {
     store.rows.push(
-      { userId: ALICE, date: "2026-11-09", desk: "D01" },
-      { userId: ALICE, date: "2026-11-10", desk: "D01" },
-      { userId: BOB, date: "2026-11-09", desk: "D02" },
+      { userId: ALICE, date: "2026-11-09", desk: "A1" },
+      { userId: ALICE, date: "2026-11-10", desk: "A1" },
+      { userId: BOB, date: "2026-11-09", desk: "A2" },
     );
     const r = await call("DELETE", "/2026-11-09", { token: token(ALICE) });
     assert.equal(r.status, 200);
     assert.deepEqual(r.json, { success: true });
     assert.deepEqual(store.rows, [
-      { userId: ALICE, date: "2026-11-10", desk: "D01" },
-      { userId: BOB, date: "2026-11-09", desk: "D02" },
+      { userId: ALICE, date: "2026-11-10", desk: "A1" },
+      { userId: BOB, date: "2026-11-09", desk: "A2" },
     ]);
   });
 
@@ -302,10 +302,10 @@ describe("DELETE /api/bookings/:date", () => {
   });
 
   it("404 and the other user's booking stays when deleting someone else's date (ownership)", async () => {
-    store.rows.push({ userId: BOB, date: "2026-11-09", desk: "D02" });
+    store.rows.push({ userId: BOB, date: "2026-11-09", desk: "A2" });
     const r = await call("DELETE", "/2026-11-09", { token: token(ALICE) });
     assert.equal(r.status, 404);
-    assert.deepEqual(store.rows, [{ userId: BOB, date: "2026-11-09", desk: "D02" }]);
+    assert.deepEqual(store.rows, [{ userId: BOB, date: "2026-11-09", desk: "A2" }]);
   });
 
   it("200 withdraws a legacy booking without desk by date (AC7, AC8)", async () => {
@@ -315,7 +315,7 @@ describe("DELETE /api/bookings/:date", () => {
   });
 
   it("404 on a second withdraw of the same date", async () => {
-    store.rows.push({ userId: ALICE, date: "2026-11-09", desk: "D01" });
+    store.rows.push({ userId: ALICE, date: "2026-11-09", desk: "A1" });
     assert.equal((await call("DELETE", "/2026-11-09", { token: token(ALICE) })).status, 200);
     assert.equal((await call("DELETE", "/2026-11-09", { token: token(ALICE) })).status, 404);
   });
@@ -332,9 +332,9 @@ describe("DELETE /api/bookings/:date", () => {
 describe("GET /api/bookings/mine", () => {
   it("200 returns only the caller's bookings with desk, ascending (AC7)", async () => {
     store.rows.push(
-      { userId: ALICE, date: "2026-11-10", desk: "D04" },
-      { userId: BOB, date: "2026-11-09", desk: "D02" },
-      { userId: ALICE, date: "2026-11-06", desk: "D01" },
+      { userId: ALICE, date: "2026-11-10", desk: "A4" },
+      { userId: BOB, date: "2026-11-09", desk: "A2" },
+      { userId: ALICE, date: "2026-11-06", desk: "A1" },
     );
     const r = await call("GET", "/mine", { token: token(ALICE) });
     assert.equal(r.status, 200);
@@ -342,8 +342,8 @@ describe("GET /api/bookings/mine", () => {
       success: true,
       payload: {
         bookings: [
-          { date: "2026-11-06", desk: "D01" },
-          { date: "2026-11-10", desk: "D04" },
+          { date: "2026-11-06", desk: "A1" },
+          { date: "2026-11-10", desk: "A4" },
         ],
       },
     });
@@ -357,11 +357,11 @@ describe("GET /api/bookings/mine", () => {
 
   it("omits bookings before the server date", async () => {
     store.rows.push(
-      { userId: ALICE, date: "2026-11-05", desk: "D01" },
-      { userId: ALICE, date: "2026-11-09", desk: "D01" },
+      { userId: ALICE, date: "2026-11-05", desk: "A1" },
+      { userId: ALICE, date: "2026-11-09", desk: "A1" },
     );
     const r = await call("GET", "/mine", { token: token(ALICE) });
-    assert.deepEqual(r.json.payload, { bookings: [{ date: "2026-11-09", desk: "D01" }] });
+    assert.deepEqual(r.json.payload, { bookings: [{ date: "2026-11-09", desk: "A1" }] });
   });
 
   it("200 with an empty list when the user has no bookings", async () => {
@@ -371,7 +371,7 @@ describe("GET /api/bookings/mine", () => {
   });
 
   it("does not expose e-mail or user id in bookings", async () => {
-    store.rows.push({ userId: ALICE, date: "2026-11-09", desk: "D01" });
+    store.rows.push({ userId: ALICE, date: "2026-11-09", desk: "A1" });
     const r = await call("GET", "/mine", { token: token(ALICE) });
     assert.deepEqual(Object.keys((r.json.payload as { bookings: object[] }).bookings[0]), ["date", "desk"]);
   });
@@ -379,7 +379,7 @@ describe("GET /api/bookings/mine", () => {
 
 describe("authentication on all booking endpoints (FR10)", () => {
   const endpoints: Array<[string, string, unknown?]> = [
-    ["POST", "", { date: "2026-11-09", desk: "D02" }],
+    ["POST", "", { date: "2026-11-09", desk: "A2" }],
     ["DELETE", "/2026-11-09"],
     ["GET", "/mine"],
   ];
@@ -394,7 +394,7 @@ describe("authentication on all booking endpoints (FR10)", () => {
   for (const [method, path, body] of endpoints) {
     for (const [label, build] of cases) {
       it(`${method} ${path || "/"} -> 401 for ${label}`, async () => {
-        store.rows.push({ userId: ALICE, date: "2026-11-09", desk: "D01" });
+        store.rows.push({ userId: ALICE, date: "2026-11-09", desk: "A1" });
         const r = await call(method, path, { ...build(), body });
         assert.equal(r.status, 401);
         assert.deepEqual(r.json, { success: false, message: "Authentication required" });
@@ -408,9 +408,9 @@ describe("authentication on all booking endpoints (FR10)", () => {
       res.locals.user = { id: BOB };
       next();
     };
-    const r = await call("POST", "", { body: { date: "2026-11-09", desk: "D01" } });
+    const r = await call("POST", "", { body: { date: "2026-11-09", desk: "A1" } });
     assert.equal(r.status, 201);
-    assert.deepEqual(store.rows, [{ userId: BOB, date: "2026-11-09", desk: "D01" }]);
+    assert.deepEqual(store.rows, [{ userId: BOB, date: "2026-11-09", desk: "A1" }]);
   });
 
   it("unknown booking sub-route still requires auth (no leak)", async () => {

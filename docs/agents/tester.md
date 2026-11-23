@@ -5,7 +5,7 @@ Agent: `.github/agents/tester.agent.md` | Skills: `tdd`, `test` | Replaces: Fron
 Backend tests: `node:test` in `Backend/tests/` (`npm test`). Frontend: Karma/Jasmine (`npm run test:ci`). There is no e2e runner in the repository.
 
 > Read this file first instead of re-reading old reports. Update it at the end of every task (rules: `docs/context/README.md`, Agent context files). Keep it under ~80 lines.
-> Updated: 2026-11-16 (task 649)
+> Updated: 2026-11-23 (task 650)
 
 ## Tasks
 
@@ -21,6 +21,9 @@ Backend tests: `node:test` in `Backend/tests/` (`npm test`). Frontend: Karma/Jas
 | create a mockup office | 287 pass, 2 skipped (`tdd-backend.md`) | 191/191 (`tdd-frontend.md`) | e2e: `skipped: no e2e runner`, journeys listed in [e2e.md](../runs/manual-create-a-mockup-office-for-booking/e2e.md) |
 | containerize | 72 backend tests at the AC7 check | n/a | Stack tests are in [container-engineer.md](container-engineer.md) |
 | 649 select/deselect | n/a | 247/247 (56 new: calendar +8, desk plan +11, `booking.component.toggle.spec.ts` +37); 38 red specs adapted to the spec | [tdd-frontend.md](../runs/649/tdd-frontend.md); e2e `skipped: no e2e runner` ([e2e.md](../runs/649/e2e.md)) |
+| 650 desk numbering (green) | 308: 306 pass, 2 skipped; fixtures adapted to A1-D4 / 16 desks | 263/263 (+2: `data-block`, spacing classes); fixtures adapted | [tdd-green.md](../runs/650/tdd-green.md); e2e `skipped: no e2e runner` ([e2e.md](../runs/650/e2e.md)); no defects |
+| 650 desk numbering (red) | see `tdd-backend.md` | 261/261, 14 new in `desk-numbering.spec.ts`, all already-green (UI is data-driven); block separation deferred-to-green | [tdd-frontend.md](../runs/650/tdd-frontend.md) |
+| 650 desk numbering (red) | 308 run: 289 pass, 17 red (`desksRenumber.test.ts`: static checks of the 006+ migration, missing file) | not run | [tdd-backend.md](../runs/650/tdd-backend.md); first real `red` run |
 
 ## Defects and lessons
 

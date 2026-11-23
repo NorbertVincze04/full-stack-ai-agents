@@ -34,9 +34,9 @@ describe('BookingService', () => {
     const req = http.expectOne(`${url}/mine`);
     expect(req.request.method).toBe('GET');
     expect(req.request.headers.get('Authorization')).toBe(`Bearer ${token}`);
-    req.flush({ success: true, payload: { bookings: [{ date: '2026-11-09', desk: 'D03' }, { date: '2026-11-10', desk: null }] } });
+    req.flush({ success: true, payload: { bookings: [{ date: '2026-11-09', desk: 'A3' }, { date: '2026-11-10', desk: null }] } });
     expect(result).toEqual([
-      { date: '2026-11-09', desk: 'D03' },
+      { date: '2026-11-09', desk: 'A3' },
       { date: '2026-11-10', desk: null }
     ]);
     http.verify();
@@ -45,12 +45,12 @@ describe('BookingService', () => {
   it('book should POST { date, desk } to /bookings with the Bearer token (FR5)', () => {
     const token = makeToken(3600);
     const service = create(token);
-    service.book('2026-11-09', 'D03').subscribe();
+    service.book('2026-11-09', 'A3').subscribe();
     const req = http.expectOne(url);
     expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual({ date: '2026-11-09', desk: 'D03' });
+    expect(req.request.body).toEqual({ date: '2026-11-09', desk: 'A3' });
     expect(req.request.headers.get('Authorization')).toBe(`Bearer ${token}`);
-    req.flush({ success: true, payload: { booking: { date: '2026-11-09', desk: 'D03' } } }, { status: 201, statusText: 'Created' });
+    req.flush({ success: true, payload: { booking: { date: '2026-11-09', desk: 'A3' } } }, { status: 201, statusText: 'Created' });
     http.verify();
   });
 
@@ -70,7 +70,7 @@ describe('BookingService', () => {
     const statuses: number[] = [];
     const onError = (e: unknown) => statuses.push((e as HttpErrorResponse).status);
     service.listMine().subscribe({ error: onError });
-    service.book('2026-11-09', 'D03').subscribe({ error: onError });
+    service.book('2026-11-09', 'A3').subscribe({ error: onError });
     service.withdraw('2026-11-09').subscribe({ error: onError });
     expect(statuses).toEqual([401, 401, 401]);
     http.expectNone(() => true);
@@ -80,7 +80,7 @@ describe('BookingService', () => {
   it('should propagate server errors to the caller', () => {
     const service = create(makeToken(3600));
     let status = 0;
-    service.book('2026-11-09', 'D03').subscribe({ error: (e: HttpErrorResponse) => (status = e.status) });
+    service.book('2026-11-09', 'A3').subscribe({ error: (e: HttpErrorResponse) => (status = e.status) });
     http.expectOne(url).flush({ success: false }, { status: 409, statusText: 'Conflict' });
     expect(status).toBe(409);
   });
