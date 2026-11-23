@@ -24,6 +24,7 @@ Turns a work item into `docs/tasks/<id>.md` and `docs/specs/<id>.md`. Azure DevO
 | CI on dev push, then CD after CI success | manual | pipelines | Inspection-only task; risks R1 (auto-merge on first green CI), R2 (repository settings) |
 | 649 | Azure | feature | Frontend-only toggle select/deselect for calendar days and desks; 11 ACs after answers (no day on load, disabled `Book Now` without a day, own day/desk toggle = selection only); risks R1-R3 (all low); decisions D1-D3; spec `docs/specs/649.md`. An e2e runner follow-up (D4-D8, ACs 12-20, R4, R5, R8) was withdrawn by human decision D9: no runner, no dependency, flags back to no dependency/security change, area `frontend` with no new work; AC10 is verified manually by the human (steps in the spec), then the task may be set to `done` |
 | 650 | Azure | feature | Specified 2026-11-23, status `specified`, no open questions: 16 desks A1-D4 as 4 blocks of 2 x 2, labels only; area frontend + backend; human chose Q1c (delete and recreate desks; `booking_desk` set to NULL first because the FK blocks the delete); risks R1, R2 (destructive migration, safer alternative kept), decisions D1-D4, assumptions A1-A4 (incl. Q2c vs Q3a: blocks without headings); tag ignored |
+| desk labeling | manual | defect/verification | Same as 650 (A1-D4). Human saw D01..D12: 006 not applied to the running DB (init SQL runs only on an empty `db-data` volume; Cloud Foundry is human-applied). Specified, area containers, no code change, ACs 1-5, risks R1-R3; open: which DB, who applies |
 
 ## Defects and lessons
 
@@ -39,4 +40,5 @@ Turns a work item into `docs/tasks/<id>.md` and `docs/specs/<id>.md`. Azure DevO
 - `decision:` input used twice (649, D4 and D9); the task `status` stays `implemented` until the human accepts AC10 after the manual browser check.
 - Task 649: nothing to implement; only the human's manual AC10 check and acceptance are open (`docs/runs/649/e2e.md` still describes the runner as a follow-up; the Tester or Release Manager records the result).
 - Task 650: answers merged; ready for implementation (human applies the migration after `pg_dump`). Azure DevOps `System.State` set to `Done` on 2026-11-23 (human confirmed; only the state changed).
+- manual-desk-labeling: answers merged, ready; local container only, Container Engineer dumps then `compose down -v` (R1, R2 approved); lesson: a migration in `db/migrations` does not reach an existing `db-data` volume.
 - The `list` mode depends on the `ado` MCP server (PAT prompt) being started.
